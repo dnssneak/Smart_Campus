@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Campus - Test</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">🏫 Smart Campus</div>
+        <div class="nav-links">
+           <a href="dashboard.html">Dashboard</a>
+            <a href="events.html">Events</a>
+            <a href="venues.html">Venues</a>
+            <a href="bookings.html">My Bookings</a>
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <h1>🔧 Backend API Test</h1>
+
+        <!-- Health Check -->
+        <div class="test-card">
+            <h2>1. Health Check</h2>
+            <button onclick="testHealth()">Test Connection</button>
+            <div id="healthResult" class="result"></div>
+        </div>
+
+        <!-- Register -->
+        <div class="test-card">
+            <h2>2. Register User</h2>
+            <input type="email" id="regEmail" placeholder="test@university.edu" value="test@university.edu">
+            <input type="password" id="regPassword" placeholder="password" value="test123">
+            <input type="text" id="regFirstName" placeholder="First Name" value="Test">
+            <input type="text" id="regLastName" placeholder="Last Name" value="User">
+            <select id="regRole">
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+                <option value="society_rep">Society Rep</option>
+                <option value="admin">Admin</option>
+            </select>
+            <input type="text" id="regDept" placeholder="Department" value="CS">
+            <button onclick="testRegister()">Register</button>
+            <div id="registerResult" class="result"></div>
+        </div>
+
+        <!-- Login -->
+        <div class="test-card">
+            <h2>3. Login</h2>
+            <input type="email" id="loginEmail" placeholder="Email" value="test@university.edu">
+            <input type="password" id="loginPassword" placeholder="Password" value="test123">
+            <button onclick="testLogin()">Login</button>
+            <div id="loginResult" class="result"></div>
+        </div>
+
+        <!-- Get Profile -->
+        <div class="test-card">
+            <h2>4. Get Profile (needs token)</h2>
+            <button onclick="testProfile()">Get My Profile</button>
+            <div id="profileResult" class="result"></div>
+        </div>
+
+        <!-- Token Display -->
+        <div class="test-card">
+            <h2>Current Token</h2>
+            <textarea id="tokenDisplay" readonly placeholder="No token yet..."></textarea>
+            <button onclick="clearToken()" class="btn-danger">Clear Token</button>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        // Health Check
+        async function testHealth() {
+            const resultDiv = document.getElementById('healthResult');
+            resultDiv.innerHTML = '<p class="loading">Testing...</p>';
+            
+            try {
+                const data = await api.get('/health');
+                resultDiv.innerHTML = `
+                    <p class="success">✅ ${data.message}</p>
+                    <p>Venues: ${data.venues_count}</p>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+
+        // Register
+        async function testRegister() {
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.innerHTML = '<p class="loading">Registering...</p>';
+
+            const data = {
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value,
+                firstName: document.getElementById('regFirstName').value,
+                lastName: document.getElementById('regLastName').value,
+                role: document.getElementById('regRole').value,
+                department: document.getElementById('regDept').value
+            };
+
+            try {
+                const result = await api.post('/auth/register', data);
+                
+                // Save token
+                localStorage.setItem('token', result.token);
+                localStorage.setItem('user', JSON.stringify(result.user));
+                updateTokenDisplay();
+
+                resultDiv.innerHTML = `
+                    <p class="success">✅ Registered!</p>
+                    <pre>${JSON.stringify(result.user, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+
+        // Login
+        async function testLogin() {
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.innerHTML = '<p class="loading">Logging in...</p>';
+
+            const data = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const result = await api.post('/auth/login', data);
+                
+                // Save token
+                localStorage.setItem('token', result.token);
+                localStorage.setItem('user', JSON.stringify(result.user));
+                updateTokenDisplay();
+
+                resultDiv.innerHTML = `
+                    <p class="success">✅ Logged in!</p>
+                    <pre>${JSON.stringify(result.user, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+
+        // Get Profile
+        async function testProfile() {
+            const resultDiv = document.getElementById('profileResult');
+            resultDiv.innerHTML = '<p class="loading">Fetching...</p>';
+
+            if (!localStorage.getItem('token')) {
+                resultDiv.innerHTML = '<p class="error">❌ No token! Login first.</p>';
+                return;
+            }
+
+            try {
+                const data = await api.get('/auth/profile');
+                resultDiv.innerHTML = `
+                    <p class="success">✅ Profile loaded!</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+
+        // Token management
+        function updateTokenDisplay() {
+            const token = localStorage.getItem('token');
+            document.getElementById('tokenDisplay').value = token || 'No token';
+        }
+
+        function clearToken() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            updateTokenDisplay();
+            alert('Token cleared!');
+        }
+
+        // Load token on page load
+        updateTokenDisplay();
+    </script>
+</body>
+</html>

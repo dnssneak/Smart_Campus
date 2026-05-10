@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venues - Smart Campus</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-university"></i>
+            <span>Smart Campus</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="events.html">Events</a>
+            <a href="venues.html" class="active">Venues</a>
+            <a href="bookings.html">My Bookings</a>
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <!-- Event Info Banner -->
+        <div id="eventBanner" class="event-banner hidden">
+            <div class="banner-content">
+                <i class="fas fa-calendar"></i>
+                <div>
+                    <h3>Booking for: <span id="bannerEventTitle">Event</span></h3>
+                    <p>Select a venue and time slot for your event</p>
+                </div>
+                <button class="btn btn-secondary" onclick="clearEventSelection()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h1><i class="fas fa-building"></i> Campus Venues</h1>
+            <div class="filters">
+                <input type="text" id="venueSearch" placeholder="Search venues..." onkeyup="filterVenues()">
+                <select id="capacityFilter" onchange="filterVenues()">
+                    <option value="">All Capacities</option>
+                    <option value="small">Small (&lt; 50)</option>
+                    <option value="medium">Medium (50-200)</option>
+                    <option value="large">Large (&gt; 200)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="venuesGrid" class="venues-grid">
+            <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading venues...</p>
+        </div>
+
+        <!-- Booking Modal -->
+        <div id="bookingModal" class="modal">
+            <div class="modal-content large">
+                <span class="close" onclick="closeBookingModal()">&times;</span>
+                <h2><i class="fas fa-calendar-plus"></i> Book Venue</h2>
+                
+                <div id="bookingVenueInfo" class="booking-venue-info"></div>
+                
+                <div class="booking-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Select Date *</label>
+                            <input type="date" id="bookDate" required onchange="loadBookingSlots()">
+                        </div>
+                        <div class="form-group">
+                            <label>Your Event *</label>
+                            <select id="bookEvent" required>
+                                <option value="">Select an event...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="slotSection" class="hidden">
+                        <h4>Available Time Slots <small>(Click a green slot to select)</small></h4>
+                        <div id="bookingSlots" class="slots-grid">
+                            <p class="empty">Select a date to see available slots</p>
+                        </div>
+                    </div>
+
+                    <div id="selectedSlotInfo" class="hidden">
+                        <h4>Selected Time</h4>
+                        <p id="selectedTimeDisplay"></p>
+                    </div>
+
+                    <div id="bookingMessage"></div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeBookingModal()">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="confirmBookBtn" onclick="confirmBooking()">
+                            <i class="fas fa-check"></i> Confirm Booking
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Venue Detail Modal -->
+        <div id="venueModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeVenueModal()">&times;</span>
+                <div id="venueModalBody"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        let allVenues = [];
+        let allEvents = [];
+        let selectedVenueId = null;
+        let selectedSlot = null;
+        let selectedEventId = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const eventId = urlParams.get('eventId');
+
+            await Promise.all([
+                loadVenues(),
+                loadMyEvents()
+            ]);
+
+            if (eventId) {
+                preselectEvent(eventId);
+            }
+
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            document.getElementById('bookDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('bookDate').min = new Date().toISOString().split('T')[0];
+        });
+
+        async function loadVenues() {
+            try {
+                const response = await api.get('/venues');
+                allVenues = response.venues || [];
+                renderVenues(allVenues);
+            } catch (error) {
+                document.getElementById('venuesGrid').innerHTML = 
+                    `<p class="error">❌ Failed to load venues: ${error.message}</p>`;
+            }
+        }
+
+        async function loadMyEvents() {
+            try {
+                const response = await api.get('/events');
+                allEvents = response.events || [];
+                
+                const myEvents = allEvents.filter(e => 
+                    e.created_by === JSON.parse(localStorage.getItem('user')).id &&
+                    (e.status === 'pending' || e.status === 'approved')
+                );
+
+                const select = document.getElementById('bookEvent');
+                select.innerHTML = '<option value="">Select an event...</option>';
+                
+                myEvents.forEach(e => {
+                    const option = document.createElement('option');
+                    option.value = e.id;
+                    option.textContent = `${e.title} (${e.category})`;
+                    select.appendChild(option);
+                });
+            } catch (e) {
+                console.error('Failed to load events:', e);
+            }
+        }
+
+        function preselectEvent(eventId) {
+            const event = allEvents.find(e => e.id == eventId);
+            if (event) {
+                document.getElementById('eventBanner').classList.remove('hidden');
+                document.getElementById('bannerEventTitle').textContent = event.title;
+                document.getElementById('bookEvent').value = eventId;
+                selectedEventId = eventId;
+            }
+        }
+
+        function clearEventSelection() {
+            document.getElementById('eventBanner').classList.add('hidden');
+            document.getElementById('bookEvent').value = '';
+            selectedEventId = null;
+            window.history.replaceState({}, '', 'venues.html');
+        }
+
+        function renderVenues(venues) {
+            const grid = document.getElementById('venuesGrid');
+            
+            if (venues.length === 0) {
+                grid.innerHTML = '<p class="empty">No venues available</p>';
+                return;
+            }
+
+            grid.innerHTML = venues.map(v => `
+                <div class="venue-card" data-capacity="${v.capacity}">
+                    <div class="venue-image">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="venue-info">
+                        <h3>${v.name}</h3>
+                        <p class="location"><i class="fas fa-map-marker-alt"></i> ${v.location || 'Campus'}</p>
+                        <div class="venue-meta">
+                            <span><i class="fas fa-users"></i> ${v.capacity} people</span>
+                            <span><i class="fas fa-star"></i> ${v.facilities?.length || 0} facilities</span>
+                        </div>
+                        <div class="facilities">
+                            ${(v.facilities || []).slice(0, 3).map(f => `<span class="tag">${f}</span>`).join('')}
+                        </div>
+                        <div class="venue-actions">
+                            <button class="btn btn-primary" onclick="openBookingModal(${v.id})">
+                                <i class="fas fa-calendar-plus"></i> Book Now
+                            </button>
+                            <button class="btn btn-secondary" onclick="showVenueDetail(${v.id})">
+                                <i class="fas fa-info-circle"></i> Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterVenues() {
+            const search = document.getElementById('venueSearch').value.toLowerCase();
+            const capacity = document.getElementById('capacityFilter').value;
+            
+            let filtered = allVenues.filter(v => 
+                v.name.toLowerCase().includes(search) || 
+                (v.location && v.location.toLowerCase().includes(search))
+            );
+
+            if (capacity) {
+                filtered = filtered.filter(v => {
+                    if (capacity === 'small') return v.capacity < 50;
+                    if (capacity === 'medium') return v.capacity >= 50 && v.capacity <= 200;
+                    if (capacity === 'large') return v.capacity > 200;
+                });
+            }
+
+            renderVenues(filtered);
+        }
+
+        function openBookingModal(venueId) {
+            selectedVenueId = venueId;
+            selectedSlot = null;
+            
+            const venue = allVenues.find(v => v.id === venueId);
+            
+            document.getElementById('bookingVenueInfo').innerHTML = `
+                <div class="venue-preview">
+                    <h3>${venue.name}</h3>
+                    <p><i class="fas fa-users"></i> Capacity: ${venue.capacity} | 
+                       <i class="fas fa-map-marker-alt"></i> ${venue.location || 'Campus'}</p>
+                </div>
+            `;
+
+            document.getElementById('slotSection').classList.add('hidden');
+            document.getElementById('selectedSlotInfo').classList.add('hidden');
+            document.getElementById('bookingMessage').innerHTML = '';
+            
+            document.getElementById('bookingModal').style.display = 'block';
+        }
+
+        async function loadBookingSlots() {
+            const date = document.getElementById('bookDate').value;
+            if (!date || !selectedVenueId) return;
+
+            const container = document.getElementById('bookingSlots');
+            container.innerHTML = '<p class="loading"><i class="fas fa-spinner fa-spin"></i> Checking availability...</p>';
+            document.getElementById('slotSection').classList.remove('hidden');
+
+            try {
+                const response = await api.get(`/venues/${selectedVenueId}/availability?date=${date}`);
+                const slots = response.slots;
+
+                if (slots.length === 0) {
+                    container.innerHTML = '<p class="empty">No slots available for this date</p>';
+                    return;
+                }
+
+                container.innerHTML = slots.map((slot, index) => `
+                    <div class="slot ${slot.available ? 'available' : 'booked'}" 
+                         id="slot-${index}"
+                         data-start="${slot.start}" 
+                         data-end="${slot.end}">
+                        <span class="time">${slot.start.split('T')[1].substring(0, 5)}</span>
+                        <span class="status">${slot.available ? 'Available' : 'Booked'}</span>
+                    </div>
+                `).join('');
+
+                // Add click listeners to available slots
+                document.querySelectorAll('.slot.available').forEach((slotEl) => {
+                    slotEl.addEventListener('click', function() {
+                        const start = this.getAttribute('data-start');
+                        const end = this.getAttribute('data-end');
+                        selectSlot(start, end, this);
+                    });
+                });
+
+            } catch (error) {
+                container.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        }
+
+        function selectSlot(start, end, element) {
+            selectedSlot = { start, end };
+            
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+            element.classList.add('selected');
+
+            document.getElementById('selectedSlotInfo').classList.remove('hidden');
+            document.getElementById('selectedTimeDisplay').innerHTML = `
+                <strong>Date:</strong> ${start.split('T')[0]}<br>
+                <strong>Time:</strong> ${start.split('T')[1].substring(0, 5)} - ${end.split('T')[1].substring(0, 5)}
+            `;
+            
+            console.log('Slot selected:', selectedSlot);
+        }
+
+        async function confirmBooking() {
+            const msgDiv = document.getElementById('bookingMessage');
+            const eventId = document.getElementById('bookEvent').value || selectedEventId;
+
+            console.log('Booking attempt:', { eventId, venueId: selectedVenueId, slot: selectedSlot });
+
+            if (!eventId) {
+                msgDiv.innerHTML = '<p class="error">❌ Please select an event from the dropdown</p>';
+                return;
+            }
+
+            if (!selectedSlot) {
+                msgDiv.innerHTML = '<p class="error">❌ Please select a time slot (click a green slot)</p>';
+                return;
+            }
+
+            if (!selectedVenueId) {
+                msgDiv.innerHTML = '<p class="error">❌ Venue not selected</p>';
+                return;
+            }
+
+            msgDiv.innerHTML = '<p class="loading"><i class="fas fa-spinner fa-spin"></i> Submitting booking...</p>';
+
+            try {
+                const result = await api.post('/bookings', {
+                    eventId: parseInt(eventId),
+                    venueId: parseInt(selectedVenueId),
+                    startDateTime: selectedSlot.start,
+                    endDateTime: selectedSlot.end
+                });
+
+                msgDiv.innerHTML = '<p class="success">✅ Booking submitted successfully!</p>';
+                
+                setTimeout(() => {
+                    closeBookingModal();
+                    window.location.href = 'bookings.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Booking error:', error);
+                
+                if (error.status === 409) {
+                    msgDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h4><i class="fas fa-exclamation-triangle"></i> Time Slot Unavailable</h4>
+                            <p>This slot was just booked by someone else. Please select another slot.</p>
+                        </div>
+                    `;
+                    loadBookingSlots();
+                } else {
+                    msgDiv.innerHTML = `<p class="error">❌ ${error.message || 'Booking failed'}</p>`;
+                }
+            }
+        }
+
+        function closeBookingModal() {
+            document.getElementById('bookingModal').style.display = 'none';
+            selectedSlot = null;
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+        }
+
+        async function showVenueDetail(id) {
+            try {
+                const response = await api.get(`/venues/${id}`);
+                const v = response.venue;
+                
+                document.getElementById('venueModalBody').innerHTML = `
+                    <div class="venue-detail">
+                        <div class="venue-detail-header">
+                            <i class="fas fa-building"></i>
+                            <h2>${v.name}</h2>
+                        </div>
+                        <p class="description">${v.description || 'No description'}</p>
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="label"><i class="fas fa-users"></i> Capacity</span>
+                                <span class="value">${v.capacity} people</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label"><i class="fas fa-map-marker-alt"></i> Location</span>
+                                <span class="value">${v.location || 'Campus'}</span>
+                            </div>
+                        </div>
+                        <div class="detail-section">
+                            <h4><i class="fas fa-star"></i> Facilities</h4>
+                            <div class="facilities">
+                                ${(v.facilities || []).map(f => `<span class="tag">${f}</span>`).join('') || '<span class="empty">None listed</span>'}
+                            </div>
+                        </div>
+                        <div class="venue-actions" style="margin-top: 1.5rem;">
+                            <button class="btn btn-primary" onclick="closeVenueModal(); openBookingModal(${v.id})">
+                                <i class="fas fa-calendar-plus"></i> Book This Venue
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('venueModal').style.display = 'block';
+            } catch (error) {
+                alert('Failed to load venue: ' + error.message);
+            }
+        }
+
+        function closeVenueModal() {
+            document.getElementById('venueModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

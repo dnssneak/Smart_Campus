@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events - Smart Campus</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-university"></i>
+            <span>Smart Campus</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="events.html" class="active">Events</a>
+            <a href="venues.html">Venues</a>
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-star"></i> Events</h1>
+            <button class="btn btn-primary" onclick="showCreateForm()">
+                <i class="fas fa-plus"></i> Create Event
+            </button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-bar">
+            <select id="filterStatus" onchange="loadEvents()">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+            <select id="filterCategory" onchange="loadEvents()">
+                <option value="">All Categories</option>
+                <option value="academic">Academic</option>
+                <option value="cultural">Cultural</option>
+                <option value="sports">Sports</option>
+                <option value="technical">Technical</option>
+                <option value="social">Social</option>
+            </select>
+            <button class="btn btn-secondary" onclick="loadEvents()">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Create Event Form -->
+        <div id="createForm" class="form-panel hidden">
+            <div class="card">
+                <div class="form-header">
+                    <h2><i class="fas fa-plus-circle"></i> Create New Event</h2>
+                    <button class="close-btn" onclick="hideCreateForm()">&times;</button>
+                </div>
+                <form id="eventForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Event Title *</label>
+                            <input type="text" id="eventTitle" required placeholder="e.g., Tech Fest 2026">
+                        </div>
+                        <div class="form-group">
+                            <label>Category *</label>
+                            <select id="eventCategory" required>
+                                <option value="academic">Academic</option>
+                                <option value="cultural">Cultural</option>
+                                <option value="sports">Sports</option>
+                                <option value="technical">Technical</option>
+                                <option value="social">Social</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="eventDescription" rows="3" placeholder="Describe your event..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Expected Attendance</label>
+                            <input type="number" id="eventAttendance" min="1" placeholder="Number of people">
+                        </div>
+                        <div class="form-group">
+                            <label>Priority</label>
+                            <select id="eventPriority">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Date & Time *</label>
+                            <input type="datetime-local" id="eventStart" required>
+                        </div>
+                        <div class="form-group">
+                            <label>End Date & Time *</label>
+                            <input type="datetime-local" id="eventEnd" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="eventRecurring" onchange="toggleRecurring()">
+                            This is a recurring event
+                        </label>
+                    </div>
+
+                    <div id="recurringOptions" class="hidden">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Repeat</label>
+                                <select id="recurrenceType">
+                                    <option value="weekly">Weekly</option>
+                                    <option value="biweekly">Bi-weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Until Date</label>
+                                <input type="date" id="recurrenceEnd">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="hideCreateForm()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Event
+                        </button>
+                    </div>
+                </form>
+                <div id="formMessage"></div>
+            </div>
+        </div>
+
+        <!-- Events List -->
+        <div id="eventsList" class="events-list">
+            <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading events...</p>
+        </div>
+    </main>
+
+    <!-- Event Detail Modal -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEventModal()">&times;</span>
+            <div id="eventModalBody"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let allEvents = [];
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            currentUser = JSON.parse(localStorage.getItem('user'));
+            
+            // Set min datetime to now
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const minDateTime = now.toISOString().slice(0, 16);
+            document.getElementById('eventStart').min = minDateTime;
+            document.getElementById('eventEnd').min = minDateTime;
+
+            await loadEvents();
+        });
+
+        async function loadEvents() {
+            const list = document.getElementById('eventsList');
+            list.innerHTML = '<p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading events...</p>';
+
+            try {
+                const status = document.getElementById('filterStatus').value;
+                const category = document.getElementById('filterCategory').value;
+                
+                let url = '/events';
+                const params = [];
+                if (status) params.push(`status=${status}`);
+                if (category) params.push(`category=${category}`);
+                if (params.length) url += '?' + params.join('&');
+
+                const response = await api.get(url);
+                allEvents = response.events || [];
+                renderEvents(allEvents);
+            } catch (error) {
+                list.innerHTML = `<p class="error">❌ Failed to load events: ${error.message}</p>`;
+            }
+        }
+
+        function renderEvents(events) {
+            const list = document.getElementById('eventsList');
+
+            if (events.length === 0) {
+                list.innerHTML = '<p class="empty">No events found. Create your first event!</p>';
+                return;
+            }
+
+            list.innerHTML = events.map(e => {
+                const isOwner = e.created_by === currentUser?.id;
+                const canEdit = isOwner && e.status === 'pending';
+                
+                return `
+                <div class="event-card ${e.category}">
+                    <div class="event-header">
+                        <div class="event-badges">
+                            <span class="category-badge ${e.category}">${e.category}</span>
+                            <span class="priority-badge ${e.priority}">${e.priority}</span>
+                            <span class="status-badge ${e.status}">${e.status}</span>
+                        </div>
+                        ${isOwner ? '<span class="owner-badge"><i class="fas fa-user"></i> Yours</span>' : ''}
+                    </div>
+                    
+                    <h3>${e.title}</h3>
+                    <p class="event-desc">${e.description || 'No description'}</p>
+                    
+                    <div class="event-meta">
+                        <span><i class="fas fa-calendar"></i> ${formatDateTime(e.start_datetime)}</span>
+                        <span><i class="fas fa-clock"></i> ${formatTime(e.start_datetime)} - ${formatTime(e.end_datetime)}</span>
+                        <span><i class="fas fa-users"></i> ${e.expected_attendance || 'N/A'} expected</span>
+                    </div>
+
+                    <div class="event-footer">
+                        <span class="creator">By ${e.profiles?.first_name || 'Unknown'} ${e.profiles?.last_name || ''}</span>
+                        <div class="event-actions">
+                            <button class="btn btn-small" onclick="showEventDetail(${e.id})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            ${canEdit ? `
+                                <button class="btn btn-small btn-secondary" onclick="editEvent(${e.id})">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            ` : ''}
+                            ${e.status === 'approved' ? `
+                                <button class="btn btn-small btn-primary" onclick="bookVenue(${e.id})">
+                                    <i class="fas fa-calendar-plus"></i> Book Venue
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function showCreateForm() {
+            document.getElementById('createForm').classList.remove('hidden');
+            document.getElementById('eventsList').classList.add('hidden');
+            document.getElementById('formMessage').innerHTML = '';
+        }
+
+        function hideCreateForm() {
+            document.getElementById('createForm').classList.add('hidden');
+            document.getElementById('eventsList').classList.remove('hidden');
+            document.getElementById('eventForm').reset();
+            document.getElementById('recurringOptions').classList.add('hidden');
+        }
+
+        function toggleRecurring() {
+            const checked = document.getElementById('eventRecurring').checked;
+            document.getElementById('recurringOptions').classList.toggle('hidden', !checked);
+        }
+
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const msgDiv = document.getElementById('formMessage');
+            msgDiv.innerHTML = '<p class="loading"><i class="fas fa-spinner fa-spin"></i> Creating event...</p>';
+
+            const startDateTime = document.getElementById('eventStart').value;
+            const endDateTime = document.getElementById('eventEnd').value;
+
+            if (new Date(endDateTime) <= new Date(startDateTime)) {
+                msgDiv.innerHTML = '<p class="error">❌ End time must be after start time</p>';
+                return;
+            }
+
+            const eventData = {
+                title: document.getElementById('eventTitle').value.trim(),
+                description: document.getElementById('eventDescription').value.trim(),
+                category: document.getElementById('eventCategory').value,
+                expectedAttendance: parseInt(document.getElementById('eventAttendance').value) || null,
+                priority: document.getElementById('eventPriority').value,
+                startDateTime,
+                endDateTime,
+                isRecurring: document.getElementById('eventRecurring').checked,
+                requiredResources: []
+            };
+
+            if (eventData.isRecurring) {
+                eventData.recurrencePattern = {
+                    type: document.getElementById('recurrenceType').value,
+                    endDate: document.getElementById('recurrenceEnd').value
+                };
+            }
+
+            try {
+                const result = await api.post('/events', eventData);
+                msgDiv.innerHTML = '<p class="success">✅ Event created successfully!</p>';
+                
+                setTimeout(() => {
+                    hideCreateForm();
+                    loadEvents();
+                }, 1000);
+            } catch (error) {
+                msgDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
+            }
+        });
+
+        async function showEventDetail(id) {
+            try {
+                const response = await api.get(`/events/${id}`);
+                const e = response.event;
+
+                document.getElementById('eventModalBody').innerHTML = `
+                    <div class="event-detail">
+                        <div class="event-detail-header">
+                            <div class="event-badges">
+                                <span class="category-badge ${e.category}">${e.category}</span>
+                                <span class="priority-badge ${e.priority}">${e.priority}</span>
+                                <span class="status-badge ${e.status}">${e.status}</span>
+                            </div>
+                            <h2>${e.title}</h2>
+                        </div>
+                        
+                        <p class="description">${e.description || 'No description'}</p>
+                        
+                        <div class="detail-grid">
+                            <div class="detail-item">
+                                <span class="label"><i class="fas fa-calendar"></i> Start</span>
+                                <span class="value">${formatDateTime(e.start_datetime)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label"><i class="fas fa-calendar-check"></i> End</span>
+                                <span class="value">${formatDateTime(e.end_datetime)}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label"><i class="fas fa-users"></i> Expected</span>
+                                <span class="value">${e.expected_attendance || 'N/A'} people</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label"><i class="fas fa-user"></i> Created By</span>
+                                <span class="value">${e.profiles?.first_name || 'Unknown'} ${e.profiles?.last_name || ''}</span>
+                            </div>
+                        </div>
+
+                        ${e.is_recurring ? `
+                            <div class="detail-section">
+                                <h4><i class="fas fa-redo"></i> Recurring</h4>
+                                <p>${e.recurrence_pattern?.type || 'Weekly'} until ${e.recurrence_pattern?.endDate || 'N/A'}</p>
+                            </div>
+                        ` : ''}
+
+                        <div class="event-actions" style="margin-top: 1.5rem;">
+                            ${e.status === 'approved' ? `
+                                <button class="btn btn-primary" onclick="closeEventModal(); bookVenue(${e.id})">
+                                    <i class="fas fa-calendar-plus"></i> Book Venue
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('eventModal').style.display = 'block';
+            } catch (error) {
+                alert('Failed to load event: ' + error.message);
+            }
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').style.display = 'none';
+        }
+
+        function editEvent(id) {
+            alert('Edit feature coming in next update!');
+        }
+
+        function bookVenue(eventId) {
+            window.location.href = `venues.html?eventId=${eventId}`;
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Helper functions
+        function formatDateTime(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        function formatTime(dateString) {
+            if (!dateString) return 'N/A';
+            return new Date(dateString).toLocaleTimeString('en-US', {
+                hour: '2-digit', minute: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html>

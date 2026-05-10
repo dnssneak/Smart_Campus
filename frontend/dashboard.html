@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Smart Campus</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-university"></i>
+            <span>Smart Campus</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html" class="active">Dashboard</a>
+            <a href="events.html">Events</a>
+            <a href="venues.html">Venues</a>
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <main class="dashboard">
+        <aside class="sidebar">
+            <div class="user-info">
+                <div class="avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <h3 id="userName">Loading...</h3>
+                <span id="userRole" class="role-badge">Loading...</span>
+                <p id="userEmail" class="user-email">Loading...</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="active" onclick="showSection('overview')">
+                    <i class="fas fa-home"></i> Overview
+                </a>
+                <a href="#" onclick="showSection('profile')">
+                    <i class="fas fa-user"></i> My Profile
+                </a>
+                <a href="events.html">
+                    <i class="fas fa-calendar"></i> My Events
+                </a>
+                <a href="venues.html">
+                    <i class="fas fa-building"></i> Book Venue
+                </a>
+            </nav>
+        </aside>
+
+        <div class="dashboard-content">
+            <!-- Overview Section -->
+            <section id="overview" class="dashboard-section">
+                <h2>Dashboard Overview</h2>
+                <div class="stats-grid">
+                    <div class="stat-card large">
+                        <i class="fas fa-calendar-check"></i>
+                        <div>
+                            <h3 id="statEvents">0</h3>
+                            <p>My Events</p>
+                        </div>
+                    </div>
+                    <div class="stat-card large">
+                        <i class="fas fa-building"></i>
+                        <div>
+                            <h3 id="statBookings">0</h3>
+                            <p>My Bookings</p>
+                        </div>
+                    </div>
+                    <div class="stat-card large">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h3 id="statPending">0</h3>
+                            <p>Pending</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-widgets">
+                    <div class="widget">
+                        <h3><i class="fas fa-user"></i> Profile Info</h3>
+                        <div id="profileInfo" class="profile-details">
+                            <p class="empty">Loading...</p>
+                        </div>
+                    </div>
+                    <div class="widget">
+                        <h3><i class="fas fa-bell"></i> Quick Actions</h3>
+                        <div class="quick-actions">
+                            <a href="events.html" class="action-btn">
+                                <i class="fas fa-plus"></i> Create Event
+                            </a>
+                            <a href="venues.html" class="action-btn">
+                                <i class="fas fa-calendar-plus"></i> Book Venue
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profile" class="dashboard-section hidden">
+                <h2>My Profile</h2>
+                <div class="card">
+                    <div id="profileDetails" class="profile-details">
+                        <p class="empty">Loading...</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadProfile()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            await loadUserData();
+            await loadProfile();
+        });
+
+        async function loadUserData() {
+            try {
+                const user = JSON.parse(localStorage.getItem('user'));
+                
+                document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
+                document.getElementById('userRole').textContent = user.role.replace('_', ' ').toUpperCase();
+                document.getElementById('userEmail').textContent = user.email;
+
+                // Update stats (placeholder for now)
+                document.getElementById('statEvents').textContent = '0';
+                document.getElementById('statBookings').textContent = '0';
+                document.getElementById('statPending').textContent = '0';
+
+            } catch (e) {
+                console.error('Error loading user:', e);
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                const profile = await api.get('/auth/profile');
+                
+                const html = `
+                    <div class="detail-row">
+                        <span class="label">Name:</span>
+                        <span class="value">${profile.first_name} ${profile.last_name}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Email:</span>
+                        <span class="value">${profile.email || JSON.parse(localStorage.getItem('user')).email}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Role:</span>
+                        <span class="value"><span class="role-badge ${profile.role}">${profile.role.replace('_', ' ').toUpperCase()}</span></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Department:</span>
+                        <span class="value">${profile.department || 'Not set'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Phone:</span>
+                        <span class="value">${profile.phone || 'Not set'}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="label">Member Since:</span>
+                        <span class="value">${new Date(profile.created_at).toLocaleDateString()}</span>
+                    </div>
+                `;
+
+                document.getElementById('profileInfo').innerHTML = html;
+                document.getElementById('profileDetails').innerHTML = html;
+
+            } catch (e) {
+                console.error('Error loading profile:', e);
+                document.getElementById('profileInfo').innerHTML = '<p class="error">Failed to load profile</p>';
+            }
+        }
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+            event.target.closest('a').classList.add('active');
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>
