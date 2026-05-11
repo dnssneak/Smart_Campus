@@ -1,4 +1,5 @@
 const supabase = require('../config/supabase');
+const { createNotification } = require('./notificationController');
 
 exports.createEvent = async (req, res) => {
     try {
@@ -49,6 +50,7 @@ exports.createEvent = async (req, res) => {
             event
         });
     } catch (error) {
+        console.error('Create event error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -60,15 +62,11 @@ exports.getEvents = async (req, res) => {
     try {
         let query = supabase
             .from('events')
-            .select(`
-                *,
-                creator:profiles!fk_events_created_by_profiles (first_name, last_name, role)
-            `);
+            .select('*');
 
         if (req.user.role !== 'admin') {
             query = query.or(`created_by.eq.${req.user.id},status.eq.approved`);
         }
-
         if (req.query.status) {
             query = query.eq('status', req.query.status);
         }
@@ -80,12 +78,30 @@ exports.getEvents = async (req, res) => {
 
         if (error) throw error;
 
+        const userIds = [...new Set(events.map(e => e.created_by).filter(Boolean))];
+        let profileMap = {};
+        
+        if (userIds.length > 0) {
+            const { data: profiles } = await supabase
+                .from('profiles')
+                .select('id, first_name, last_name, role')
+                .in('id', userIds);
+            
+            profiles?.forEach(p => profileMap[p.id] = p);
+        }
+
+        const eventsWithCreator = events.map(e => ({
+            ...e,
+            creator: profileMap[e.created_by] || null
+        }));
+
         res.json({
             success: true,
-            count: events.length,
-            events
+            count: eventsWithCreator.length,
+            events: eventsWithCreator
         });
     } catch (error) {
+        console.error('Get events error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -99,10 +115,7 @@ exports.getEventById = async (req, res) => {
 
         const { data: event, error } = await supabase
             .from('events')
-            .select(`
-                *,
-                creator:profiles!fk_events_created_by_profiles (first_name, last_name)
-            `)
+            .select('*')
             .eq('id', id)
             .single();
 
@@ -114,9 +127,18 @@ exports.getEventById = async (req, res) => {
             });
         }
 
+        const { data: creator } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', event.created_by)
+            .single();
+
         res.json({
             success: true,
-            event
+            event: {
+                ...event,
+                creator: creator || null
+            }
         });
     } catch (error) {
         res.status(500).json({
@@ -237,6 +259,19 @@ exports.updateStatus = async (req, res) => {
             });
         }
 
+        const { data: eventBefore, error: eventError } = await supabase
+            .from('events')
+            .select('title, created_by, status')
+            .eq('id', id)
+            .single();
+
+        if (eventError || !eventBefore) {
+            return res.status(404).json({
+                success: false,
+                message: 'Event not found'
+            });
+        }
+
         const { data: event, error } = await supabase
             .from('events')
             .update({
@@ -249,6 +284,21 @@ exports.updateStatus = async (req, res) => {
             .single();
 
         if (error) throw error;
+
+        if (status === 'approved' || status === 'rejected') {
+            const ownerId = eventBefore.created_by;
+            
+            if (ownerId && ownerId !== req.user.id) {
+                await createNotification(
+                    ownerId,
+                    status === 'approved' ? 'event_approved' : 'event_rejected',
+                    status === 'approved' ? '✅ Event Approved!' : '❌ Event Rejected',
+                    `Your event "${eventBefore.title}" has been ${status} by an admin.`,
+                    id,
+                    'event'
+                );
+            }
+        }
 
         res.json({
             success: true,
