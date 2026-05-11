@@ -19,7 +19,10 @@
             <a href="venues.html">Venues</a>
             <a href="bookings.html">My Bookings</a>
             <a href="waitlist.html" class="active">Waitlist</a>
-            <a href="reports.html">Reports</a>
+            <a href="notifications.html">
+                Notifications
+                <span id="navBadge" class="notification-badge" style="display:none; margin-left:5px;">0</span>
+            </a>
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </nav>
@@ -114,14 +117,15 @@
             }
 
             await loadMyWaitlist();
+            updateNavBadge();
         });
 
         async function loadMyWaitlist() {
             const container = document.getElementById('waitlistContainer');
             
             try {
-                const response = await api.get('/waitlist/my');
-                allWaitlist = response.waitlist || [];
+                const response = await api.get('/waitlists');
+                allWaitlist = response.waitlists || [];
 
                 // Update stats
                 const waiting = allWaitlist.filter(w => w.status === 'waiting').length;
@@ -148,9 +152,9 @@
                     <div class="waitlist-card ${w.status}">
                         <div class="waitlist-header">
                             <div>
-                                <h3>${w.events?.title || 'Event'}</h3>
+                                <h3>${w.event?.title || 'Event'}</h3>
                                 <span class="venue-name">
-                                    <i class="fas fa-building"></i> ${w.venues?.name || 'Unknown Venue'}
+                                    <i class="fas fa-building"></i> ${w.venue?.name || 'Unknown Venue'}
                                 </span>
                             </div>
                             <div class="waitlist-badges">
@@ -170,7 +174,7 @@
                             </div>
                             <div class="detail">
                                 <i class="fas fa-users"></i>
-                                <span>${w.venues?.capacity || 'N/A'} capacity</span>
+                                <span>${w.venue?.capacity || 'N/A'} capacity</span>
                             </div>
                             <div class="detail">
                                 <i class="fas fa-hourglass-half"></i>
@@ -201,18 +205,18 @@
         async function loadAdminWaitlist() {
             try {
                 const status = document.getElementById('waitlistStatusFilter').value;
-                let url = '/waitlist/all';
+                let url = '/waitlists';
                 if (status) url += `?status=${status}`;
 
                 const response = await api.get(url);
-                const entries = response.waitlist || [];
+                const entries = response.waitlists || [];
 
                 const tbody = document.getElementById('adminWaitlistTable');
                 tbody.innerHTML = entries.map(e => `
                     <tr>
-                        <td>${e.profiles?.first_name || ''} ${e.profiles?.last_name || ''}</td>
-                        <td>${e.events?.title || 'N/A'}</td>
-                        <td>${e.venues?.name || 'N/A'}</td>
+                        <td>${e.user?.first_name || ''} ${e.user?.last_name || ''}</td>
+                        <td>${e.event?.title || 'N/A'}</td>
+                        <td>${e.venue?.name || 'N/A'}</td>
                         <td>${formatDate(e.requested_start_time)} ${formatTime(e.requested_start_time)}</td>
                         <td><span class="priority-badge">${e.priority}</span></td>
                         <td><span class="status-badge ${e.status}">${e.status}</span></td>
@@ -235,41 +239,35 @@
             if (!confirm('Remove this waitlist entry?')) return;
 
             try {
-                await api.put(`/waitlist/${id}/cancel`);
-                showNotification('Waitlist entry removed', 'success');
+                await api.put(`/waitlists/${id}/cancel`);
+                alert('Waitlist entry removed');
                 loadMyWaitlist();
             } catch (error) {
-                showNotification('Failed to remove: ' + error.message, 'error');
+                alert('Failed to remove: ' + error.message);
             }
         }
 
         async function processWaitlist() {
-            try {
-                // This would need specific venue/time from admin selection
-                // For now, show alert that it's automatic on cancellation
-                alert('Waitlist is processed automatically when a booking is cancelled.\n\nTo manually process: Go to Bookings → Cancel a booking → System auto-promotes highest priority waitlist entry.');
-            } catch (error) {
-                showNotification('Error: ' + error.message, 'error');
-            }
+            alert('Waitlist is processed automatically when a booking is cancelled.\n\nTo manually process: Go to Bookings → Cancel a booking → System auto-promotes highest priority waitlist entry.');
         }
 
         async function promoteWaitlist(id) {
-            // Admin manual promotion
             try {
                 const entry = allWaitlist.find(w => w.id === id);
                 if (!entry) return;
 
-                await api.post('/waitlist/process', {
+                await api.post('/bookings', {
+                    eventId: entry.booking_request_id,
                     venueId: entry.venue_id,
-                    startTime: entry.requested_start_time,
-                    endTime: entry.requested_end_time
+                    startDateTime: entry.requested_start_time,
+                    endDateTime: entry.requested_end_time
                 });
 
-                showNotification('Waitlist entry promoted!', 'success');
+                alert('Waitlist entry promoted!');
                 loadAdminWaitlist();
                 loadMyWaitlist();
             } catch (error) {
-                showNotification('Failed to promote: ' + error.message, 'error');
+                alert('Failed to promote: ' + error.message);
             }
         }
 
@@ -293,9 +291,24 @@
             });
         }
 
-        function showNotification(message, type) {
-            // Simple toast - you can enhance this
-            alert(message);
+        // Notification badge updater
+        async function updateNavBadge() {
+            if (!localStorage.getItem('token')) return;
+            try {
+                const response = await api.get('/notifications/unread-count');
+                const badges = document.querySelectorAll('#navBadge');
+                const count = response.unreadCount || 0;
+                badges.forEach(badge => {
+                    if (count > 0) {
+                        badge.textContent = count > 99 ? '99+' : count;
+                        badge.style.display = 'inline-flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                });
+            } catch (e) {
+                console.error('Badge update failed:', e);
+            }
         }
     </script>
 </body>

@@ -48,6 +48,8 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/venues', require('./routes/venues'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/waitlists', require('./routes/waitlists'));
+app.use('/api/reports', require('./routes/reports'));
 
 // Error handler
 app.use((err, req, res, next) => {
@@ -59,4 +61,11 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+});
+// 404 handler — return JSON instead of HTML
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: 'API endpoint not found: ' + req.method + ' ' + req.originalUrl
+    });
 });

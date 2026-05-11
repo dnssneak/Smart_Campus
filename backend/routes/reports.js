@@ -2,17 +2,15 @@ const express = require('express');
 const router = express.Router();
 const {
     getDashboardStats,
-    getVenueUsageReport,
-    getEventStatsReport,
-    getUserActivityReport
+    getEventStatusBreakdown,
+    getEventsByCategory,
+    getVenueUtilization
 } = require('../controllers/reportController');
 const auth = require('../middleware/auth');
-const roleCheck = require('../middleware/roleCheck');
 
-// All reports require auth, some require admin
 router.get('/dashboard', auth, getDashboardStats);
-router.get('/venue-usage', auth, getVenueUsageReport);
-router.get('/event-stats', auth, getEventStatsReport);
-router.get('/user-activity', auth, roleCheck(['admin']), getUserActivityReport);
+router.get('/event-status', auth, getEventStatusBreakdown);
+router.get('/events-by-category', auth, getEventsByCategory);
+router.get('/venue-utilization', auth, getVenueUtilization);
 
 module.exports = router;

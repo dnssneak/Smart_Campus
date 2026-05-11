@@ -27,153 +27,69 @@
     <main class="container">
         <div class="page-header">
             <h1><i class="fas fa-chart-line"></i> Reports & Analytics</h1>
-            <div class="report-filters">
-                <input type="date" id="filterStartDate" onchange="loadAllReports()">
-                <input type="date" id="filterEndDate" onchange="loadAllReports()">
-                <button class="btn btn-secondary" onclick="resetFilters()">
+            <div class="date-filters">
+                <input type="date" id="startDate" onchange="loadReports()">
+                <input type="date" id="endDate" onchange="loadReports()">
+                <button class="btn btn-secondary" onclick="resetDates()">
                     <i class="fas fa-sync"></i> Reset
                 </button>
             </div>
         </div>
 
-        <!-- Overview Stats Cards -->
-        <div class="stats-overview" id="overviewStats">
+        <!-- Stats Cards -->
+        <div class="stats-grid four">
             <div class="stat-card large">
-                <i class="fas fa-building"></i>
+                <i class="fas fa-building" style="color: #6366f1;"></i>
                 <div>
-                    <h3 id="statVenues">--</h3>
+                    <h3 id="totalVenues">--</h3>
                     <p>Total Venues</p>
                 </div>
             </div>
             <div class="stat-card large">
-                <i class="fas fa-star"></i>
+                <i class="fas fa-star" style="color: #f59e0b;"></i>
                 <div>
-                    <h3 id="statEvents">--</h3>
+                    <h3 id="totalEvents">--</h3>
                     <p>Total Events</p>
                 </div>
             </div>
             <div class="stat-card large">
-                <i class="fas fa-calendar-check"></i>
+                <i class="fas fa-calendar-check" style="color: #10b981;"></i>
                 <div>
-                    <h3 id="statBookings">--</h3>
+                    <h3 id="totalBookings">--</h3>
                     <p>Total Bookings</p>
                 </div>
             </div>
             <div class="stat-card large">
-                <i class="fas fa-users"></i>
+                <i class="fas fa-users" style="color: #ec4899;"></i>
                 <div>
-                    <h3 id="statUsers">--</h3>
+                    <h3 id="totalUsers">--</h3>
                     <p>Total Users</p>
                 </div>
             </div>
         </div>
 
         <!-- Charts Row -->
-        <div class="charts-row">
-            <div class="chart-card">
+        <div class="dashboard-widgets">
+            <div class="widget">
                 <h3>Event Status Breakdown</h3>
-                <canvas id="eventStatusChart"></canvas>
+                <canvas id="statusChart"></canvas>
             </div>
-            <div class="chart-card">
+            <div class="widget">
                 <h3>Events by Category</h3>
                 <canvas id="categoryChart"></canvas>
             </div>
         </div>
 
-        <!-- Venue Usage Chart -->
-        <div class="chart-card full-width">
+        <!-- Venue Utilization -->
+        <div class="widget" style="margin-top: 2rem;">
             <h3>Venue Utilization</h3>
-            <canvas id="venueUsageChart"></canvas>
-        </div>
-
-        <!-- Monthly Trends -->
-        <div class="chart-card full-width">
-            <h3>Monthly Booking Trends</h3>
-            <canvas id="monthlyTrendChart"></canvas>
-        </div>
-
-        <!-- Detailed Tables -->
-        <div class="report-section">
-            <h2><i class="fas fa-list"></i> Venue Usage Details</h2>
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Venue</th>
-                            <th>Location</th>
-                            <th>Capacity</th>
-                            <th>Total Bookings</th>
-                            <th>Hours Used</th>
-                            <th>Utilization</th>
-                        </tr>
-                    </thead>
-                    <tbody id="venueUsageTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Event Stats Table -->
-        <div class="report-section">
-            <h2><i class="fas fa-star"></i> Event Details</h2>
-            <div class="filters-bar">
-                <select id="eventCategoryFilter" onchange="loadEventStats()">
-                    <option value="">All Categories</option>
-                    <option value="academic">Academic</option>
-                    <option value="cultural">Cultural</option>
-                    <option value="sports">Sports</option>
-                    <option value="technical">Technical</option>
-                    <option value="social">Social</option>
-                </select>
-                <select id="eventStatusFilter" onchange="loadEventStats()">
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                    <option value="rejected">Rejected</option>
-                </select>
-            </div>
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>Category</th>
-                            <th>Status</th>
-                            <th>Priority</th>
-                            <th>Expected</th>
-                            <th>Venue</th>
-                            <th>Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="eventStatsTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Admin Only: User Activity -->
-        <div class="report-section admin-only hidden" id="userActivitySection">
-            <h2><i class="fas fa-users"></i> User Activity</h2>
-            <div class="table-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Department</th>
-                            <th>Events Created</th>
-                            <th>Bookings Made</th>
-                            <th>Member Since</th>
-                        </tr>
-                    </thead>
-                    <tbody id="userActivityTable"></tbody>
-                </table>
-            </div>
+            <canvas id="utilizationChart"></canvas>
         </div>
     </main>
 
     <script src="js/api.js"></script>
     <script>
-        let charts = {};
+        let statusChart, categoryChart, utilizationChart;
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (!localStorage.getItem('token')) {
@@ -181,248 +97,161 @@
                 return;
             }
 
-            const user = JSON.parse(localStorage.getItem('user'));
-            if (user.role === 'admin') {
-                document.getElementById('userActivitySection').classList.remove('hidden');
-                loadUserActivity();
-            }
-
             // Set default date range (last 30 days)
             const end = new Date();
             const start = new Date();
             start.setDate(start.getDate() - 30);
-            document.getElementById('filterEndDate').value = end.toISOString().split('T')[0];
-            document.getElementById('filterStartDate').value = start.toISOString().split('T')[0];
+            
+            document.getElementById('endDate').value = end.toISOString().split('T')[0];
+            document.getElementById('startDate').value = start.toISOString().split('T')[0];
 
-            await loadAllReports();
+            await loadReports();
         });
 
-        async function loadAllReports() {
-            await Promise.all([
-                loadDashboardStats(),
-                loadVenueUsage(),
-                loadEventStats()
-            ]);
+        async function loadReports() {
+            try {
+                await Promise.all([
+                    loadStats(),
+                    loadEventStatus(),
+                    loadEventsByCategory(),
+                    loadVenueUtilization()
+                ]);
+            } catch (error) {
+                console.error('Failed to load reports:', error);
+            }
         }
 
-        async function loadDashboardStats() {
+        async function loadStats() {
             try {
                 const response = await api.get('/reports/dashboard');
                 const stats = response.stats;
-
-                // Update cards
-                document.getElementById('statVenues').textContent = stats.totalVenues || 0;
-                document.getElementById('statEvents').textContent = stats.totalEvents || 0;
-                document.getElementById('statBookings').textContent = stats.totalBookings || 0;
-                document.getElementById('statUsers').textContent = stats.totalUsers || 0;
-
-                // Event Status Chart
-                updateChart('eventStatusChart', 'doughnut', 
-                    Object.keys(stats.eventStatusCounts || {}),
-                    Object.values(stats.eventStatusCounts || {}),
-                    ['#f59e0b', '#10b981', '#ef4444', '#6b7280']
-                );
-
-                // Category Chart
-                updateChart('categoryChart', 'bar',
-                    Object.keys(stats.categoryCounts || {}),
-                    Object.values(stats.categoryCounts || {}),
-                    ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6', '#6b7280']
-                );
-
-                // Venue Usage Chart
-                updateChart('venueUsageChart', 'bar',
-                    Object.keys(stats.venueUsage || {}),
-                    Object.values(stats.venueUsage || {}),
-                    '#6366f1'
-                );
-
-                // Monthly Trend Chart
-                const months = Object.keys(stats.monthlyTrends || {});
-                const monthCounts = Object.values(stats.monthlyTrends || {});
-                updateLineChart('monthlyTrendChart', months, monthCounts);
-
-            } catch (error) {
-                console.error('Dashboard stats error:', error);
-            }
-        }
-
-        async function loadVenueUsage() {
-            try {
-                const startDate = document.getElementById('filterStartDate').value;
-                const endDate = document.getElementById('filterEndDate').value;
                 
-                let url = '/reports/venue-usage';
-                const params = [];
-                if (startDate) params.push(`startDate=${startDate}`);
-                if (endDate) params.push(`endDate=${endDate}`);
-                if (params.length) url += '?' + params.join('&');
-
-                const response = await api.get(url);
-                const venueStats = response.venueStats || [];
-
-                // Update table
-                const tbody = document.getElementById('venueUsageTable');
-                tbody.innerHTML = venueStats.map(v => `
-                    <tr>
-                        <td><strong>${v.venue}</strong></td>
-                        <td>${v.location || 'N/A'}</td>
-                        <td>${v.capacity || 'N/A'}</td>
-                        <td>${v.totalBookings}</td>
-                        <td>${v.totalHours.toFixed(1)}h</td>
-                        <td>
-                            <div class="utilization-bar">
-                                <div class="utilization-fill" style="width: ${Math.min(v.totalHours / 100 * 100, 100)}%"></div>
-                                <span>${(v.totalHours / 100 * 100).toFixed(1)}%</span>
-                            </div>
-                        </td>
-                    </tr>
-                `).join('');
-
+                document.getElementById('totalVenues').textContent = stats.totalVenues;
+                document.getElementById('totalEvents').textContent = stats.totalEvents;
+                document.getElementById('totalBookings').textContent = stats.totalBookings;
+                document.getElementById('totalUsers').textContent = stats.totalUsers;
             } catch (error) {
-                console.error('Venue usage error:', error);
+                console.error('Stats error:', error);
             }
         }
 
-        async function loadEventStats() {
+        async function loadEventStatus() {
             try {
-                const category = document.getElementById('eventCategoryFilter').value;
-                const status = document.getElementById('eventStatusFilter').value;
-                const startDate = document.getElementById('filterStartDate').value;
-                const endDate = document.getElementById('filterEndDate').value;
+                const response = await api.get('/reports/event-status');
+                const breakdown = response.breakdown;
 
-                let url = '/reports/event-stats';
-                const params = [];
-                if (category) params.push(`category=${category}`);
-                if (status) params.push(`status=${status}`);
-                if (startDate) params.push(`startDate=${startDate}`);
-                if (endDate) params.push(`endDate=${endDate}`);
-                if (params.length) url += '?' + params.join('&');
+                const ctx = document.getElementById('statusChart').getContext('2d');
+                
+                if (statusChart) statusChart.destroy();
 
-                const response = await api.get(url);
-                const events = response.events || [];
-
-                const tbody = document.getElementById('eventStatsTable');
-                tbody.innerHTML = events.map(e => `
-                    <tr>
-                        <td>${e.title}</td>
-                        <td><span class="category-badge ${e.category}">${e.category}</span></td>
-                        <td><span class="status-badge ${e.status}">${e.status}</span></td>
-                        <td><span class="priority-badge ${e.priority}">${e.priority}</span></td>
-                        <td>${e.expected_attendance || 'N/A'}</td>
-                        <td>${e.venueName || '<span class="empty">Not booked</span>'}</td>
-                        <td>${formatDate(e.start_datetime)}</td>
-                    </tr>
-                `).join('');
-
-            } catch (error) {
-                console.error('Event stats error:', error);
-            }
-        }
-
-        async function loadUserActivity() {
-            try {
-                const response = await api.get('/reports/user-activity');
-                const users = response.users || [];
-
-                const tbody = document.getElementById('userActivityTable');
-                tbody.innerHTML = users.map(u => `
-                    <tr>
-                        <td>${u.name}</td>
-                        <td>${u.email}</td>
-                        <td><span class="role-badge ${u.role}">${u.role.replace('_', ' ').toUpperCase()}</span></td>
-                        <td>${u.department || 'N/A'}</td>
-                        <td>${u.eventsCreated}</td>
-                        <td>${u.bookingsMade}</td>
-                        <td>${formatDate(u.memberSince)}</td>
-                    </tr>
-                `).join('');
-
-            } catch (error) {
-                console.error('User activity error:', error);
-            }
-        }
-
-        function updateChart(canvasId, type, labels, data, colors) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            
-            if (charts[canvasId]) {
-                charts[canvasId].destroy();
-            }
-
-            charts[canvasId] = new Chart(ctx, {
-                type: type,
-                data: {
-                    labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors,
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: type === 'doughnut' ? 'right' : 'top'
+                statusChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Pending', 'Approved', 'Rejected', 'Cancelled'],
+                        datasets: [{
+                            data: [
+                                breakdown.pending,
+                                breakdown.approved,
+                                breakdown.rejected,
+                                breakdown.cancelled
+                            ],
+                            backgroundColor: ['#f59e0b', '#10b981', '#ef4444', '#94a3b8']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
                         }
                     }
-                }
-            });
+                });
+            } catch (error) {
+                console.error('Status chart error:', error);
+            }
         }
 
-        function updateLineChart(canvasId, labels, data) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            
-            if (charts[canvasId]) {
-                charts[canvasId].destroy();
-            }
+        async function loadEventsByCategory() {
+            try {
+                const response = await api.get('/reports/events-by-category');
+                const categories = response.categories;
 
-            charts[canvasId] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Bookings',
-                        data: data,
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
+                const labels = Object.keys(categories);
+                const data = Object.values(categories);
+
+                const ctx = document.getElementById('categoryChart').getContext('2d');
+                
+                if (categoryChart) categoryChart.destroy();
+
+                categoryChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                        datasets: [{
+                            label: 'Events',
+                            data: data,
+                            backgroundColor: '#6366f1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1 } }
                         }
                     }
-                }
-            });
+                });
+            } catch (error) {
+                console.error('Category chart error:', error);
+            }
         }
 
-        function resetFilters() {
+        async function loadVenueUtilization() {
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                let url = '/reports/venue-utilization';
+                if (startDate && endDate) {
+                    url += `?startDate=${startDate}&endDate=${endDate}`;
+                }
+
+                const response = await api.get(url);
+                const utilization = response.utilization;
+
+                const ctx = document.getElementById('utilizationChart').getContext('2d');
+                
+                if (utilizationChart) utilizationChart.destroy();
+
+                utilizationChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: utilization.map(u => u.venueName),
+                        datasets: [{
+                            label: 'Hours Booked',
+                            data: utilization.map(u => u.hoursBooked),
+                            backgroundColor: '#8b5cf6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Utilization chart error:', error);
+            }
+        }
+
+        function resetDates() {
             const end = new Date();
             const start = new Date();
             start.setDate(start.getDate() - 30);
-            document.getElementById('filterEndDate').value = end.toISOString().split('T')[0];
-            document.getElementById('filterStartDate').value = start.toISOString().split('T')[0];
-            document.getElementById('eventCategoryFilter').value = '';
-            document.getElementById('eventStatusFilter').value = '';
-            loadAllReports();
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            return new Date(dateString).toLocaleDateString('en-US', {
-                month: 'short', day: 'numeric', year: 'numeric'
-            });
+            
+            document.getElementById('endDate').value = end.toISOString().split('T')[0];
+            document.getElementById('startDate').value = start.toISOString().split('T')[0];
+            
+            loadReports();
         }
     </script>
 </body>
