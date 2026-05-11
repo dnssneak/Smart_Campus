@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-brand">
@@ -18,6 +20,8 @@
             <a href="events.html">Events</a>
             <a href="venues.html" class="active">Venues</a>
             <a href="bookings.html">My Bookings</a>
+            <a href="reports.html">Reports</a>
+            <a href="waitlist.html" class="active">Waitlist</a>
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </nav>
@@ -59,9 +63,9 @@
             <div class="modal-content large">
                 <span class="close" onclick="closeBookingModal()">&times;</span>
                 <h2><i class="fas fa-calendar-plus"></i> Book Venue</h2>
-                
+
                 <div id="bookingVenueInfo" class="booking-venue-info"></div>
-                
+
                 <div class="booking-form">
                     <div class="form-row">
                         <div class="form-group">
@@ -147,7 +151,7 @@
                 allVenues = response.venues || [];
                 renderVenues(allVenues);
             } catch (error) {
-                document.getElementById('venuesGrid').innerHTML = 
+                document.getElementById('venuesGrid').innerHTML =
                     `<p class="error">❌ Failed to load venues: ${error.message}</p>`;
             }
         }
@@ -156,15 +160,15 @@
             try {
                 const response = await api.get('/events');
                 allEvents = response.events || [];
-                
-                const myEvents = allEvents.filter(e => 
+
+                const myEvents = allEvents.filter(e =>
                     e.created_by === JSON.parse(localStorage.getItem('user')).id &&
                     (e.status === 'pending' || e.status === 'approved')
                 );
 
                 const select = document.getElementById('bookEvent');
                 select.innerHTML = '<option value="">Select an event...</option>';
-                
+
                 myEvents.forEach(e => {
                     const option = document.createElement('option');
                     option.value = e.id;
@@ -195,7 +199,7 @@
 
         function renderVenues(venues) {
             const grid = document.getElementById('venuesGrid');
-            
+
             if (venues.length === 0) {
                 grid.innerHTML = '<p class="empty">No venues available</p>';
                 return;
@@ -232,9 +236,9 @@
         function filterVenues() {
             const search = document.getElementById('venueSearch').value.toLowerCase();
             const capacity = document.getElementById('capacityFilter').value;
-            
-            let filtered = allVenues.filter(v => 
-                v.name.toLowerCase().includes(search) || 
+
+            let filtered = allVenues.filter(v =>
+                v.name.toLowerCase().includes(search) ||
                 (v.location && v.location.toLowerCase().includes(search))
             );
 
@@ -252,9 +256,9 @@
         function openBookingModal(venueId) {
             selectedVenueId = venueId;
             selectedSlot = null;
-            
+
             const venue = allVenues.find(v => v.id === venueId);
-            
+
             document.getElementById('bookingVenueInfo').innerHTML = `
                 <div class="venue-preview">
                     <h3>${venue.name}</h3>
@@ -266,7 +270,7 @@
             document.getElementById('slotSection').classList.add('hidden');
             document.getElementById('selectedSlotInfo').classList.add('hidden');
             document.getElementById('bookingMessage').innerHTML = '';
-            
+
             document.getElementById('bookingModal').style.display = 'block';
         }
 
@@ -299,7 +303,7 @@
 
                 // Add click listeners to available slots
                 document.querySelectorAll('.slot.available').forEach((slotEl) => {
-                    slotEl.addEventListener('click', function() {
+                    slotEl.addEventListener('click', function () {
                         const start = this.getAttribute('data-start');
                         const end = this.getAttribute('data-end');
                         selectSlot(start, end, this);
@@ -313,7 +317,7 @@
 
         function selectSlot(start, end, element) {
             selectedSlot = { start, end };
-            
+
             document.querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
             element.classList.add('selected');
 
@@ -322,7 +326,7 @@
                 <strong>Date:</strong> ${start.split('T')[0]}<br>
                 <strong>Time:</strong> ${start.split('T')[1].substring(0, 5)} - ${end.split('T')[1].substring(0, 5)}
             `;
-            
+
             console.log('Slot selected:', selectedSlot);
         }
 
@@ -358,7 +362,7 @@
                 });
 
                 msgDiv.innerHTML = '<p class="success">✅ Booking submitted successfully!</p>';
-                
+
                 setTimeout(() => {
                     closeBookingModal();
                     window.location.href = 'bookings.html';
@@ -366,7 +370,7 @@
 
             } catch (error) {
                 console.error('Booking error:', error);
-                
+
                 if (error.status === 409) {
                     msgDiv.innerHTML = `
                         <div class="alert alert-warning">
@@ -391,7 +395,7 @@
             try {
                 const response = await api.get(`/venues/${id}`);
                 const v = response.venue;
-                
+
                 document.getElementById('venueModalBody').innerHTML = `
                     <div class="venue-detail">
                         <div class="venue-detail-header">
@@ -432,11 +436,12 @@
             document.getElementById('venueModal').style.display = 'none';
         }
 
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
         }
     </script>
 </body>
+
 </html>

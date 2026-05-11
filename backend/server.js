@@ -45,10 +45,14 @@ app.get('/api/health', async (req, res) => {
 
 
 // Routes
+// Routes
+// Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/venues', require('./routes/venues'));
 app.use('/api/events', require('./routes/events'));
-app.use('/api/bookings', require('./routes/bookings'));  // ADD THIS
+app.use('/api/bookings', require('./routes/bookings'));
+app.use('/api/reports', require('./routes/reports'));
+app.use('/api/waitlist', require('./routes/waitlist'));  // ADD THIS
 
 // Error handler
 app.use((err, req, res, next) => {

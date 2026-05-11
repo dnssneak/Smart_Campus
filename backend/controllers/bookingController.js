@@ -60,13 +60,49 @@ exports.createBooking = async (req, res) => {
 
         if (conflictError) throw conflictError;
 
+        // 5. If conflicts exist, AUTO-ADD TO WAITLIST
         if (conflicts && conflicts.length > 0) {
-            // Get alternative slots
+            // Calculate priority based on event priority
+            const priorityWeights = { low: 1, medium: 2, high: 3, urgent: 4 };
+            let calculatedPriority = priorityWeights[event.priority] || 2;
+            if (event.category === 'academic') calculatedPriority += 1;
+
+            // Add to waitlist
+            const { data: waitlistEntry, error: waitlistError } = await supabase
+                .from('waitlists')
+                .insert({
+                    booking_request_id: eventId,
+                    venue_id: venueId,
+                    requested_start_time: startDateTime,
+                    requested_end_time: endDateTime,
+                    priority: calculatedPriority,
+                    priority_reason: 'event_type',
+                    status: 'waiting',
+                    user_id: req.user.id
+                })
+                .select()
+                .single();
+
+            if (waitlistError) {
+                return res.status(409).json({
+                    success: false,
+                    message: 'Venue unavailable. Waitlist failed.',
+                    conflicts: conflicts.map(c => ({
+                        id: c.id,
+                        start: c.start_datetime,
+                        end: c.end_datetime
+                    }))
+                });
+            }
+
+            // Get alternative slots for response
             const alternatives = await getAlternativeSlots(venueId, startDateTime, endDateTime);
-            
+
             return res.status(409).json({
                 success: false,
-                message: 'Venue is not available at requested time',
+                message: 'Venue is booked. You have been added to the waitlist!',
+                waitlist: true,
+                waitlistId: waitlistEntry.id,
                 conflicts: conflicts.map(c => ({
                     id: c.id,
                     start: c.start_datetime,
@@ -76,7 +112,7 @@ exports.createBooking = async (req, res) => {
             });
         }
 
-        // 5. Create booking
+        // 6. No conflicts — create booking
         const { data: booking, error: bookingError } = await supabase
             .from('bookings')
             .insert({
@@ -92,9 +128,6 @@ exports.createBooking = async (req, res) => {
             .single();
 
         if (bookingError) throw bookingError;
-
-        // 6. Update event status to approved if auto-approve (optional)
-        // For now, keep event pending until admin approves
 
         res.status(201).json({
             success: true,
@@ -126,7 +159,7 @@ async function getAlternativeSlots(venueId, preferredStart, preferredEnd, durati
             const slotStart = new Date(`${date}T${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}:00`);
             const slotEnd = new Date(slotStart.getTime() + durationMinutes * 60000);
 
-            if (slotEnd.getHours() > 22) continue;
+            if (slotEnd.getHours() > 22 || (slotEnd.getHours() === 22 && slotEnd.getMinutes() > 0)) continue;
 
             // Check if available
             const { data: existing } = await supabase
@@ -267,14 +300,14 @@ exports.approveBooking = async (req, res) => {
     }
 };
 
-// Cancel booking
+// Cancel booking + AUTO-PROCESS WAITLIST
 exports.cancelBooking = async (req, res) => {
     try {
         const { id } = req.params;
 
         const { data: existing } = await supabase
             .from('bookings')
-            .select('booked_by, event_id')
+            .select('booked_by, event_id, venue_id, start_datetime, end_datetime')
             .eq('id', id)
             .single();
 
@@ -292,6 +325,7 @@ exports.cancelBooking = async (req, res) => {
             });
         }
 
+        // Cancel the booking
         const { error } = await supabase
             .from('bookings')
             .update({ status: 'cancelled' })
@@ -299,12 +333,19 @@ exports.cancelBooking = async (req, res) => {
 
         if (error) throw error;
 
-        // Check waitlist for this venue/time
-        await processWaitlist(existing.event_id);
+        // AUTO-PROCESS WAITLIST for this venue/time slot
+        const promotionResult = await autoProcessWaitlist(
+            existing.venue_id,
+            existing.start_datetime,
+            existing.end_datetime,
+            req.user.id
+        );
 
         res.json({
             success: true,
-            message: 'Booking cancelled successfully'
+            message: 'Booking cancelled successfully',
+            waitlistProcessed: promotionResult.processed,
+            promotedBooking: promotionResult.booking || null
         });
     } catch (error) {
         res.status(500).json({
@@ -314,19 +355,107 @@ exports.cancelBooking = async (req, res) => {
     }
 };
 
-// Process waitlist when booking cancelled
-async function processWaitlist(eventId) {
-    // Simple waitlist check — will expand in Phase 8
-    const { data: waitlistItems } = await supabase
-        .from('waitlists')
-        .select('*')
-        .eq('status', 'waiting')
-        .order('priority', { ascending: false })
-        .order('created_at', { ascending: true })
-        .limit(1);
+// Auto-process waitlist when slot opens
+async function autoProcessWaitlist(venueId, startTime, endTime, adminUserId) {
+    try {
+        // Find highest priority waitlist entry for this venue/time
+        const { data: candidates, error } = await supabase
+            .from('waitlists')
+            .select(`
+                *,
+                events:booking_request_id (*)
+            `)
+            .eq('venue_id', venueId)
+            .eq('status', 'waiting')
+            .lte('requested_start_time', endTime)
+            .gte('requested_end_time', startTime)
+            .order('priority', { ascending: false })
+            .order('created_at', { ascending: true })
+            .limit(1);
 
-    if (waitlistItems && waitlistItems.length > 0) {
-        console.log('Waitlist items found:', waitlistItems.length);
-        // Will promote in Phase 8
+        if (error || !candidates || candidates.length === 0) {
+            return { processed: false, message: 'No waitlist entries found' };
+        }
+
+        const candidate = candidates[0];
+
+        // Double-check slot is still available
+        const { data: conflicts } = await supabase
+            .from('bookings')
+            .select('id')
+            .eq('venue_id', venueId)
+            .in('status', ['confirmed', 'pending'])
+            .lt('start_datetime', candidate.requested_end_time)
+            .gt('end_datetime', candidate.requested_start_time)
+            .limit(1);
+
+        if (conflicts && conflicts.length > 0) {
+            return { processed: false, message: 'Slot filled by another booking' };
+        }
+
+        // Create confirmed booking for waitlisted user
+        const { data: newBooking, error: bookingError } = await supabase
+            .from('bookings')
+            .insert({
+                event_id: candidate.booking_request_id,
+                venue_id: venueId,
+                start_datetime: candidate.requested_start_time,
+                end_datetime: candidate.requested_end_time,
+                status: 'confirmed',
+                conflict_status: 'none',
+                booked_by: candidate.user_id,
+                approved_by: adminUserId,
+                approved_at: new Date().toISOString()
+            })
+            .select()
+            .single();
+
+        if (bookingError) throw bookingError;
+
+        // Update waitlist entry to promoted
+        await supabase
+            .from('waitlists')
+            .update({
+                status: 'promoted',
+                promoted_at: new Date().toISOString()
+            })
+            .eq('id', candidate.id);
+
+        // Approve the event
+        await supabase
+            .from('events')
+            .update({ status: 'approved' })
+            .eq('id', candidate.booking_request_id);
+
+        // Create notification for user
+        await supabase
+            .from('notifications')
+            .insert({
+                user_id: candidate.user_id,
+                type: 'waitlist_promotion',
+                title: 'Waitlist Promotion!',
+                message: `Your waitlist request for ${candidate.events?.title || 'event'} has been promoted to a confirmed booking!`,
+                is_read: false,
+                related_id: newBooking.id,
+                related_type: 'booking'
+            });
+
+        return {
+            processed: true,
+            message: 'Waitlist entry promoted',
+            booking: newBooking
+        };
+
+    } catch (error) {
+        console.error('Auto-process waitlist error:', error);
+        return { processed: false, message: error.message };
     }
 }
+
+module.exports = {
+    createBooking: exports.createBooking,
+    getBookings: exports.getBookings,
+    getBookingById: exports.getBookingById,
+    approveBooking: exports.approveBooking,
+    cancelBooking: exports.cancelBooking
+};

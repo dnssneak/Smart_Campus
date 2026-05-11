@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Campus - Test</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-brand">🏫 Smart Campus</div>
         <div class="nav-links">
-           <a href="dashboard.html">Dashboard</a>
+            <a href="dashboard.html">Dashboard</a>
             <a href="events.html">Events</a>
             <a href="venues.html">Venues</a>
             <a href="bookings.html">My Bookings</a>
+            <a href="reports.html">Reports</a>
+            <a href="waitlist.html" class="active">Waitlist</a>
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </nav>
@@ -76,7 +80,7 @@
         async function testHealth() {
             const resultDiv = document.getElementById('healthResult');
             resultDiv.innerHTML = '<p class="loading">Testing...</p>';
-            
+
             try {
                 const data = await api.get('/health');
                 resultDiv.innerHTML = `
@@ -104,7 +108,7 @@
 
             try {
                 const result = await api.post('/auth/register', data);
-                
+
                 // Save token
                 localStorage.setItem('token', result.token);
                 localStorage.setItem('user', JSON.stringify(result.user));
@@ -131,7 +135,7 @@
 
             try {
                 const result = await api.post('/auth/login', data);
-                
+
                 // Save token
                 localStorage.setItem('token', result.token);
                 localStorage.setItem('user', JSON.stringify(result.user));
@@ -184,4 +188,5 @@
         updateTokenDisplay();
     </script>
 </body>
+
 </html>

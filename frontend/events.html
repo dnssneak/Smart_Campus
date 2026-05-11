@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
     <nav class="navbar">
         <div class="nav-brand">
@@ -17,6 +19,9 @@
             <a href="dashboard.html">Dashboard</a>
             <a href="events.html" class="active">Events</a>
             <a href="venues.html">Venues</a>
+            <a href="bookings.html">My Bookings</a>
+            <a href="reports.html">Reports</a>
+            <a href="waitlist.html" class="active">Waitlist</a>
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </nav>
@@ -169,7 +174,7 @@
             }
 
             currentUser = JSON.parse(localStorage.getItem('user'));
-            
+
             // Set min datetime to now
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -187,7 +192,7 @@
             try {
                 const status = document.getElementById('filterStatus').value;
                 const category = document.getElementById('filterCategory').value;
-                
+
                 let url = '/events';
                 const params = [];
                 if (status) params.push(`status=${status}`);
@@ -213,7 +218,7 @@
             list.innerHTML = events.map(e => {
                 const isOwner = e.created_by === currentUser?.id;
                 const canEdit = isOwner && e.status === 'pending';
-                
+
                 return `
                 <div class="event-card ${e.category}">
                     <div class="event-header">
@@ -310,7 +315,7 @@
             try {
                 const result = await api.post('/events', eventData);
                 msgDiv.innerHTML = '<p class="success">✅ Event created successfully!</p>';
-                
+
                 setTimeout(() => {
                     hideCreateForm();
                     loadEvents();
@@ -373,7 +378,7 @@
                         </div>
                     </div>
                 `;
-                
+
                 document.getElementById('eventModal').style.display = 'block';
             } catch (error) {
                 alert('Failed to load event: ' + error.message);
@@ -392,7 +397,7 @@
             window.location.href = `venues.html?eventId=${eventId}`;
         }
 
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (event.target.classList.contains('modal')) {
                 event.target.style.display = 'none';
             }
@@ -415,4 +420,5 @@
         }
     </script>
 </body>
+
 </html>
