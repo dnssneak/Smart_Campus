@@ -240,7 +240,7 @@
                     </div>
 
                     <div class="event-footer">
-                        <span class="creator">By ${e.profiles?.first_name || 'Unknown'} ${e.profiles?.last_name || ''}</span>
+                        <span class="creator">By ${e.creator?.first_name || 'Unknown'} ${e.creator?.last_name || ''}</span>
                         <div class="event-actions">
                             <button class="btn btn-small" onclick="showEventDetail(${e.id})">
                                 <i class="fas fa-eye"></i> View
@@ -358,7 +358,7 @@
                             </div>
                             <div class="detail-item">
                                 <span class="label"><i class="fas fa-user"></i> Created By</span>
-                                <span class="value">${e.profiles?.first_name || 'Unknown'} ${e.profiles?.last_name || ''}</span>
+                                <span class="value">${e.creator?.first_name || 'Unknown'} ${e.creator?.last_name || ''}</span>
                             </div>
                         </div>
 

@@ -1,6 +1,5 @@
 const supabase = require('../config/supabase');
 
-// Get all venues
 exports.getAllVenues = async (req, res) => {
     try {
         const { data: venues, error } = await supabase
@@ -17,12 +16,10 @@ exports.getAllVenues = async (req, res) => {
             venues
         });
     } catch (error) {
-        console.error('Get venues error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Get single venue by ID
 exports.getVenueById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -42,17 +39,15 @@ exports.getVenueById = async (req, res) => {
     }
 };
 
-// Get venue availability for a date
 exports.getVenueAvailability = async (req, res) => {
     try {
         const { id } = req.params;
-        const { date } = req.query; // YYYY-MM-DD
+        const { date } = req.query;
 
         if (!date) {
             return res.status(400).json({ success: false, message: 'Date parameter required (YYYY-MM-DD)' });
         }
 
-        // Get bookings for this venue on this date
         const startOfDay = `${date}T00:00:00`;
         const endOfDay = `${date}T23:59:59`;
 
@@ -66,7 +61,6 @@ exports.getVenueAvailability = async (req, res) => {
 
         if (error) throw error;
 
-        // Generate time slots (8 AM to 10 PM, 1-hour slots)
         const slots = [];
         for (let hour = 8; hour < 22; hour++) {
             const slotStart = `${date}T${String(hour).padStart(2, '0')}:00:00`;
@@ -98,7 +92,6 @@ exports.getVenueAvailability = async (req, res) => {
     }
 };
 
-// Create venue (admin only)
 exports.createVenue = async (req, res) => {
     try {
         const { name, description, capacity, location, facilities, equipment } = req.body;
@@ -129,7 +122,6 @@ exports.createVenue = async (req, res) => {
     }
 };
 
-// Update venue (admin only)
 exports.updateVenue = async (req, res) => {
     try {
         const { id } = req.params;
@@ -154,7 +146,6 @@ exports.updateVenue = async (req, res) => {
     }
 };
 
-// Delete venue (soft delete - admin only)
 exports.deleteVenue = async (req, res) => {
     try {
         const { id } = req.params;

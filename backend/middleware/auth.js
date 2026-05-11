@@ -9,17 +9,14 @@ const auth = async (req, res, next) => {
             return res.status(401).json({ message: 'No token, authorization denied' });
         }
 
-        // Verify JWT
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         
-        // Get user from Supabase
         const { data: user, error } = await supabase.auth.admin.getUserById(decoded.id);
         
         if (error || !user) {
             return res.status(401).json({ message: 'Token is not valid' });
         }
 
-        // Get profile with role
         const { data: profile } = await supabase
             .from('profiles')
             .select('*')

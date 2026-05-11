@@ -192,8 +192,8 @@ exports.getBookings = async (req, res) => {
             .from('bookings')
             .select(`
                 *,
-                events:event_id (title, category, status, priority),
-                venues:venue_id (name, capacity, location)
+                event:events!fk_bookings_event_id_events (title, category, status, priority),
+                venue:venues!fk_bookings_venue_id_venues (name, capacity, location)
             `);
 
         // Non-admins see only their bookings
@@ -227,8 +227,8 @@ exports.getBookingById = async (req, res) => {
             .from('bookings')
             .select(`
                 *,
-                events:event_id (*),
-                venues:venue_id (*)
+                event:events!fk_bookings_event_id_events (*),
+                venue:venues!fk_bookings_venue_id_venues (*)
             `)
             .eq('id', id)
             .single();
@@ -363,7 +363,7 @@ async function autoProcessWaitlist(venueId, startTime, endTime, adminUserId) {
             .from('waitlists')
             .select(`
                 *,
-                events:booking_request_id (*)
+                event:events!fk_waitlists_booking_request_id_events (*)
             `)
             .eq('venue_id', venueId)
             .eq('status', 'waiting')
@@ -434,7 +434,7 @@ async function autoProcessWaitlist(venueId, startTime, endTime, adminUserId) {
                 user_id: candidate.user_id,
                 type: 'waitlist_promotion',
                 title: 'Waitlist Promotion!',
-                message: `Your waitlist request for ${candidate.events?.title || 'event'} has been promoted to a confirmed booking!`,
+                message: `Your waitlist request for ${candidate.event?.title || 'event'} has been promoted to a confirmed booking!`,
                 is_read: false,
                 related_id: newBooking.id,
                 related_type: 'booking'

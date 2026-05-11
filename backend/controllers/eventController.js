@@ -1,6 +1,5 @@
 const supabase = require('../config/supabase');
 
-// Create event
 exports.createEvent = async (req, res) => {
     try {
         const {
@@ -16,7 +15,6 @@ exports.createEvent = async (req, res) => {
             recurrencePattern
         } = req.body;
 
-        // Validate dates
         if (new Date(endDateTime) <= new Date(startDateTime)) {
             return res.status(400).json({
                 success: false,
@@ -51,7 +49,6 @@ exports.createEvent = async (req, res) => {
             event
         });
     } catch (error) {
-        console.error('Create event error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -59,22 +56,19 @@ exports.createEvent = async (req, res) => {
     }
 };
 
-// Get all events (with filters)
 exports.getEvents = async (req, res) => {
     try {
         let query = supabase
             .from('events')
             .select(`
                 *,
-                profiles:created_by (first_name, last_name, role)
+                creator:profiles!fk_events_created_by_profiles (first_name, last_name, role)
             `);
 
-        // If not admin, show only user's events OR approved public events
         if (req.user.role !== 'admin') {
             query = query.or(`created_by.eq.${req.user.id},status.eq.approved`);
         }
 
-        // Apply filters from query params
         if (req.query.status) {
             query = query.eq('status', req.query.status);
         }
@@ -92,7 +86,6 @@ exports.getEvents = async (req, res) => {
             events
         });
     } catch (error) {
-        console.error('Get events error:', error);
         res.status(500).json({
             success: false,
             message: error.message
@@ -100,7 +93,6 @@ exports.getEvents = async (req, res) => {
     }
 };
 
-// Get single event
 exports.getEventById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -109,7 +101,7 @@ exports.getEventById = async (req, res) => {
             .from('events')
             .select(`
                 *,
-                profiles:created_by (first_name, last_name)
+                creator:profiles!fk_events_created_by_profiles (first_name, last_name)
             `)
             .eq('id', id)
             .single();
@@ -134,12 +126,10 @@ exports.getEventById = async (req, res) => {
     }
 };
 
-// Update event (only creator or admin)
 exports.updateEvent = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Check ownership
         const { data: existing } = await supabase
             .from('events')
             .select('created_by, status')
@@ -168,7 +158,7 @@ exports.updateEvent = async (req, res) => {
         }
 
         const updates = req.body;
-        delete updates.created_by; // Prevent changing owner
+        delete updates.created_by;
 
         const { data: event, error } = await supabase
             .from('events')
@@ -192,7 +182,6 @@ exports.updateEvent = async (req, res) => {
     }
 };
 
-// Delete event (soft delete)
 exports.deleteEvent = async (req, res) => {
     try {
         const { id } = req.params;
@@ -236,7 +225,6 @@ exports.deleteEvent = async (req, res) => {
     }
 };
 
-// Approve/Reject event (admin only)
 exports.updateStatus = async (req, res) => {
     try {
         const { id } = req.params;
