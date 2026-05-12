@@ -1,4 +1,6 @@
 const supabase = require('../config/supabase');
+const { eventBus, EVENTS } = require('../utils/EventBus');
+const { priorityCalculator } = require('../utils/PriorityCalculator');
 
 // Create booking (connects event + venue)
 exports.createBooking = async (req, res) => {
@@ -62,10 +64,15 @@ exports.createBooking = async (req, res) => {
 
         // 5. If conflicts exist, AUTO-ADD TO WAITLIST
         if (conflicts && conflicts.length > 0) {
-            // Calculate priority based on event priority
-            const priorityWeights = { low: 1, medium: 2, high: 3, urgent: 4 };
-            let calculatedPriority = priorityWeights[event.priority] || 2;
-            if (event.category === 'academic') calculatedPriority += 1;
+            // Get user profile for priority calculation
+            const { data: userProfile } = await supabase
+                .from('profiles')
+                .select('role')
+                .eq('id', req.user.id)
+                .single();
+
+            // Calculate priority using PriorityCalculator
+            const calculatedPriority = priorityCalculator.calculate(event, userProfile || { role: 'student' });
 
             // Add to waitlist
             const { data: waitlistEntry, error: waitlistError } = await supabase
@@ -98,11 +105,20 @@ exports.createBooking = async (req, res) => {
             // Get alternative slots for response
             const alternatives = await getAlternativeSlots(venueId, startDateTime, endDateTime);
 
+            // Emit waitlist added event
+            await eventBus.emit(EVENTS.WAITLIST_ADDED, {
+                waitlistId: waitlistEntry.id,
+                venueName: venue.name,
+                position: calculatedPriority,
+                userId: req.user.id
+            });
+
             return res.status(409).json({
                 success: false,
                 message: 'Venue is booked. You have been added to the waitlist!',
                 waitlist: true,
                 waitlistId: waitlistEntry.id,
+                priority: calculatedPriority,
                 conflicts: conflicts.map(c => ({
                     id: c.id,
                     start: c.start_datetime,
@@ -129,16 +145,13 @@ exports.createBooking = async (req, res) => {
 
         if (bookingError) throw bookingError;
 
-        // Create notification for user
-        const { createNotification } = require('./notificationController');
-        await createNotification(
-            req.user.id,
-            'booking_confirmed',
-            '📅 Booking Submitted',
-            `Your booking request for ${venue.name} on ${new Date(startDateTime).toLocaleDateString()} has been submitted and is pending approval.`,
-            booking.id,
-            'booking'
-        );
+        // Emit booking requested event
+        await eventBus.emit(EVENTS.BOOKING_REQUESTED, {
+            bookingId: booking.id,
+            venueName: venue.name,
+            date: new Date(startDateTime).toLocaleDateString(),
+            userId: req.user.id
+        });
 
         res.status(201).json({
             success: true,
@@ -297,16 +310,20 @@ exports.approveBooking = async (req, res) => {
                 .update({ status: 'approved' })
                 .eq('id', booking.event_id);
 
-            // Create notification for user
-            const { createNotification } = require('./notificationController');
-            await createNotification(
-                booking.booked_by,
-                'booking_confirmed',
-                '✅ Booking Approved!',
-                `Your booking has been approved by an admin. Your event is confirmed!`,
-                booking.id,
-                'booking'
-            );
+            // Get venue name for notification
+            const { data: venue } = await supabase
+                .from('venues')
+                .select('name')
+                .eq('id', booking.venue_id)
+                .single();
+
+            // Emit booking approved event
+            await eventBus.emit(EVENTS.BOOKING_APPROVED, {
+                bookingId: booking.id,
+                venueName: venue?.name || 'Venue',
+                date: new Date(booking.start_datetime).toLocaleDateString(),
+                userId: booking.booked_by
+            });
         }
 
         res.json({
@@ -350,21 +367,28 @@ exports.cancelBooking = async (req, res) => {
         // Cancel the booking
         const { error } = await supabase
             .from('bookings')
-            .update({ status: 'cancelled' })
+            .update({ 
+                status: 'cancelled',
+                cancelled_at: new Date().toISOString()
+            })
             .eq('id', id);
 
         if (error) throw error;
 
-        // Create notification for user
-        const { createNotification } = require('./notificationController');
-        await createNotification(
-            existing.booked_by,
-            'booking_cancelled',
-            '❌ Booking Cancelled',
-            `Your booking has been cancelled. The time slot is now available for others.`,
-            id,
-            'booking'
-        );
+        // Get venue name for notification
+        const { data: venue } = await supabase
+            .from('venues')
+            .select('name')
+            .eq('id', existing.venue_id)
+            .single();
+
+        // Emit booking cancelled event
+        await eventBus.emit(EVENTS.BOOKING_CANCELLED, {
+            bookingId: id,
+            venueName: venue?.name || 'Venue',
+            date: new Date(existing.start_datetime).toLocaleDateString(),
+            userId: existing.booked_by
+        });
 
         // AUTO-PROCESS WAITLIST for this venue/time slot
         const promotionResult = await autoProcessWaitlist(
@@ -460,18 +484,19 @@ async function autoProcessWaitlist(venueId, startTime, endTime, adminUserId) {
             .update({ status: 'approved' })
             .eq('id', candidate.booking_request_id);
 
-        // Create notification for user
-        await supabase
-            .from('notifications')
-            .insert({
-                user_id: candidate.user_id,
-                type: 'waitlist_promotion',
-                title: 'Waitlist Promotion!',
-                message: `Your waitlist request for ${candidate.event?.title || 'event'} has been promoted to a confirmed booking!`,
-                is_read: false,
-                related_id: newBooking.id,
-                related_type: 'booking'
-            });
+        // Get venue name
+        const { data: venue } = await supabase
+            .from('venues')
+            .select('name')
+            .eq('id', venueId)
+            .single();
+
+        // Emit waitlist promoted event
+        await eventBus.emit(EVENTS.WAITLIST_PROMOTED, {
+            bookingId: newBooking.id,
+            venueName: venue?.name || 'Venue',
+            userId: candidate.user_id
+        });
 
         return {
             processed: true,
