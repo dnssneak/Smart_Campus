@@ -6,167 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events - Smart Campus</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/modern-styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<script>
-// ─── Bell Dropdown Functions ───
-async function updateBellBadge() {
-    try {
-        const response = await api.get('/notifications/unread-count');
-        const count = response.unreadCount || 0;
-        const badge = document.getElementById('bellBadge');
-        
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.style.display = 'block';
-        } else {
-            badge.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Badge error:', error);
-    }
-}
-
-async function loadBellDropdown() {
-    try {
-        const response = await api.get('/notifications?unreadOnly=true');
-        const notifications = response.notifications || [];
-        const list = document.getElementById('bellDropdownList');
-
-        if (notifications.length === 0) {
-            list.innerHTML = `<p style="padding:1.5rem;text-align:center;color:#94a3b8">No unread notifications</p>`;
-            return;
-        }
-
-        const iconMap = {
-            event_approved: 'fa-check-circle',
-            event_rejected: 'fa-times-circle',
-            booking_confirmed: 'fa-calendar-check',
-            booking_cancelled: 'fa-calendar-times',
-            waitlist_promotion: 'fa-arrow-up',
-            venue_conflict: 'fa-exclamation-triangle',
-            system: 'fa-info-circle'
-        };
-
-        list.innerHTML = notifications.slice(0, 5).map(n => `
-            <div class="bell-dropdown-item ${n.is_read ? '' : 'unread'}" onclick="window.location.href='notifications.html'">
-                <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${getIconColor(n.type)};color:white;font-size:0.9rem">
-                    <i class="fas ${iconMap[n.type] || 'fa-bell'}"></i>
-                </div>
-                <div style="flex:1">
-                    <div style="font-weight:600;font-size:0.9rem;color:#1e293b">${n.title}</div>
-                    <div style="font-size:0.8rem;color:#64748b">${n.message.substring(0, 50)}${n.message.length > 50 ? '...' : ''}</div>
-                    <small>${getTimeAgo(n.created_at)}</small>
-                </div>
-            </div>
-        `).join('');
-
-    } catch (error) {
-        console.error('Dropdown error:', error);
-    }
-}
-
-function getIconColor(type) {
-    const colors = {
-        event_approved: '#059669',
-        event_rejected: '#dc2626',
-        booking_confirmed: '#2563eb',
-        booking_cancelled: '#d97706',
-        waitlist_promotion: '#6366f1',
-        venue_conflict: '#db2777',
-        system: '#6b7280'
-    };
-    return colors[type] || '#6366f1';
-}
-
-function getTimeAgo(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-    
-    if (seconds < 60) return 'Just now';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function toggleBellDropdown(e) {
-    e.stopPropagation();
-    document.getElementById('bellDropdown').classList.toggle('show');
-}
-
-async function markAllAsReadFromBell() {
-    try {
-        await api.put('/notifications/mark-all-read');
-        updateBellBadge();
-        loadBellDropdown();
-    } catch (error) {
-        console.error('Mark all read error:', error);
-    }
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', () => {
-    const dropdown = document.getElementById('bellDropdown');
-    if (dropdown) dropdown.classList.remove('show');
-});
-
-// Auto-refresh badge every 30 seconds
-setInterval(() => {
-    if (localStorage.getItem('token')) {
-        updateBellBadge();
-        loadBellDropdown();
-    }
-}, 30000);
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('token')) {
-        updateBellBadge();
-        loadBellDropdown();
-    }
-});
-</script>
 <body>
     <nav class="navbar">
-    <div class="nav-brand">
-        <i class="fas fa-university"></i>
-        <span>Smart Campus</span>
-    </div>
-    <div class="nav-links">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="events.html">Events</a>
-        <a href="venues.html">Venues</a>
-        <a href="bookings.html">My Bookings</a>
-        <a href="waitlist.html">Waitlist</a>
-        <a href="reports.html">Reports</a>
-        
-        <!-- Bell Icon -->
-        <div class="nav-bell" onclick="toggleBellDropdown(event)">
-            <i class="fas fa-bell"></i>
-            <span class="bell-badge" id="bellBadge">0</span>
+        <div class="nav-brand">
+            <i class="fas fa-university"></i>
+            <span>Smart Campus</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+            <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
+            <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
+            <a href="bookings.html"><i class="fas fa-calendar-check"></i> <span>Bookings</span></a>
+            <a href="waitlist.html"><i class="fas fa-clock"></i> <span>Waitlist</span></a>
+            <a href="resources.html"><i class="fas fa-boxes"></i> <span>Resources</span></a>
+            <a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
             
-            <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
-                <div class="bell-dropdown-header">
-                    <h4>Notifications</h4>
-                    <button class="btn btn-small" onclick="markAllAsReadFromBell()">Mark all read</button>
-                </div>
-                <div class="bell-dropdown-list" id="bellDropdownList">
-                    <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
-                </div>
-                <div class="bell-dropdown-footer">
-                    <a href="notifications.html">View all notifications</a>
+            <!-- Bell Icon -->
+            <div class="nav-bell" onclick="toggleBellDropdown(event)">
+                <i class="fas fa-bell"></i>
+                <span class="bell-badge" id="bellBadge">0</span>
+                
+                <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
+                    <div class="bell-dropdown-header">
+                        <h4>Notifications</h4>
+                        <button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
+                    </div>
+                    <div class="bell-dropdown-list" id="bellDropdownList">
+                        <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
+                    </div>
+                    <div class="bell-dropdown-footer">
+                        <a href="notifications.html">View all notifications</a>
+                    </div>
                 </div>
             </div>
+            
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
         </div>
-        
-        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </div>
-</nav>
+    </nav>
     <main class="container">
         <div class="page-header">
             <h1><i class="fas fa-star"></i> Events</h1>
@@ -304,6 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
 
     <script src="js/api.js"></script>
+    <script src="js/notifications-helper.js"></script>
     <script>
         let allEvents = [];
         let currentUser = null;

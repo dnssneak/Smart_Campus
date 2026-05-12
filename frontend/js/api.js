@@ -23,7 +23,18 @@ const api = {
 
         try {
             const response = await fetch(url, config);
-            const data = await response.json();
+            
+            // Check if response is JSON before parsing
+            const contentType = response.headers.get('content-type');
+            let data;
+            
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                // Handle non-JSON responses (like rate limit HTML pages)
+                const text = await response.text();
+                data = { message: text.substring(0, 100) }; // Truncate long HTML responses
+            }
 
             if (!response.ok) {
                 const error = new Error(data.message || `Request failed: ${response.status}`);

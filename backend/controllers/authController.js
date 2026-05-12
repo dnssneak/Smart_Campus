@@ -10,7 +10,19 @@ exports.register = async (req, res) => {
             return res.status(400).json({ message: 'Please use a valid university email (@university.edu)' });
         }
 
-        // Create user in Supabase Auth
+        // Validate required fields
+        if (!firstName || !lastName) {
+            return res.status(400).json({ message: 'First name and last name are required' });
+        }
+
+        // Validate role
+        const validRoles = ['student', 'faculty', 'admin', 'staff'];
+        const userRole = role || 'student';
+        if (!validRoles.includes(userRole)) {
+            return res.status(400).json({ message: 'Invalid role. Must be one of: student, faculty, admin, staff' });
+        }
+
+        // Step 1: Create user with admin API (bypasses email confirmation and trigger issues)
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email,
             password,
@@ -18,27 +30,66 @@ exports.register = async (req, res) => {
         });
 
         if (authError) {
-            return res.status(400).json({ message: authError.message });
+            console.error('Auth error:', authError);
+            return res.status(400).json({ message: authError.message || 'Failed to create user account' });
         }
 
-        // Create profile
-        const { data: profile, error: profileError } = await supabase
+        if (!authData || !authData.user) {
+            return res.status(400).json({ message: 'Failed to create user account' });
+        }
+
+        // Step 2: Manually create profile (bypassing trigger)
+        // First, check if profile already exists (in case trigger ran)
+        const { data: existingProfile } = await supabase
             .from('profiles')
-            .insert({
-                id: authData.user.id,
-                first_name: firstName,
-                last_name: lastName,
-                role: role || 'student',
-                department,
-                phone
-            })
-            .select()
+            .select('id')
+            .eq('id', authData.user.id)
             .single();
 
-        if (profileError) {
-            // Rollback: delete auth user if profile fails
-            await supabase.auth.admin.deleteUser(authData.user.id);
-            return res.status(400).json({ message: profileError.message });
+        let profile;
+        if (existingProfile) {
+            // Update existing profile
+            const { data: updatedProfile, error: updateError } = await supabase
+                .from('profiles')
+                .update({
+                    first_name: firstName,
+                    last_name: lastName,
+                    role: userRole,
+                    department: department || null,
+                    phone: phone || null
+                })
+                .eq('id', authData.user.id)
+                .select()
+                .single();
+
+            if (updateError) {
+                console.error('Profile update error:', updateError);
+                await supabase.auth.admin.deleteUser(authData.user.id);
+                return res.status(400).json({ message: `Failed to update profile: ${updateError.message}` });
+            }
+            profile = updatedProfile;
+        } else {
+            // Create new profile
+            const { data: newProfile, error: profileError } = await supabase
+                .from('profiles')
+                .insert({
+                    id: authData.user.id,
+                    first_name: firstName,
+                    last_name: lastName,
+                    role: userRole,
+                    department: department || null,
+                    phone: phone || null
+                })
+                .select()
+                .single();
+
+            if (profileError) {
+                console.error('Profile creation error:', profileError);
+                // Rollback: delete auth user
+                await supabase.auth.admin.deleteUser(authData.user.id);
+                return res.status(400).json({ message: `Failed to create profile: ${profileError.message}` });
+            }
+            profile = newProfile;
         }
 
         // Generate JWT
@@ -62,7 +113,7 @@ exports.register = async (req, res) => {
         });
     } catch (error) {
         console.error('Register error:', error);
-        res.status(500).json({ message: error.message });
+        res.status(500).json({ message: `Server error: ${error.message}` });
     }
 };
 

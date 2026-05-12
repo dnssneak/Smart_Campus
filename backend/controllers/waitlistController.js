@@ -178,8 +178,8 @@ exports.getWaitlists = async (req, res) => {
             .from('waitlists')
             .select(`
                 *,
-                event:events!fk_waitlists_booking_request_id_events (title, category, status, priority),
-                venue:venues!fk_waitlists_venue_id_venues (name, capacity, location)
+                events!waitlists_booking_request_id_fkey (title, category, status, priority),
+                venues!waitlists_venue_id_fkey (name, capacity, location)
             `);
 
         if (req.user.role !== 'admin') {
@@ -212,8 +212,8 @@ exports.getWaitlistById = async (req, res) => {
             .from('waitlists')
             .select(`
                 *,
-                event:events!fk_waitlists_booking_request_id_events (*),
-                venue:venues!fk_waitlists_venue_id_venues (*)
+                events!waitlists_booking_request_id_fkey (*),
+                venues!waitlists_venue_id_fkey (*)
             `)
             .eq('id', id)
             .single();
@@ -297,7 +297,7 @@ exports.autoProcessWaitlist = async (venueId, startTime, endTime, adminUserId) =
             .from('waitlists')
             .select(`
                 *,
-                event:events!fk_waitlists_booking_request_id_events (*)
+                events!waitlists_booking_request_id_fkey (*)
             `)
             .eq('venue_id', venueId)
             .eq('status', 'waiting')

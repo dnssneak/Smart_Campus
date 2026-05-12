@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources - Smart Campus</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/modern-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-university"></i>
+            <span>Smart Campus</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+            <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
+            <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
+            <a href="bookings.html"><i class="fas fa-calendar-check"></i> <span>Bookings</span></a>
+            <a href="waitlist.html"><i class="fas fa-clock"></i> <span>Waitlist</span></a>
+            <a href="resources.html"><i class="fas fa-boxes"></i> <span>Resources</span></a>
+            <a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
+            
+            <!-- Bell Icon -->
+            <div class="nav-bell" onclick="toggleBellDropdown(event)">
+                <i class="fas fa-bell"></i>
+                <span class="bell-badge" id="bellBadge">0</span>
+                
+                <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
+                    <div class="bell-dropdown-header">
+                        <h4>Notifications</h4>
+                        <button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
+                    </div>
+                    <div class="bell-dropdown-list" id="bellDropdownList">
+                        <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
+                    </div>
+                    <div class="bell-dropdown-footer">
+                        <a href="notifications.html">View all notifications</a>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-boxes"></i> Campus Resources</h1>
+            <p>Browse available facilities and equipment across all venues</p>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="resources-filters">
+            <input type="text" id="resourceSearch" placeholder="Search resources..." onkeyup="filterResources()">
+            <select id="resourceType" onchange="filterResources()">
+                <option value="all">All Types</option>
+                <option value="facilities">Facilities</option>
+                <option value="equipment">Equipment</option>
+            </select>
+        </div>
+
+        <!-- Resources Overview -->
+        <div class="resources-overview">
+            <div class="resource-summary-card">
+                <div class="resource-icon">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <div>
+                    <h3 id="facilitiesCount">0</h3>
+                    <p>Facilities</p>
+                </div>
+            </div>
+            <div class="resource-summary-card">
+                <div class="resource-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div>
+                    <h3 id="equipmentCount">0</h3>
+                    <p>Equipment</p>
+                </div>
+            </div>
+            <div class="resource-summary-card">
+                <div class="resource-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div>
+                    <h3 id="venuesCount">0</h3>
+                    <p>Venues</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facilities Section -->
+        <section class="resources-section">
+            <h2><i class="fas fa-door-open"></i> Facilities</h2>
+            <div id="facilitiesList" class="resources-grid">
+                <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading facilities...</p>
+            </div>
+        </section>
+
+        <!-- Equipment Section -->
+        <section class="resources-section">
+            <h2><i class="fas fa-tools"></i> Equipment</h2>
+            <div id="equipmentList" class="resources-grid">
+                <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading equipment...</p>
+            </div>
+        </section>
+
+        <!-- Venue Search by Resources -->
+        <section class="resources-section">
+            <h2><i class="fas fa-search"></i> Find Venues by Resources</h2>
+            <div class="resource-search-form">
+                <div class="form-group">
+                    <label>Required Facilities</label>
+                    <input type="text" id="searchFacilities" placeholder="e.g., Projector, WiFi">
+                    <small>Separate multiple items with commas</small>
+                </div>
+                <div class="form-group">
+                    <label>Required Equipment</label>
+                    <input type="text" id="searchEquipment" placeholder="e.g., Microphone, Whiteboard">
+                    <small>Separate multiple items with commas</small>
+                </div>
+                <div class="form-group">
+                    <label>Minimum Capacity</label>
+                    <input type="number" id="searchCapacity" placeholder="e.g., 50">
+                </div>
+                <button class="btn btn-primary" onclick="searchVenuesByResources()">
+                    <i class="fas fa-search"></i> Search Venues
+                </button>
+            </div>
+            <div id="searchResults" class="search-results"></div>
+        </section>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/notifications-helper.js"></script>
+    <script>
+        let allResources = { facilities: [], equipment: [] };
+        let allVenues = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            await loadResources();
+            await loadVenues();
+        });
+
+        async function loadResources() {
+            try {
+                const response = await api.get('/resources');
+                allResources = response.resources || { facilities: [], equipment: [] };
+
+                // Update counts
+                document.getElementById('facilitiesCount').textContent = allResources.facilities.length;
+                document.getElementById('equipmentCount').textContent = allResources.equipment.length;
+
+                renderFacilities(allResources.facilities);
+                renderEquipment(allResources.equipment);
+            } catch (error) {
+                console.error('Failed to load resources:', error);
+                document.getElementById('facilitiesList').innerHTML = 
+                    `<p class="error">❌ Failed to load facilities: ${error.message}</p>`;
+                document.getElementById('equipmentList').innerHTML = 
+                    `<p class="error">❌ Failed to load equipment: ${error.message}</p>`;
+            }
+        }
+
+        async function loadVenues() {
+            try {
+                const response = await api.get('/venues');
+                allVenues = response.venues || [];
+                document.getElementById('venuesCount').textContent = allVenues.length;
+            } catch (error) {
+                console.error('Failed to load venues:', error);
+            }
+        }
+
+        function renderFacilities(facilities) {
+            const container = document.getElementById('facilitiesList');
+            
+            if (facilities.length === 0) {
+                container.innerHTML = '<p class="empty">No facilities found</p>';
+                return;
+            }
+
+            container.innerHTML = facilities.map(f => `
+                <div class="resource-card">
+                    <div class="resource-card-icon">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <h3>${f}</h3>
+                    <p>${getVenuesWithResource(f, 'facilities')} venues</p>
+                    <button class="btn btn-small btn-secondary" onclick="showVenuesWithResource('${f}', 'facilities')">
+                        View Venues
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderEquipment(equipment) {
+            const container = document.getElementById('equipmentList');
+            
+            if (equipment.length === 0) {
+                container.innerHTML = '<p class="empty">No equipment found</p>';
+                return;
+            }
+
+            container.innerHTML = equipment.map(e => `
+                <div class="resource-card">
+                    <div class="resource-card-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>${e}</h3>
+                    <p>${getVenuesWithResource(e, 'equipment')} venues</p>
+                    <button class="btn btn-small btn-secondary" onclick="showVenuesWithResource('${e}', 'equipment')">
+                        View Venues
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function getVenuesWithResource(resource, type) {
+            return allVenues.filter(v => 
+                (v[type] || []).some(r => r.toLowerCase() === resource.toLowerCase())
+            ).length;
+        }
+
+        function showVenuesWithResource(resource, type) {
+            const venues = allVenues.filter(v => 
+                (v[type] || []).some(r => r.toLowerCase() === resource.toLowerCase())
+            );
+
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = `
+                <h3>Venues with ${resource}</h3>
+                <div class="venues-grid">
+                    ${venues.map(v => `
+                        <div class="venue-card">
+                            <h4>${v.name}</h4>
+                            <p><i class="fas fa-map-marker-alt"></i> ${v.location || 'Campus'}</p>
+                            <p><i class="fas fa-users"></i> Capacity: ${v.capacity}</p>
+                            <a href="venues.html" class="btn btn-small btn-primary">Book Venue</a>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function searchVenuesByResources() {
+            const facilities = document.getElementById('searchFacilities').value;
+            const equipment = document.getElementById('searchEquipment').value;
+            const capacity = document.getElementById('searchCapacity').value;
+
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '<p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Searching...</p>';
+
+            try {
+                const params = new URLSearchParams();
+                if (facilities) params.append('facilities', facilities);
+                if (equipment) params.append('equipment', equipment);
+                if (capacity) params.append('minCapacity', capacity);
+
+                const response = await api.get(`/resources/search?${params.toString()}`);
+                const venues = response.venues || [];
+
+                if (venues.length === 0) {
+                    resultsDiv.innerHTML = '<p class="empty">No venues found matching your criteria</p>';
+                    return;
+                }
+
+                resultsDiv.innerHTML = `
+                    <h3>Found ${venues.length} venue(s)</h3>
+                    <div class="venues-grid">
+                        ${venues.map(v => `
+                            <div class="venue-card">
+                                <h4>${v.name}</h4>
+                                <p><i class="fas fa-map-marker-alt"></i> ${v.location || 'Campus'}</p>
+                                <p><i class="fas fa-users"></i> Capacity: ${v.capacity}</p>
+                                <div class="facilities">
+                                    ${(v.facilities || []).slice(0, 3).map(f => `<span class="tag">${f}</span>`).join('')}
+                                </div>
+                                <a href="venues.html" class="btn btn-small btn-primary">Book Venue</a>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">❌ Search failed: ${error.message}</p>`;
+            }
+        }
+
+        function filterResources() {
+            const search = document.getElementById('resourceSearch').value.toLowerCase();
+            const type = document.getElementById('resourceType').value;
+
+            let filteredFacilities = allResources.facilities;
+            let filteredEquipment = allResources.equipment;
+
+            if (search) {
+                filteredFacilities = filteredFacilities.filter(f => f.toLowerCase().includes(search));
+                filteredEquipment = filteredEquipment.filter(e => e.toLowerCase().includes(search));
+            }
+
+            if (type === 'facilities') {
+                renderFacilities(filteredFacilities);
+                document.getElementById('equipmentList').parentElement.style.display = 'none';
+            } else if (type === 'equipment') {
+                renderEquipment(filteredEquipment);
+                document.getElementById('facilitiesList').parentElement.style.display = 'none';
+            } else {
+                renderFacilities(filteredFacilities);
+                renderEquipment(filteredEquipment);
+                document.getElementById('facilitiesList').parentElement.style.display = 'block';
+                document.getElementById('equipmentList').parentElement.style.display = 'block';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

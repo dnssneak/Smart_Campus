@@ -129,6 +129,17 @@ exports.createBooking = async (req, res) => {
 
         if (bookingError) throw bookingError;
 
+        // Create notification for user
+        const { createNotification } = require('./notificationController');
+        await createNotification(
+            req.user.id,
+            'booking_confirmed',
+            '📅 Booking Submitted',
+            `Your booking request for ${venue.name} on ${new Date(startDateTime).toLocaleDateString()} has been submitted and is pending approval.`,
+            booking.id,
+            'booking'
+        );
+
         res.status(201).json({
             success: true,
             message: 'Booking request submitted successfully',
@@ -192,8 +203,8 @@ exports.getBookings = async (req, res) => {
             .from('bookings')
             .select(`
                 *,
-                event:events!fk_bookings_event_id_events (title, category, status, priority),
-                venue:venues!fk_bookings_venue_id_venues (name, capacity, location)
+                events!bookings_event_id_fkey (title, category, status, priority),
+                venues!bookings_venue_id_fkey (name, capacity, location)
             `);
 
         // Non-admins see only their bookings
@@ -227,8 +238,8 @@ exports.getBookingById = async (req, res) => {
             .from('bookings')
             .select(`
                 *,
-                event:events!fk_bookings_event_id_events (*),
-                venue:venues!fk_bookings_venue_id_venues (*)
+                events!bookings_event_id_fkey (*),
+                venues!bookings_venue_id_fkey (*)
             `)
             .eq('id', id)
             .single();
@@ -285,6 +296,17 @@ exports.approveBooking = async (req, res) => {
                 .from('events')
                 .update({ status: 'approved' })
                 .eq('id', booking.event_id);
+
+            // Create notification for user
+            const { createNotification } = require('./notificationController');
+            await createNotification(
+                booking.booked_by,
+                'booking_confirmed',
+                '✅ Booking Approved!',
+                `Your booking has been approved by an admin. Your event is confirmed!`,
+                booking.id,
+                'booking'
+            );
         }
 
         res.json({
@@ -333,6 +355,17 @@ exports.cancelBooking = async (req, res) => {
 
         if (error) throw error;
 
+        // Create notification for user
+        const { createNotification } = require('./notificationController');
+        await createNotification(
+            existing.booked_by,
+            'booking_cancelled',
+            '❌ Booking Cancelled',
+            `Your booking has been cancelled. The time slot is now available for others.`,
+            id,
+            'booking'
+        );
+
         // AUTO-PROCESS WAITLIST for this venue/time slot
         const promotionResult = await autoProcessWaitlist(
             existing.venue_id,
@@ -363,7 +396,7 @@ async function autoProcessWaitlist(venueId, startTime, endTime, adminUserId) {
             .from('waitlists')
             .select(`
                 *,
-                event:events!fk_waitlists_booking_request_id_events (*)
+                events!waitlists_booking_request_id_fkey (*)
             `)
             .eq('venue_id', venueId)
             .eq('status', 'waiting')

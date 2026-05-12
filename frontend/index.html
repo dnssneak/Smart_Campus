@@ -1,339 +1,225 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Campus - Test</title>
+    <title>Smart Campus - Welcome</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/modern-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-
-<script>
-// ─── Bell Dropdown Functions ───
-async function updateBellBadge() {
-    try {
-        const response = await api.get('/notifications/unread-count');
-        const count = response.unreadCount || 0;
-        const badge = document.getElementById('bellBadge');
+<body class="welcome-page">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-logo animate-fade-in">
+                <i class="fas fa-university"></i>
+            </div>
+            <h1 class="hero-title animate-slide-up">Smart Campus</h1>
+            <p class="hero-subtitle animate-slide-up delay-1">Intelligent Event & Venue Management System</p>
+            <div class="hero-buttons animate-slide-up delay-2">
+                <a href="login.html" class="btn btn-hero btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Get Started
+                </a>
+                <a href="#features" class="btn btn-hero btn-secondary">
+                    <i class="fas fa-info-circle"></i> Learn More
+                </a>
+            </div>
+        </div>
         
-        if (count > 0) {
-            badge.textContent = count > 99 ? '99+' : count;
-            badge.style.display = 'block';
-        } else {
-            badge.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Badge error:', error);
-    }
-}
+        <!-- Animated Background Elements -->
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+        </div>
+    </div>
 
-async function loadBellDropdown() {
-    try {
-        const response = await api.get('/notifications?unreadOnly=true');
-        const notifications = response.notifications || [];
-        const list = document.getElementById('bellDropdownList');
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 class="section-title animate-on-scroll">Powerful Features</h2>
+            <p class="section-subtitle animate-on-scroll">Everything you need to manage campus events efficiently</p>
+            
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>Smart Scheduling</h3>
+                    <p>AI-powered conflict detection and automatic time slot optimization</p>
+                </div>
 
-        if (notifications.length === 0) {
-            list.innerHTML = `<p style="padding:1.5rem;text-align:center;color:#94a3b8">No unread notifications</p>`;
-            return;
-        }
+                <div class="feature-card animate-on-scroll delay-1">
+                    <div class="feature-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h3>Venue Management</h3>
+                    <p>Real-time availability tracking and resource allocation</p>
+                </div>
 
-        const iconMap = {
-            event_approved: 'fa-check-circle',
-            event_rejected: 'fa-times-circle',
-            booking_confirmed: 'fa-calendar-check',
-            booking_cancelled: 'fa-calendar-times',
-            waitlist_promotion: 'fa-arrow-up',
-            venue_conflict: 'fa-exclamation-triangle',
-            system: 'fa-info-circle'
+                <div class="feature-card animate-on-scroll delay-2">
+                    <div class="feature-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <h3>Live Notifications</h3>
+                    <p>Instant updates for bookings, approvals, and conflicts</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">
+                        <i class="fas fa-list-ol"></i>
+                    </div>
+                    <h3>Smart Waitlist</h3>
+                    <p>Priority-based queue with automatic promotion system</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll delay-1">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Analytics & Reports</h3>
+                    <p>Comprehensive insights and utilization statistics</p>
+                </div>
+
+                <div class="feature-card animate-on-scroll delay-2">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Role-Based Access</h3>
+                    <p>Secure authentication with granular permissions</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item animate-on-scroll">
+                    <div class="stat-number" data-target="1000">0</div>
+                    <div class="stat-label">Events Managed</div>
+                </div>
+                <div class="stat-item animate-on-scroll delay-1">
+                    <div class="stat-number" data-target="50">0</div>
+                    <div class="stat-label">Venues Available</div>
+                </div>
+                <div class="stat-item animate-on-scroll delay-2">
+                    <div class="stat-number" data-target="5000">0</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-item animate-on-scroll delay-3">
+                    <div class="stat-number" data-target="99">0</div>
+                    <div class="stat-label">Satisfaction Rate</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content animate-on-scroll">
+                <h2>Ready to Transform Your Campus?</h2>
+                <p>Join hundreds of institutions using Smart Campus for seamless event management</p>
+                <a href="login.html" class="btn btn-hero btn-primary btn-large">
+                    <i class="fas fa-rocket"></i> Start Now
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="welcome-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-university"></i>
+                    <span>Smart Campus</span>
+                </div>
+                <div class="footer-links">
+                    <a href="login.html">Login</a>
+                    <a href="#features">Features</a>
+                    <a href="dashboard.html">Dashboard</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Smart Campus. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animate on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
         };
 
-        list.innerHTML = notifications.slice(0, 5).map(n => `
-            <div class="bell-dropdown-item ${n.is_read ? '' : 'unread'}" onclick="window.location.href='notifications.html'">
-                <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${getIconColor(n.type)};color:white;font-size:0.9rem">
-                    <i class="fas ${iconMap[n.type] || 'fa-bell'}"></i>
-                </div>
-                <div style="flex:1">
-                    <div style="font-weight:600;font-size:0.9rem;color:#1e293b">${n.title}</div>
-                    <div style="font-size:0.8rem;color:#64748b">${n.message.substring(0, 50)}${n.message.length > 50 ? '...' : ''}</div>
-                    <small>${getTimeAgo(n.created_at)}</small>
-                </div>
-            </div>
-        `).join('');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
 
-    } catch (error) {
-        console.error('Dropdown error:', error);
-    }
-}
+        document.querySelectorAll('.animate-on-scroll').forEach(el => {
+            observer.observe(el);
+        });
 
-function getIconColor(type) {
-    const colors = {
-        event_approved: '#059669',
-        event_rejected: '#dc2626',
-        booking_confirmed: '#2563eb',
-        booking_cancelled: '#d97706',
-        waitlist_promotion: '#6366f1',
-        venue_conflict: '#db2777',
-        system: '#6b7280'
-    };
-    return colors[type] || '#6366f1';
-}
+        // Animate stats counter
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000;
+            const step = target / (duration / 16);
+            let current = 0;
 
-function getTimeAgo(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-    
-    if (seconds < 60) return 'Just now';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-}
-
-function toggleBellDropdown(e) {
-    e.stopPropagation();
-    document.getElementById('bellDropdown').classList.toggle('show');
-}
-
-async function markAllAsReadFromBell() {
-    try {
-        await api.put('/notifications/mark-all-read');
-        updateBellBadge();
-        loadBellDropdown();
-    } catch (error) {
-        console.error('Mark all read error:', error);
-    }
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', () => {
-    const dropdown = document.getElementById('bellDropdown');
-    if (dropdown) dropdown.classList.remove('show');
-});
-
-// Auto-refresh badge every 30 seconds
-setInterval(() => {
-    if (localStorage.getItem('token')) {
-        updateBellBadge();
-        loadBellDropdown();
-    }
-}, 30000);
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('token')) {
-        updateBellBadge();
-        loadBellDropdown();
-    }
-});
-</script>
-
-<body>
-    <nav class="navbar">
-    <div class="nav-brand">
-        <i class="fas fa-university"></i>
-        <span>Smart Campus</span>
-    </div>
-    <div class="nav-links">
-        <a href="dashboard.html">Dashboard</a>
-        <a href="events.html">Events</a>
-        <a href="venues.html">Venues</a>
-        <a href="bookings.html">My Bookings</a>
-        <a href="waitlist.html">Waitlist</a>
-        <a href="reports.html">Reports</a>
-        
-        <!-- Bell Icon -->
-        <div class="nav-bell" onclick="toggleBellDropdown(event)">
-            <i class="fas fa-bell"></i>
-            <span class="bell-badge" id="bellBadge">0</span>
-            
-            <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
-                <div class="bell-dropdown-header">
-                    <h4>Notifications</h4>
-                    <button class="btn btn-small" onclick="markAllAsReadFromBell()">Mark all read</button>
-                </div>
-                <div class="bell-dropdown-list" id="bellDropdownList">
-                    <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
-                </div>
-                <div class="bell-dropdown-footer">
-                    <a href="notifications.html">View all notifications</a>
-                </div>
-            </div>
-        </div>
-        
-        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
-    </div>
-</nav>
-
-    <main class="container">
-        <h1>🔧 Backend API Test</h1>
-
-        <!-- Health Check -->
-        <div class="test-card">
-            <h2>1. Health Check</h2>
-            <button onclick="testHealth()">Test Connection</button>
-            <div id="healthResult" class="result"></div>
-        </div>
-
-        <!-- Register -->
-        <div class="test-card">
-            <h2>2. Register User</h2>
-            <input type="email" id="regEmail" placeholder="test@university.edu" value="test@university.edu">
-            <input type="password" id="regPassword" placeholder="password" value="test123">
-            <input type="text" id="regFirstName" placeholder="First Name" value="Test">
-            <input type="text" id="regLastName" placeholder="Last Name" value="User">
-            <select id="regRole">
-                <option value="student">Student</option>
-                <option value="faculty">Faculty</option>
-                <option value="society_rep">Society Rep</option>
-                <option value="admin">Admin</option>
-            </select>
-            <input type="text" id="regDept" placeholder="Department" value="CS">
-            <button onclick="testRegister()">Register</button>
-            <div id="registerResult" class="result"></div>
-        </div>
-
-        <!-- Login -->
-        <div class="test-card">
-            <h2>3. Login</h2>
-            <input type="email" id="loginEmail" placeholder="Email" value="test@university.edu">
-            <input type="password" id="loginPassword" placeholder="Password" value="test123">
-            <button onclick="testLogin()">Login</button>
-            <div id="loginResult" class="result"></div>
-        </div>
-
-        <!-- Get Profile -->
-        <div class="test-card">
-            <h2>4. Get Profile (needs token)</h2>
-            <button onclick="testProfile()">Get My Profile</button>
-            <div id="profileResult" class="result"></div>
-        </div>
-
-        <!-- Token Display -->
-        <div class="test-card">
-            <h2>Current Token</h2>
-            <textarea id="tokenDisplay" readonly placeholder="No token yet..."></textarea>
-            <button onclick="clearToken()" class="btn-danger">Clear Token</button>
-        </div>
-    </main>
-
-    <script src="js/api.js"></script>
-    <script>
-        // Health Check
-        async function testHealth() {
-            const resultDiv = document.getElementById('healthResult');
-            resultDiv.innerHTML = '<p class="loading">Testing...</p>';
-
-            try {
-                const data = await api.get('/health');
-                resultDiv.innerHTML = `
-                    <p class="success">✅ ${data.message}</p>
-                    <p>Venues: ${data.venues_count}</p>
-                `;
-            } catch (error) {
-                resultDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
-            }
+            const timer = setInterval(() => {
+                current += step;
+                if (current >= target) {
+                    element.textContent = target + (element.parentElement.querySelector('.stat-label').textContent.includes('Rate') ? '%' : '+');
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current) + (element.parentElement.querySelector('.stat-label').textContent.includes('Rate') ? '%' : '+');
+                }
+            }, 16);
         }
 
-        // Register
-        async function testRegister() {
-            const resultDiv = document.getElementById('registerResult');
-            resultDiv.innerHTML = '<p class="loading">Registering...</p>';
+        // Trigger counter animation when stats section is visible
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    document.querySelectorAll('.stat-number').forEach(el => {
+                        animateCounter(el);
+                    });
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
 
-            const data = {
-                email: document.getElementById('regEmail').value,
-                password: document.getElementById('regPassword').value,
-                firstName: document.getElementById('regFirstName').value,
-                lastName: document.getElementById('regLastName').value,
-                role: document.getElementById('regRole').value,
-                department: document.getElementById('regDept').value
-            };
-
-            try {
-                const result = await api.post('/auth/register', data);
-
-                // Save token
-                localStorage.setItem('token', result.token);
-                localStorage.setItem('user', JSON.stringify(result.user));
-                updateTokenDisplay();
-
-                resultDiv.innerHTML = `
-                    <p class="success">✅ Registered!</p>
-                    <pre>${JSON.stringify(result.user, null, 2)}</pre>
-                `;
-            } catch (error) {
-                resultDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
-            }
+        const statsSection = document.querySelector('.stats-section');
+        if (statsSection) {
+            statsObserver.observe(statsSection);
         }
 
-        // Login
-        async function testLogin() {
-            const resultDiv = document.getElementById('loginResult');
-            resultDiv.innerHTML = '<p class="loading">Logging in...</p>';
-
-            const data = {
-                email: document.getElementById('loginEmail').value,
-                password: document.getElementById('loginPassword').value
-            };
-
-            try {
-                const result = await api.post('/auth/login', data);
-
-                // Save token
-                localStorage.setItem('token', result.token);
-                localStorage.setItem('user', JSON.stringify(result.user));
-                updateTokenDisplay();
-
-                resultDiv.innerHTML = `
-                    <p class="success">✅ Logged in!</p>
-                    <pre>${JSON.stringify(result.user, null, 2)}</pre>
-                `;
-            } catch (error) {
-                resultDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
-            }
-        }
-
-        // Get Profile
-        async function testProfile() {
-            const resultDiv = document.getElementById('profileResult');
-            resultDiv.innerHTML = '<p class="loading">Fetching...</p>';
-
-            if (!localStorage.getItem('token')) {
-                resultDiv.innerHTML = '<p class="error">❌ No token! Login first.</p>';
-                return;
-            }
-
-            try {
-                const data = await api.get('/auth/profile');
-                resultDiv.innerHTML = `
-                    <p class="success">✅ Profile loaded!</p>
-                    <pre>${JSON.stringify(data, null, 2)}</pre>
-                `;
-            } catch (error) {
-                resultDiv.innerHTML = `<p class="error">❌ ${error.message}</p>`;
-            }
-        }
-
-        // Token management
-        function updateTokenDisplay() {
-            const token = localStorage.getItem('token');
-            document.getElementById('tokenDisplay').value = token || 'No token';
-        }
-
-        function clearToken() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            updateTokenDisplay();
-            alert('Token cleared!');
-        }
-
-        // Load token on page load
-        updateTokenDisplay();
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
     </script>
 </body>
-
 </html>

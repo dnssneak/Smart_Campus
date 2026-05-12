@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentication - Smart Campus</title>
+    <title>Login - Smart Campus</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/modern-styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="auth-page">
-    <div class="auth-container">
+    <div class="auth-container fade-in">
         <div class="auth-box">
             <div class="auth-header">
                 <i class="fas fa-university"></i>
@@ -17,8 +18,12 @@
             </div>
 
             <div class="auth-tabs">
-                <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-                <button class="tab-btn" onclick="switchTab('register')">Register</button>
+                <button class="tab-btn active" onclick="switchTab('login')">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="tab-btn" onclick="switchTab('register')">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
             </div>
 
             <!-- Login Form -->
@@ -29,7 +34,7 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="loginPassword" placeholder="Enter password" required>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">
                     <i class="fas fa-sign-in-alt"></i> Login
@@ -40,11 +45,11 @@
             <form id="registerForm" class="auth-form hidden">
                 <div class="form-row">
                     <div class="form-group">
-                        <label>First Name</label>
+                        <label><i class="fas fa-user"></i> First Name</label>
                         <input type="text" id="regFirstName" required placeholder="John">
                     </div>
                     <div class="form-group">
-                        <label>Last Name</label>
+                        <label><i class="fas fa-user"></i> Last Name</label>
                         <input type="text" id="regLastName" required placeholder="Doe">
                     </div>
                 </div>
@@ -54,7 +59,7 @@
                 </div>
                 <div class="form-group">
                     <label><i class="fas fa-lock"></i> Password</label>
-                    <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6">
+                    <input type="password" id="regPassword" placeholder="Minimum 6 characters" required minlength="6">
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -62,12 +67,12 @@
                         <select id="regRole" required>
                             <option value="student">Student</option>
                             <option value="faculty">Faculty</option>
-                            <option value="society_rep">Society Representative</option>
-                            <option value="technical_staff">Technical Staff</option>
+                            <option value="staff">Staff</option>
+                            <option value="admin">Admin</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Department</label>
+                        <label><i class="fas fa-building"></i> Department</label>
                         <input type="text" id="regDept" placeholder="e.g., Computer Science">
                     </div>
                 </div>
@@ -76,7 +81,7 @@
                     <input type="text" id="regPhone" placeholder="+1-555-0100">
                 </div>
                 <button type="submit" class="btn btn-primary btn-full">
-                    <i class="fas fa-user-plus"></i> Register
+                    <i class="fas fa-user-plus"></i> Create Account
                 </button>
             </form>
 
@@ -88,7 +93,7 @@
     <script>
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            event.target.closest('.tab-btn').classList.add('active');
             
             if (tab === 'login') {
                 document.getElementById('loginForm').classList.remove('hidden');
@@ -124,7 +129,7 @@
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const msgDiv = document.getElementById('authMessage');
-            msgDiv.innerHTML = '<p class="loading"><i class="fas fa-spinner fa-spin"></i> Registering...</p>';
+            msgDiv.innerHTML = '<p class="loading"><i class="fas fa-spinner fa-spin"></i> Creating account...</p>';
 
             try {
                 const result = await api.post('/auth/register', {

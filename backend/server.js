@@ -14,10 +14,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Rate limiting
+// Rate limiting - increased limits for development
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500, // Increased from 100 to 500 requests per window
+    message: { success: false, message: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
 });
 app.use('/api/', limiter);
 
@@ -49,7 +52,9 @@ app.use('/api/venues', require('./routes/venues'));
 app.use('/api/events', require('./routes/events'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/waitlists', require('./routes/waitlists'));
+app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/reports', require('./routes/reports'));
+app.use('/api/resources', require('./routes/resources'));
 
 // Error handler
 app.use((err, req, res, next) => {

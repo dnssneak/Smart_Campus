@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Smart Campus</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/modern-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-university"></i>
+            <span>Smart Campus</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+            <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
+            <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
+            <a href="bookings.html"><i class="fas fa-calendar-check"></i> <span>Bookings</span></a>
+            <a href="waitlist.html"><i class="fas fa-clock"></i> <span>Waitlist</span></a>
+            <a href="resources.html"><i class="fas fa-boxes"></i> <span>Resources</span></a>
+            <a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
+            
+            <!-- Bell Icon -->
+            <div class="nav-bell" onclick="toggleBellDropdown(event)">
+                <i class="fas fa-bell"></i>
+                <span class="bell-badge" id="bellBadge">0</span>
+                
+                <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
+                    <div class="bell-dropdown-header">
+                        <h4>Notifications</h4>
+                        <button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
+                    </div>
+                    <div class="bell-dropdown-list" id="bellDropdownList">
+                        <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
+                    </div>
+                    <div class="bell-dropdown-footer">
+                        <a href="notifications.html">View all notifications</a>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-bell"></i> Notifications</h1>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="filterNotifications('all')">
+                    <i class="fas fa-list"></i> All
+                </button>
+                <button class="btn btn-secondary" onclick="filterNotifications('unread')">
+                    <i class="fas fa-envelope"></i> Unread
+                </button>
+                <button class="btn btn-primary" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double"></i> Mark All Read
+                </button>
+            </div>
+        </div>
+
+        <div id="notificationsList" class="notifications-list">
+            <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading notifications...</p>
+        </div>
+    </main>
+
+    <script src="js/api.js"></script>
+    <script src="js/notifications-helper.js"></script>
+    <script>
+        let allNotifications = [];
+        let currentFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!localStorage.getItem('token')) {
+                window.location.href = 'login.html';
+                return;
+            }
+            await loadNotifications();
+        });
+
+        async function loadNotifications() {
+            const list = document.getElementById('notificationsList');
+            list.innerHTML = '<p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading notifications...</p>';
+
+            try {
+                const response = await api.get('/notifications');
+                allNotifications = response.notifications || [];
+                renderNotifications();
+            } catch (error) {
+                list.innerHTML = `<p class="error">❌ Failed to load notifications: ${error.message}</p>`;
+            }
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById('notificationsList');
+            
+            let filtered = allNotifications;
+            if (currentFilter === 'unread') {
+                filtered = allNotifications.filter(n => !n.is_read);
+            }
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-bell-slash"></i>
+                        <p>No ${currentFilter === 'unread' ? 'unread' : ''} notifications</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const iconMap = {
+                event_approved: 'fa-check-circle',
+                event_rejected: 'fa-times-circle',
+                booking_confirmed: 'fa-calendar-check',
+                booking_cancelled: 'fa-calendar-times',
+                waitlist_promotion: 'fa-arrow-up',
+                venue_conflict: 'fa-exclamation-triangle',
+                reminder: 'fa-clock',
+                system: 'fa-info-circle'
+            };
+
+            list.innerHTML = filtered.map(n => `
+                <div class="notification-card ${n.is_read ? 'read' : 'unread'}" onclick="markAsRead(${n.id})">
+                    <div class="notification-icon" style="background: ${getIconColor(n.type)}">
+                        <i class="fas ${iconMap[n.type] || 'fa-bell'}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-header">
+                            <h3>${escapeHtml(n.title)}</h3>
+                            <span class="notification-time">${getTimeAgo(n.created_at)}</span>
+                        </div>
+                        <p class="notification-message">${escapeHtml(n.message)}</p>
+                        <div class="notification-meta">
+                            <span class="type-badge ${n.type}">${n.type.replace(/_/g, ' ')}</span>
+                            ${!n.is_read ? '<span class="unread-indicator">●</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterNotifications(filter) {
+            currentFilter = filter;
+            renderNotifications();
+            
+            // Update button states
+            document.querySelectorAll('.header-actions .btn-secondary').forEach(btn => {
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-secondary');
+            });
+            event.target.classList.remove('btn-secondary');
+            event.target.classList.add('btn-primary');
+        }
+
+        async function markAsRead(id) {
+            try {
+                await api.put(`/notifications/${id}/read`);
+                const notification = allNotifications.find(n => n.id === id);
+                if (notification) {
+                    notification.is_read = true;
+                }
+                renderNotifications();
+                updateBellBadge();
+            } catch (error) {
+                console.error('Failed to mark as read:', error);
+            }
+        }
+
+        async function markAllAsRead() {
+            try {
+                await api.put('/notifications/mark-all-read');
+                allNotifications.forEach(n => n.is_read = true);
+                renderNotifications();
+                updateBellBadge();
+                alert('✅ All notifications marked as read');
+            } catch (error) {
+                alert('❌ Failed to mark all as read: ' + error.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
