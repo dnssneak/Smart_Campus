@@ -1,5 +1,7 @@
 const supabase = require('../config/supabase');
 const { createNotification } = require('./notificationController');
+const { eventBus, EVENTS } = require('../utils/EventBus');
+const { venueRecommender } = require('../utils/VenueRecommender');
 
 exports.createEvent = async (req, res) => {
     try {
@@ -44,10 +46,31 @@ exports.createEvent = async (req, res) => {
 
         if (error) throw error;
 
+        // Emit event created for notifications
+        await eventBus.emit(EVENTS.EVENT_CREATED, {
+            eventId: event.id,
+            eventTitle: event.title,
+            createdBy: req.user.id
+        });
+
+        // Get venue recommendations
+        let venueRecommendations = [];
+        if (expectedAttendance && startDateTime && endDateTime) {
+            venueRecommendations = await venueRecommender.recommendVenues({
+                expectedAttendance,
+                requiredResources: requiredResources || [],
+                startDateTime,
+                endDateTime,
+                category: category || 'other',
+                priority: priority || 'medium'
+            });
+        }
+
         res.status(201).json({
             success: true,
             message: 'Event created successfully',
-            event
+            event,
+            venueRecommendations: venueRecommendations.slice(0, 5) // Top 5 recommendations
         });
     } catch (error) {
         console.error('Create event error:', error);
@@ -235,6 +258,23 @@ exports.deleteEvent = async (req, res) => {
 
         if (error) throw error;
 
+        // Get affected users (those with bookings for this event)
+        const { data: affectedBookings } = await supabase
+            .from('bookings')
+            .select('booked_by')
+            .eq('event_id', id)
+            .in('status', ['pending', 'confirmed']);
+
+        const affectedUserIds = affectedBookings ? 
+            [...new Set(affectedBookings.map(b => b.booked_by))] : [];
+
+        // Emit event cancelled
+        await eventBus.emit(EVENTS.EVENT_CANCELLED, {
+            eventId: id,
+            eventTitle: existing.title || 'Event',
+            affectedUserIds
+        });
+
         res.json({
             success: true,
             message: 'Event cancelled successfully'
@@ -285,19 +325,38 @@ exports.updateStatus = async (req, res) => {
 
         if (error) throw error;
 
-        if (status === 'approved' || status === 'rejected') {
-            const ownerId = eventBefore.created_by;
-            
-            if (ownerId && ownerId !== req.user.id) {
-                await createNotification(
-                    ownerId,
-                    status === 'approved' ? 'event_approved' : 'event_rejected',
-                    status === 'approved' ? '✅ Event Approved!' : '❌ Event Rejected',
-                    `Your event "${eventBefore.title}" has been ${status} by an admin.`,
-                    id,
-                    'event'
-                );
-            }
+        // Emit events for notification system
+        if (status === 'approved') {
+            await eventBus.emit(EVENTS.EVENT_APPROVED, {
+                eventId: id,
+                eventTitle: eventBefore.title,
+                userId: eventBefore.created_by
+            });
+
+            // Also update related bookings if any
+            await supabase
+                .from('bookings')
+                .update({ status: 'confirmed' })
+                .eq('event_id', id)
+                .eq('status', 'pending');
+
+        } else if (status === 'rejected') {
+            await eventBus.emit(EVENTS.EVENT_REJECTED, {
+                eventId: id,
+                eventTitle: eventBefore.title,
+                userId: eventBefore.created_by,
+                reason: req.body.reason || ''
+            });
+
+            // Cancel related bookings
+            await supabase
+                .from('bookings')
+                .update({ 
+                    status: 'cancelled',
+                    cancellation_reason: 'Event rejected by admin'
+                })
+                .eq('event_id', id)
+                .in('status', ['pending', 'confirmed']);
         }
 
         res.json({
