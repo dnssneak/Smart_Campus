@@ -7,129 +7,198 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/modern-styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .resources-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .resource-summary-card { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .resource-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .resource-icon.facilities { background: #dbeafe; color: #1d4ed8; }
+        .resource-icon.equipment { background: #dcfce7; color: #15803d; }
+        .resource-icon.venues { background: #f3e8ff; color: #7c3aed; }
+        .resource-icon.assignments { background: #fef3c7; color: #b45309; }
+        .resources-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+        .resource-card { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; transition: transform 0.2s; border: 1px solid var(--border-color); cursor: pointer; }
+        .resource-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .resource-card-icon { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+        .resource-card h3 { margin: 0 0 0.5rem 0; font-size: 1.1rem; }
+        .resource-meta { display: flex; gap: 1rem; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; }
+        .venue-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+        .venue-tag { background: var(--bg-secondary); padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem; }
+        .search-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+        .availability-indicator { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
+        .available { background: #dcfce7; color: #15803d; }
+        .limited { background: #fef3c7; color: #b45309; }
+        .unavailable { background: #fee2e2; color: #b91c1c; }
+        .quick-filters { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .quick-filter-btn { padding: 0.5rem 1rem; border: 1px solid var(--border-color); border-radius: 20px; background: transparent; cursor: pointer; transition: all 0.2s; }
+        .quick-filter-btn:hover, .quick-filter-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .tabs { display: flex; gap: 0.5rem; border-bottom: 2px solid var(--border-color); margin-bottom: 1.5rem; }
+        .tab { padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .tab.active { border-bottom-color: var(--primary-color); color: var(--primary-color); font-weight: 600; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .assignment-panel { background: var(--card-bg); border-radius: 12px; padding: 1.5rem; margin-top: 2rem; border: 2px solid var(--primary-color); }
+        .assignment-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .priority-select { padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-color); }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 500; }
+        .override-btn { background: #f59e0b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; }
+        .override-btn:hover { background: #d97706; }
+        .real-time-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: #dcfce7; color: #15803d; padding: 0.5rem 1rem; border-radius: 20px; font-size: 0.9rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .resource-stock { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .stock-bar { width: 100%; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+        .stock-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .stock-fill.high { background: #22c55e; }
+        .stock-fill.medium { background: #f59e0b; }
+        .stock-fill.low { background: #ef4444; }
+        .assignment-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .assignment-table th, .assignment-table td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .assignment-table th { background: var(--bg-secondary); font-weight: 600; }
+    </style>
 </head>
 <body>
     <nav class="navbar">
-        <div class="nav-brand">
-            <i class="fas fa-university"></i>
-            <span>Smart Campus</span>
-        </div>
+        <div class="nav-brand"><i class="fas fa-university"></i><span>Smart Campus</span></div>
         <div class="nav-links">
             <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
             <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
             <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
             <a href="bookings.html"><i class="fas fa-calendar-check"></i> <span>Bookings</span></a>
             <a href="waitlist.html"><i class="fas fa-clock"></i> <span>Waitlist</span></a>
-            <a href="resources.html"><i class="fas fa-boxes"></i> <span>Resources</span></a>
+            <a href="resources.html" class="active"><i class="fas fa-boxes"></i> <span>Resources</span></a>
             <a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
-            
-            <!-- Bell Icon -->
             <div class="nav-bell" onclick="toggleBellDropdown(event)">
-                <i class="fas fa-bell"></i>
-                <span class="bell-badge" id="bellBadge">0</span>
-                
+                <i class="fas fa-bell"></i><span class="bell-badge" id="bellBadge">0</span>
                 <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
-                    <div class="bell-dropdown-header">
-                        <h4>Notifications</h4>
-                        <button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
-                    </div>
-                    <div class="bell-dropdown-list" id="bellDropdownList">
-                        <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
-                    </div>
-                    <div class="bell-dropdown-footer">
-                        <a href="notifications.html">View all notifications</a>
-                    </div>
+                    <div class="bell-dropdown-header"><h4>Notifications</h4><button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button></div>
+                    <div class="bell-dropdown-list" id="bellDropdownList"><p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p></div>
+                    <div class="bell-dropdown-footer"><a href="notifications.html">View all notifications</a></div>
                 </div>
             </div>
-            
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
         </div>
     </nav>
 
     <main class="container">
-        <div class="page-header">
-            <h1><i class="fas fa-boxes"></i> Campus Resources</h1>
-            <p>Browse available facilities and equipment across all venues</p>
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div><h1><i class="fas fa-boxes"></i> Campus Resources</h1><p>Resource Assignment & Allocation System</p></div>
+            <span class="real-time-badge"><i class="fas fa-circle" style="font-size: 0.5rem;"></i> Live Tracking</span>
         </div>
 
-        <!-- Search and Filter -->
-        <div class="resources-filters">
-            <input type="text" id="resourceSearch" placeholder="Search resources..." onkeyup="filterResources()">
-            <select id="resourceType" onchange="filterResources()">
-                <option value="all">All Types</option>
-                <option value="facilities">Facilities</option>
-                <option value="equipment">Equipment</option>
-            </select>
-        </div>
-
-        <!-- Resources Overview -->
         <div class="resources-overview">
-            <div class="resource-summary-card">
-                <div class="resource-icon">
-                    <i class="fas fa-door-open"></i>
-                </div>
-                <div>
-                    <h3 id="facilitiesCount">0</h3>
-                    <p>Facilities</p>
+            <div class="resource-summary-card"><div class="resource-icon facilities"><i class="fas fa-door-open"></i></div><div><h3 id="facilitiesCount">0</h3><p>Facility Types</p></div></div>
+            <div class="resource-summary-card"><div class="resource-icon equipment"><i class="fas fa-tools"></i></div><div><h3 id="equipmentCount">0</h3><p>Equipment Types</p></div></div>
+            <div class="resource-summary-card"><div class="resource-icon venues"><i class="fas fa-building"></i></div><div><h3 id="venuesCount">0</h3><p>Total Venues</p></div></div>
+            <div class="resource-summary-card"><div class="resource-icon assignments"><i class="fas fa-clipboard-check"></i></div><div><h3 id="assignmentsCount">0</h3><p>Active Assignments</p></div></div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('browse')" data-tab="browse">Browse Resources</div>
+            <div class="tab" onclick="switchTab('assign')" data-tab="assign">Auto-Allocate</div>
+            <div class="tab" onclick="switchTab('assignments')" data-tab="assignments">Current Assignments</div>
+            <div class="tab" onclick="switchTab('availability')" data-tab="availability">Real-Time Availability</div>
+        </div>
+
+        <!-- Browse Tab -->
+        <div class="tab-content active" id="tab-browse">
+            <div class="quick-filters">
+                <button class="quick-filter-btn active" onclick="filterByType('all')">All</button>
+                <button class="quick-filter-btn" onclick="filterByType('facilities')">Facilities</button>
+                <button class="quick-filter-btn" onclick="filterByType('equipment')">Equipment</button>
+                <button class="quick-filter-btn" onclick="filterByType('assignable')">Assignable</button>
+                <button class="quick-filter-btn" onclick="filterByType('tech')">Tech-Heavy</button>
+            </div>
+            <div class="resources-filters">
+                <div class="search-form-grid">
+                    <div class="form-group"><input type="text" id="resourceSearch" placeholder="Search resources..." onkeyup="filterResources()"></div>
+                    <div class="form-group"><select id="buildingFilter" onchange="filterResources()"><option value="">All Buildings</option></select></div>
+                    <div class="form-group">
+                        <select id="resourceSort" onchange="filterResources()">
+                            <option value="popular">Most Popular</option>
+                            <option value="name">Name A-Z</option>
+                            <option value="venues">Most Venues</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div class="resource-summary-card">
-                <div class="resource-icon">
-                    <i class="fas fa-tools"></i>
+            <section class="resources-section" id="facilitiesSection">
+                <h2><i class="fas fa-door-open"></i> Facilities</h2>
+                <div id="facilitiesList" class="resources-grid"><p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading...</p></div>
+            </section>
+            <section class="resources-section" id="equipmentSection">
+                <h2><i class="fas fa-tools"></i> Equipment</h2>
+                <div id="equipmentList" class="resources-grid"><p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading...</p></div>
+            </section>
+        </div>
+
+        <!-- Auto-Allocate Tab -->
+        <div class="tab-content" id="tab-assign">
+            <div class="assignment-panel">
+                <h2><i class="fas fa-magic"></i> Automatic Resource Allocation</h2>
+                <p>Automatically assign resources to events based on priority and availability</p>
+                <div class="assignment-form">
+                    <div class="form-group"><label>Event</label><select id="allocEventId"><option value="">Select Event...</option></select></div>
+                    <div class="form-group"><label>Venue</label><select id="allocVenueId" onchange="updateResourceOptions()"><option value="">Select Venue...</option></select></div>
+                    <div class="form-group">
+                        <label>Priority Level</label>
+                        <select id="allocPriority" class="priority-select">
+                            <option value="critical">Critical - Exam/Graduation</option>
+                            <option value="high">High - Official Event</option>
+                            <option value="medium" selected>Medium - Department Event</option>
+                            <option value="low">Low - Club/Student Activity</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Resources Needed</label>
+                        <div id="resourceCheckboxes" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 0.5rem;">
+                            <p style="color: var(--text-secondary);">Select a venue first</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <h3 id="equipmentCount">0</h3>
-                    <p>Equipment</p>
-                </div>
-            </div>
-            <div class="resource-summary-card">
-                <div class="resource-icon">
-                    <i class="fas fa-building"></i>
-                </div>
-                <div>
-                    <h3 id="venuesCount">0</h3>
-                    <p>Venues</p>
-                </div>
+                <button class="btn btn-primary" onclick="autoAllocate()" style="margin-top: 1rem;"><i class="fas fa-magic"></i> Auto-Allocate Resources</button>
+                <div id="allocResult" style="margin-top: 1rem;"></div>
             </div>
         </div>
 
-        <!-- Facilities Section -->
-        <section class="resources-section">
-            <h2><i class="fas fa-door-open"></i> Facilities</h2>
-            <div id="facilitiesList" class="resources-grid">
-                <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading facilities...</p>
+        <!-- Assignments Tab -->
+        <div class="tab-content" id="tab-assignments">
+            <h2><i class="fas fa-clipboard-list"></i> Current Resource Assignments</h2>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <input type="date" id="assignmentDate" onchange="loadAssignments()">
+                <select id="assignmentStatus" onchange="loadAssignments()">
+                    <option value="">All Statuses</option>
+                    <option value="allocated">Allocated</option>
+                    <option value="in-use">In Use</option>
+                </select>
+                <button class="btn btn-secondary" onclick="loadAssignments()"><i class="fas fa-sync"></i> Refresh</button>
             </div>
-        </section>
+            <div id="assignmentsTable"></div>
+        </div>
 
-        <!-- Equipment Section -->
-        <section class="resources-section">
-            <h2><i class="fas fa-tools"></i> Equipment</h2>
-            <div id="equipmentList" class="resources-grid">
-                <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading equipment...</p>
+        <!-- Availability Tab -->
+        <div class="tab-content" id="tab-availability">
+            <h2><i class="fas fa-satellite-dish"></i> Real-Time Resource Availability</h2>
+            <div class="search-form-grid" style="margin-bottom: 1rem;">
+                <div class="form-group"><label>Venue</label><select id="availVenueId" onchange="checkAvailability()"><option value="">Select Venue...</option></select></div>
+                <div class="form-group"><label>Resource</label><select id="availResource" onchange="checkAvailability()"><option value="">Select Resource...</option></select></div>
+                <div class="form-group"><label>Start Time</label><input type="datetime-local" id="availStart" onchange="checkAvailability()"></div>
+                <div class="form-group"><label>End Time</label><input type="datetime-local" id="availEnd" onchange="checkAvailability()"></div>
             </div>
-        </section>
+            <div id="availabilityResult"></div>
+        </div>
 
-        <!-- Venue Search by Resources -->
-        <section class="resources-section">
+        <!-- Venue Search -->
+        <section class="resources-section" style="margin-top: 2rem;">
             <h2><i class="fas fa-search"></i> Find Venues by Resources</h2>
             <div class="resource-search-form">
-                <div class="form-group">
-                    <label>Required Facilities</label>
-                    <input type="text" id="searchFacilities" placeholder="e.g., Projector, WiFi">
-                    <small>Separate multiple items with commas</small>
+                <div class="search-form-grid">
+                    <div class="form-group"><label>Required Facilities</label><input type="text" id="searchFacilities" placeholder="e.g., Projector, WiFi"><small>Comma-separated</small></div>
+                    <div class="form-group"><label>Required Equipment</label><input type="text" id="searchEquipment" placeholder="e.g., Microphone, Recording"><small>Comma-separated</small></div>
+                    <div class="form-group"><label>Capacity Range</label><div style="display: flex; gap: 0.5rem;"><input type="number" id="minCapacity" placeholder="Min" style="width: 50%;"><input type="number" id="maxCapacity" placeholder="Max" style="width: 50%;"></div></div>
+                    <div class="form-group"><label>Building</label><select id="searchBuilding"><option value="">Any Building</option></select></div>
+                    <div class="form-group"><label>Date Needed</label><input type="date" id="searchDate"></div>
+                    <div class="form-group"><label>Accessibility</label><label style="display: flex; align-items: center; gap: 0.5rem; font-weight: normal;"><input type="checkbox" id="accessibleOnly"> Wheelchair accessible only</label></div>
                 </div>
-                <div class="form-group">
-                    <label>Required Equipment</label>
-                    <input type="text" id="searchEquipment" placeholder="e.g., Microphone, Whiteboard">
-                    <small>Separate multiple items with commas</small>
-                </div>
-                <div class="form-group">
-                    <label>Minimum Capacity</label>
-                    <input type="number" id="searchCapacity" placeholder="e.g., 50">
-                </div>
-                <button class="btn btn-primary" onclick="searchVenuesByResources()">
-                    <i class="fas fa-search"></i> Search Venues
-                </button>
+                <button class="btn btn-primary" onclick="searchVenuesByResources()"><i class="fas fa-search"></i> Search Venues</button>
             </div>
             <div id="searchResults" class="search-results"></div>
         </section>
@@ -140,140 +209,264 @@
     <script>
         let allResources = { facilities: [], equipment: [] };
         let allVenues = [];
+        let allEvents = [];
+        let currentFilter = 'all';
 
         document.addEventListener('DOMContentLoaded', async () => {
-            if (!localStorage.getItem('token')) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            await loadResources();
-            await loadVenues();
+            if (!localStorage.getItem('token')) { window.location.href = 'login.html'; return; }
+            await loadResources(); await loadVenues(); await loadEvents(); await loadAssignments();
+            populateBuildingFilters(); populateVenueSelects(); setDefaultDateTimes();
         });
 
         async function loadResources() {
             try {
                 const response = await api.get('/resources');
                 allResources = response.resources || { facilities: [], equipment: [] };
-
-                // Update counts
-                document.getElementById('facilitiesCount').textContent = allResources.facilities.length;
-                document.getElementById('equipmentCount').textContent = allResources.equipment.length;
-
-                renderFacilities(allResources.facilities);
-                renderEquipment(allResources.equipment);
-            } catch (error) {
-                console.error('Failed to load resources:', error);
-                document.getElementById('facilitiesList').innerHTML = 
-                    `<p class="error">❌ Failed to load facilities: ${error.message}</p>`;
-                document.getElementById('equipmentList').innerHTML = 
-                    `<p class="error">❌ Failed to load equipment: ${error.message}</p>`;
-            }
+                document.getElementById('facilitiesCount').textContent = response.summary?.totalFacilities || allResources.facilities.length;
+                document.getElementById('equipmentCount').textContent = response.summary?.totalEquipment || allResources.equipment.length;
+                renderFacilities(allResources.facilities); renderEquipment(allResources.equipment);
+            } catch (error) { showError('facilitiesList', 'Failed to load'); showError('equipmentList', 'Failed to load'); }
         }
 
         async function loadVenues() {
+            try { const response = await api.get('/venues'); allVenues = response.venues || []; document.getElementById('venuesCount').textContent = allVenues.length; }
+            catch (error) { console.error('Failed to load venues:', error); }
+        }
+
+        async function loadEvents() {
             try {
-                const response = await api.get('/venues');
-                allVenues = response.venues || [];
-                document.getElementById('venuesCount').textContent = allVenues.length;
-            } catch (error) {
-                console.error('Failed to load venues:', error);
-            }
+                const response = await api.get('/events?upcoming=true');
+                allEvents = response.events || [];
+                const select = document.getElementById('allocEventId');
+                allEvents.forEach(e => { const o = document.createElement('option'); o.value = e.id; o.textContent = `${e.title} (${new Date(e.start_datetime).toLocaleDateString()})`; select.appendChild(o); });
+            } catch (error) { console.error('Failed to load events:', error); }
+        }
+
+        async function loadAssignments() {
+            try {
+                const date = document.getElementById('assignmentDate')?.value;
+                const status = document.getElementById('assignmentStatus')?.value;
+                let url = '/resources/assignments';
+                const params = new URLSearchParams();
+                if (date) params.append('date', date); if (status) params.append('status', status);
+                if (params.toString()) url += '?' + params.toString();
+                const response = await api.get(url);
+                const assignments = response.assignments || [];
+                document.getElementById('assignmentsCount').textContent = assignments.length;
+                renderAssignmentsTable(assignments);
+            } catch (error) { console.error('Failed to load assignments:', error); }
+        }
+
+        function renderAssignmentsTable(assignments) {
+            const container = document.getElementById('assignmentsTable');
+            if (assignments.length === 0) { container.innerHTML = '<p class="empty">No active assignments</p>'; return; }
+            container.innerHTML = `
+                <table class="assignment-table">
+                    <thead><tr><th>Resource</th><th>Venue</th><th>Event</th><th>Time</th><th>Priority</th><th>Status</th><th>Method</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        ${assignments.map(a => `
+                            <tr>
+                                <td><i class="fas fa-box"></i> ${a.resource_name}</td>
+                                <td>${a.venue?.name || 'N/A'}</td>
+                                <td>${a.event?.title || 'N/A'}</td>
+                                <td>${new Date(a.start_datetime).toLocaleString()} - ${new Date(a.end_datetime).toLocaleTimeString()}</td>
+                                <td><span class="status-badge">${a.priority}</span></td>
+                                <td><span class="status-badge">${a.status}</span></td>
+                                <td>${a.assignment_method === 'auto' ? '<i class="fas fa-robot"></i> Auto' : '<i class="fas fa-hand"></i> Manual'}</td>
+                                <td>${a.assignment_method === 'auto' ? `<button class="override-btn" onclick="overrideAssignment('${a.id}')"><i class="fas fa-edit"></i> Override</button>` : '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function populateBuildingFilters() {
+            const buildings = [...new Set(allVenues.map(v => v.building).filter(Boolean))].sort();
+            ['buildingFilter', 'searchBuilding'].forEach(id => {
+                const select = document.getElementById(id); if (!select) return;
+                buildings.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; select.appendChild(o); });
+            });
+        }
+
+        function populateVenueSelects() {
+            ['allocVenueId', 'availVenueId'].forEach(id => {
+                const select = document.getElementById(id); if (!select) return;
+                allVenues.forEach(v => { const o = document.createElement('option'); o.value = v.id; o.textContent = `${v.name} (${v.building || 'Campus'})`; select.appendChild(o); });
+            });
+        }
+
+        function updateResourceOptions() {
+            const venueId = document.getElementById('allocVenueId').value;
+            const venue = allVenues.find(v => v.id === venueId);
+            const container = document.getElementById('resourceCheckboxes');
+            if (!venue) { container.innerHTML = '<p style="color: var(--text-secondary);">Select a venue first</p>'; return; }
+            const assignable = (venue.equipment || []).filter(e => {
+                const key = e.toLowerCase().trim();
+                const cat = allResources.equipment.find(eq => eq.name.toLowerCase() === key);
+                return cat?.assignable;
+            });
+            if (assignable.length === 0) { container.innerHTML = '<p style="color: var(--text-secondary);">No assignable resources at this venue</p>'; return; }
+            container.innerHTML = assignable.map(e => `<label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; cursor: pointer;"><input type="checkbox" value="${e}" class="resource-checkbox"><span>${e}</span></label>`).join('');
+        }
+
+        function setDefaultDateTimes() {
+            const now = new Date(); const tomorrow = new Date(now); tomorrow.setDate(tomorrow.getDate() + 1);
+            const format = (d) => d.toISOString().slice(0, 16);
+            const s = document.getElementById('availStart'); const e = document.getElementById('availEnd');
+            if (s) s.value = format(now); if (e) e.value = format(tomorrow);
+        }
+
+        async function autoAllocate() {
+            const eventId = document.getElementById('allocEventId').value;
+            const venueId = document.getElementById('allocVenueId').value;
+            const priority = document.getElementById('allocPriority').value;
+            const checkboxes = document.querySelectorAll('.resource-checkbox:checked');
+            const requestedResources = Array.from(checkboxes).map(cb => cb.value);
+            if (!eventId || !venueId || requestedResources.length === 0) { alert('Please select an event, venue, and at least one resource'); return; }
+
+            const resultDiv = document.getElementById('allocResult');
+            resultDiv.innerHTML = '<p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Allocating...</p>';
+
+            try {
+                const response = await api.post('/resources/allocate', { eventId, venueId, requestedResources, priority });
+                resultDiv.innerHTML = `
+                    <div style="background: ${response.allocated.length > 0 ? '#dcfce7' : '#fef3c7'}; padding: 1rem; border-radius: 8px;">
+                        <h4><i class="fas ${response.allocated.length > 0 ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> Result</h4>
+                        <p>Allocated: <strong>${response.allocated.length}</strong> / ${requestedResources.length}</p>
+                        ${response.allocated.length > 0 ? `<ul>${response.allocated.map(a => `<li><i class="fas fa-check"></i> ${a.resource_name} (Qty: ${a.quantity})</li>`).join('')}</ul>` : ''}
+                        ${response.failed.length > 0 ? `<div style="color: #b91c1c;"><strong>Failed:</strong><ul>${response.failed.map(f => `<li><i class="fas fa-times"></i> ${f.resource} - ${f.reason}</li>`).join('')}</ul></div>` : ''}
+                    </div>`;
+                await loadAssignments();
+            } catch (error) { resultDiv.innerHTML = `<p class="error">❌ Failed: ${error.message}</p>`; }
+        }
+
+        async function overrideAssignment(assignmentId) {
+            const reason = prompt('Enter reason for manual override:'); if (!reason) return;
+            const newVenueId = prompt('Enter new venue ID (or leave empty):');
+            const newQty = prompt('Enter new quantity (or leave empty):');
+            try {
+                await api.put(`/resources/override/${assignmentId}`, { newVenueId: newVenueId || undefined, newQuantity: newQty ? parseInt(newQty) : undefined, reason });
+                alert('Override successful!'); await loadAssignments();
+            } catch (error) { alert('Override failed: ' + error.message); }
+        }
+
+        async function checkAvailability() {
+            const venueId = document.getElementById('availVenueId').value;
+            const resourceName = document.getElementById('availResource').value;
+            const startDateTime = document.getElementById('availStart').value;
+            const endDateTime = document.getElementById('availEnd').value;
+            if (!venueId || !resourceName || !startDateTime || !endDateTime) return;
+
+            const resultDiv = document.getElementById('availabilityResult');
+            resultDiv.innerHTML = '<p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Checking...</p>';
+
+            try {
+                const data = await api.get(`/resources/availability?venueId=${venueId}&resourceName=${encodeURIComponent(resourceName)}&startDateTime=${startDateTime}&endDateTime=${endDateTime}`);
+                const stockPercent = (data.available / data.total) * 100;
+                const stockClass = stockPercent > 50 ? 'high' : stockPercent > 20 ? 'medium' : 'low';
+                resultDiv.innerHTML = `
+                    <div style="background: var(--card-bg); padding: 1.5rem; border-radius: 12px; margin-top: 1rem;">
+                        <h3><i class="fas ${data.isAvailable ? 'fa-check-circle' : 'fa-times-circle'}"></i> ${data.isAvailable ? 'Available' : 'Unavailable'}</h3>
+                        <div class="resource-stock" style="margin: 1rem 0;"><span>Stock: ${data.available} / ${data.total}</span><div class="stock-bar"><div class="stock-fill ${stockClass}" style="width: ${stockPercent}%"></div></div></div>
+                        ${data.conflictingAssignments?.length > 0 ? `<div style="margin-top: 1rem;"><h4>Conflicts:</h4>${data.conflictingAssignments.map(a => `<div style="padding: 0.5rem; background: #fee2e2; border-radius: 4px; margin: 0.25rem 0;"><i class="fas fa-calendar-times"></i> ${a.resource_name} - ${new Date(a.start_datetime).toLocaleString()} to ${new Date(a.end_datetime).toLocaleString()}</div>`).join('')}</div>` : '<p style="color: #15803d;"><i class="fas fa-check"></i> No conflicts</p>'}
+                    </div>`;
+            } catch (error) { resultDiv.innerHTML = `<p class="error">❌ Check failed: ${error.message}</p>`; }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
         }
 
         function renderFacilities(facilities) {
             const container = document.getElementById('facilitiesList');
-            
-            if (facilities.length === 0) {
-                container.innerHTML = '<p class="empty">No facilities found</p>';
-                return;
-            }
-
+            if (facilities.length === 0) { container.innerHTML = '<p class="empty">No facilities found</p>'; return; }
             container.innerHTML = facilities.map(f => `
                 <div class="resource-card">
-                    <div class="resource-card-icon">
-                        <i class="fas fa-door-open"></i>
-                    </div>
-                    <h3>${f}</h3>
-                    <p>${getVenuesWithResource(f, 'facilities')} venues</p>
-                    <button class="btn btn-small btn-secondary" onclick="showVenuesWithResource('${f}', 'facilities')">
-                        View Venues
-                    </button>
-                </div>
-            `).join('');
+                    <div class="resource-card-icon" style="background: #dbeafe; color: #1d4ed8;"><i class="fas ${f.category?.icon || 'fa-door-open'}"></i></div>
+                    <h3>${f.name}</h3><p style="color: var(--text-secondary); font-size: 0.9rem;">${f.category?.description || 'Campus facility'}</p>
+                    <div class="resource-meta"><span><i class="fas fa-building"></i> ${f.count} venues</span></div>
+                    <div class="venue-tags">${(f.venues || []).slice(0, 3).map(v => `<span class="venue-tag">${v.name}</span>`).join('')}${f.venues?.length > 3 ? `<span class="venue-tag">+${f.venues.length - 3}</span>` : ''}</div>
+                </div>`).join('');
         }
 
         function renderEquipment(equipment) {
             const container = document.getElementById('equipmentList');
-            
-            if (equipment.length === 0) {
-                container.innerHTML = '<p class="empty">No equipment found</p>';
-                return;
-            }
-
+            if (equipment.length === 0) { container.innerHTML = '<p class="empty">No equipment found</p>'; return; }
             container.innerHTML = equipment.map(e => `
                 <div class="resource-card">
-                    <div class="resource-card-icon">
-                        <i class="fas fa-tools"></i>
-                    </div>
-                    <h3>${e}</h3>
-                    <p>${getVenuesWithResource(e, 'equipment')} venues</p>
-                    <button class="btn btn-small btn-secondary" onclick="showVenuesWithResource('${e}', 'equipment')">
-                        View Venues
-                    </button>
-                </div>
-            `).join('');
+                    <div class="resource-card-icon" style="background: #dcfce7; color: #15803d;"><i class="fas ${e.category?.icon || 'fa-tools'}"></i></div>
+                    <h3>${e.name}</h3><p style="color: var(--text-secondary); font-size: 0.9rem;">${e.category?.description || 'Available equipment'}</p>
+                    <div class="resource-meta"><span><i class="fas fa-building"></i> ${e.count} venues</span>${e.assignable ? '<span class="availability-indicator available"><i class="fas fa-check"></i> Assignable</span>' : '<span class="availability-indicator limited">Fixed</span>'}</div>
+                    ${e.assignable ? `<div class="resource-stock"><span>Max/Venue: ${e.maxPerVenue}</span></div>` : ''}
+                    <div class="venue-tags">${(e.venues || []).slice(0, 3).map(v => `<span class="venue-tag">${v.name}</span>`).join('')}${e.venues?.length > 3 ? `<span class="venue-tag">+${e.venues.length - 3}</span>` : ''}</div>
+                </div>`).join('');
         }
 
-        function getVenuesWithResource(resource, type) {
-            return allVenues.filter(v => 
-                (v[type] || []).some(r => r.toLowerCase() === resource.toLowerCase())
-            ).length;
+        function filterByType(type) {
+            currentFilter = type;
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            filterResources();
         }
 
-        function showVenuesWithResource(resource, type) {
-            const venues = allVenues.filter(v => 
-                (v[type] || []).some(r => r.toLowerCase() === resource.toLowerCase())
-            );
+        function filterResources() {
+            const search = document.getElementById('resourceSearch').value.toLowerCase();
+            const building = document.getElementById('buildingFilter')?.value;
+            const sort = document.getElementById('resourceSort')?.value || 'popular';
+            let filteredFacilities = [...allResources.facilities];
+            let filteredEquipment = [...allResources.equipment];
 
-            const resultsDiv = document.getElementById('searchResults');
-            resultsDiv.innerHTML = `
-                <h3>Venues with ${resource}</h3>
-                <div class="venues-grid">
-                    ${venues.map(v => `
-                        <div class="venue-card">
-                            <h4>${v.name}</h4>
-                            <p><i class="fas fa-map-marker-alt"></i> ${v.location || 'Campus'}</p>
-                            <p><i class="fas fa-users"></i> Capacity: ${v.capacity}</p>
-                            <a href="venues.html" class="btn btn-small btn-primary">Book Venue</a>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+            if (search) {
+                filteredFacilities = filteredFacilities.filter(f => f.name.toLowerCase().includes(search) || f.category?.description?.toLowerCase().includes(search));
+                filteredEquipment = filteredEquipment.filter(e => e.name.toLowerCase().includes(search) || e.category?.description?.toLowerCase().includes(search));
+            }
+            if (building) {
+                filteredFacilities = filteredFacilities.filter(f => f.venues?.some(v => v.building === building));
+                filteredEquipment = filteredEquipment.filter(e => e.venues?.some(v => v.building === building));
+            }
+
+            if (currentFilter === 'facilities') { document.getElementById('equipmentSection').style.display = 'none'; document.getElementById('facilitiesSection').style.display = 'block'; }
+            else if (currentFilter === 'equipment') { document.getElementById('facilitiesSection').style.display = 'none'; document.getElementById('equipmentSection').style.display = 'block'; }
+            else if (currentFilter === 'assignable') { filteredEquipment = filteredEquipment.filter(e => e.assignable); document.getElementById('facilitiesSection').style.display = 'none'; document.getElementById('equipmentSection').style.display = 'block'; }
+            else if (currentFilter === 'tech') {
+                const techItems = ['projector', 'computer', 'interactive-whiteboard', 'video-conferencing', 'recording-equipment', 'vr-headsets', 'microphone', 'speakers'];
+                filteredFacilities = filteredFacilities.filter(f => techItems.some(t => f.name.toLowerCase().includes(t)));
+                filteredEquipment = filteredEquipment.filter(e => techItems.some(t => e.name.toLowerCase().includes(t)));
+                document.getElementById('facilitiesSection').style.display = 'block'; document.getElementById('equipmentSection').style.display = 'block';
+            } else { document.getElementById('facilitiesSection').style.display = 'block'; document.getElementById('equipmentSection').style.display = 'block'; }
+
+            if (sort === 'name') { filteredFacilities.sort((a, b) => a.name.localeCompare(b.name)); filteredEquipment.sort((a, b) => a.name.localeCompare(b.name)); }
+            else if (sort === 'venues') { filteredFacilities.sort((a, b) => (b.venues?.length || 0) - (a.venues?.length || 0)); filteredEquipment.sort((a, b) => (b.venues?.length || 0) - (a.venues?.length || 0)); }
+
+            renderFacilities(filteredFacilities); renderEquipment(filteredEquipment);
         }
 
         async function searchVenuesByResources() {
             const facilities = document.getElementById('searchFacilities').value;
             const equipment = document.getElementById('searchEquipment').value;
-            const capacity = document.getElementById('searchCapacity').value;
+            const minCapacity = document.getElementById('minCapacity').value;
+            const maxCapacity = document.getElementById('maxCapacity').value;
+            const building = document.getElementById('searchBuilding').value;
+            const date = document.getElementById('searchDate').value;
+            const accessibleOnly = document.getElementById('accessibleOnly').checked;
 
             const resultsDiv = document.getElementById('searchResults');
             resultsDiv.innerHTML = '<p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Searching...</p>';
 
             try {
                 const params = new URLSearchParams();
-                if (facilities) params.append('facilities', facilities);
-                if (equipment) params.append('equipment', equipment);
-                if (capacity) params.append('minCapacity', capacity);
+                if (facilities) params.append('facilities', facilities); if (equipment) params.append('equipment', equipment);
+                if (minCapacity) params.append('minCapacity', minCapacity); if (maxCapacity) params.append('maxCapacity', maxCapacity);
+                if (building) params.append('building', building); if (date) params.append('date', date);
+                if (accessibleOnly) params.append('accessibleOnly', 'true');
 
                 const response = await api.get(`/resources/search?${params.toString()}`);
                 const venues = response.venues || [];
 
-                if (venues.length === 0) {
-                    resultsDiv.innerHTML = '<p class="empty">No venues found matching your criteria</p>';
-                    return;
-                }
+                if (venues.length === 0) { resultsDiv.innerHTML = '<p class="empty">No venues found</p>'; return; }
 
                 resultsDiv.innerHTML = `
                     <h3>Found ${venues.length} venue(s)</h3>
@@ -281,52 +474,18 @@
                         ${venues.map(v => `
                             <div class="venue-card">
                                 <h4>${v.name}</h4>
-                                <p><i class="fas fa-map-marker-alt"></i> ${v.location || 'Campus'}</p>
+                                <p><i class="fas fa-map-marker-alt"></i> ${v.building || 'Campus'}, Floor ${v.floor || '1'}</p>
                                 <p><i class="fas fa-users"></i> Capacity: ${v.capacity}</p>
-                                <div class="facilities">
-                                    ${(v.facilities || []).slice(0, 3).map(f => `<span class="tag">${f}</span>`).join('')}
-                                </div>
+                                <div class="facilities">${(v.facilities || []).slice(0, 3).map(f => `<span class="tag">${f}</span>`).join('')}</div>
                                 <a href="venues.html" class="btn btn-small btn-primary">Book Venue</a>
                             </div>
                         `).join('')}
-                    </div>
-                `;
-            } catch (error) {
-                resultsDiv.innerHTML = `<p class="error">❌ Search failed: ${error.message}</p>`;
-            }
+                    </div>`;
+            } catch (error) { resultsDiv.innerHTML = `<p class="error">❌ Search failed: ${error.message}</p>`; }
         }
 
-        function filterResources() {
-            const search = document.getElementById('resourceSearch').value.toLowerCase();
-            const type = document.getElementById('resourceType').value;
-
-            let filteredFacilities = allResources.facilities;
-            let filteredEquipment = allResources.equipment;
-
-            if (search) {
-                filteredFacilities = filteredFacilities.filter(f => f.toLowerCase().includes(search));
-                filteredEquipment = filteredEquipment.filter(e => e.toLowerCase().includes(search));
-            }
-
-            if (type === 'facilities') {
-                renderFacilities(filteredFacilities);
-                document.getElementById('equipmentList').parentElement.style.display = 'none';
-            } else if (type === 'equipment') {
-                renderEquipment(filteredEquipment);
-                document.getElementById('facilitiesList').parentElement.style.display = 'none';
-            } else {
-                renderFacilities(filteredFacilities);
-                renderEquipment(filteredEquipment);
-                document.getElementById('facilitiesList').parentElement.style.display = 'block';
-                document.getElementById('equipmentList').parentElement.style.display = 'block';
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            window.location.href = 'login.html';
-        }
+        function showError(elementId, message) { document.getElementById(elementId).innerHTML = `<p class="error">❌ ${message}</p>`; }
+        function logout() { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = 'login.html'; }
     </script>
 </body>
 </html>

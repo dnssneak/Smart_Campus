@@ -3,19 +3,23 @@ const router = express.Router();
 const resourceController = require('../controllers/resourceController');
 const auth = require('../middleware/auth');
 
-// All routes require authentication
 router.use(auth);
 
-// Get all resources (facilities and equipment)
 router.get('/', resourceController.getAllResources);
-
-// Get resources by venue
 router.get('/venue/:venueId', resourceController.getResourcesByVenue);
-
-// Search venues by required resources
 router.get('/search', resourceController.searchVenuesByResources);
-
-// Get resource utilization statistics
 router.get('/utilization', resourceController.getResourceUtilization);
+
+// FR-RA-01: Real-time availability
+router.get('/availability', resourceController.checkResourceAvailability);
+
+// FR-RA-02: Auto-allocate
+router.post('/allocate', resourceController.autoAllocateResources);
+
+// FR-RA-06: Manual override
+router.put('/override/:assignmentId', resourceController.manualOverrideAllocation);
+
+// Current assignments
+router.get('/assignments', resourceController.getCurrentAssignments);
 
 module.exports = router;
