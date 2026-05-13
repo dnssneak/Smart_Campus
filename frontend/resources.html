@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resource Allocation - Smart Campus</title>
+    <link rel="stylesheet" href="css/new-design-system.css">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/modern-styles.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/logo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         .resources-overview { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
@@ -108,9 +111,19 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand"><i class="fas fa-university"></i><span>Smart Campus</span></div>
-        <div class="nav-links">
+    <nav class="modern-navbar">
+        <a href="index.html" class="smart-campus-logo">
+            <div class="logo-icon-wrapper">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+            </div>
+            <div class="logo-text">
+                <div class="logo-text-main">Smart Campus</div>
+                <div class="logo-text-sub">Event Management</div>
+            </div>
+        </a>
+        <div class="modern-nav-links">
             <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
             <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
             <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
@@ -122,7 +135,7 @@
             <div class="nav-bell" onclick="toggleBellDropdown(event)">
                 <i class="fas fa-bell"></i><span class="bell-badge" id="bellBadge">0</span>
                 <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
-                    <div class="bell-dropdown-header"><h4>Notifications</h4><button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button></div>
+                    <div class="bell-dropdown-header"><h4>Notifications</h4><button class="btn-modern btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button></div>
                     <div class="bell-dropdown-list" id="bellDropdownList"><p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p></div>
                     <div class="bell-dropdown-footer"><a href="notifications.html">View all notifications</a></div>
                 </div>
@@ -131,30 +144,48 @@
         </div>
     </nav>
 
-    <main class="container">
-        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 style="color: #0f172a;"><i class="fas fa-boxes"></i> Resource Allocation System</h1>
-                <p style="color: #475569; font-weight: 500;">Manage and allocate campus resources efficiently</p>
-            </div>
+    <main class="container-modern" style="padding: var(--space-xl);">
+        <div style="margin-bottom: var(--space-xl);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
+                <div>
+                    <h1 style="font-size: var(--font-size-h1); font-weight: 700; color: #0f172a; margin-bottom: var(--space-sm);">
+                        <i class="fas fa-boxes"></i> Resource Allocation System
+                    </h1>
+                    <p style="color: var(--muted); font-size: var(--font-size-body);">Manage and allocate campus resources efficiently</p>
+                </div>
             <span class="real-time-badge">
                 <i class="fas fa-circle" style="font-size: 0.5rem;"></i> Live Tracking
             </span>
         </div>
 
         <!-- Summary Cards -->
-        <div class="resources-overview">
-            <div class="resource-summary-card">
-                <div class="resource-icon equipment"><i class="fas fa-tools"></i></div>
-                <div><h3 id="equipmentCount">0</h3><p>Equipment Types</p></div>
+        <div class="stats-grid-modern" style="margin-bottom: var(--space-xl);">
+            <div class="stat-card-modern">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="stat-card-info">
+                    <h3 id="equipmentCount">0</h3>
+                    <p>Equipment Types</p>
+                </div>
             </div>
-            <div class="resource-summary-card">
-                <div class="resource-icon venues"><i class="fas fa-building"></i></div>
-                <div><h3 id="venuesCount">0</h3><p>Total Venues</p></div>
+            <div class="stat-card-modern">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #8B5CF6, #7C3AED);">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="stat-card-info">
+                    <h3 id="venuesCount">0</h3>
+                    <p>Total Venues</p>
+                </div>
             </div>
-            <div class="resource-summary-card">
-                <div class="resource-icon assignments"><i class="fas fa-clipboard-check"></i></div>
-                <div><h3 id="assignmentsCount">0</h3><p>Active Assignments</p></div>
+            <div class="stat-card-modern">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="stat-card-info">
+                    <h3 id="assignmentsCount">0</h3>
+                    <p>Active Assignments</p>
+                </div>
             </div>
         </div>
 
@@ -213,7 +244,7 @@
                     </div>
                 </div>
                 
-                <button class="btn btn-primary" onclick="autoAllocate()" style="margin-top: 1rem; width: 100%;">
+                <button class="btn-modern btn-primary" onclick="autoAllocate()" style="margin-top: 1rem; width: 100%;">
                     <i class="fas fa-magic"></i> Allocate Resources Automatically
                 </button>
             </div>
@@ -234,7 +265,7 @@
                     <option value="released">Released</option>
                 </select>
                 <input type="text" id="assignmentResource" placeholder="Search resource..." onchange="loadAssignments()">
-                <button class="btn btn-secondary" onclick="loadAssignments()">
+                <button class="btn-modern btn-secondary" onclick="loadAssignments()">
                     <i class="fas fa-sync"></i> Refresh
                 </button>
             </div>
@@ -274,7 +305,7 @@
                     </div>
                 </div>
                 
-                <button class="btn btn-primary" onclick="checkAvailability()" style="margin-top: 1rem;">
+                <button class="btn-modern btn-primary" onclick="checkAvailability()" style="margin-top: 1rem;">
                     <i class="fas fa-search"></i> Check Availability
                 </button>
                 
@@ -770,8 +801,11 @@
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }
     </script>
+    
+    <!-- Theme Manager -->
+    <script src="js/theme.js"></script>
 </body>
 </html>

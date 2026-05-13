@@ -4,17 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notifications - Smart Campus</title>
+    <link rel="stylesheet" href="css/new-design-system.css">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/modern-styles.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/logo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">
-            <i class="fas fa-university"></i>
-            <span>Smart Campus</span>
-        </div>
-        <div class="nav-links">
+    <nav class="modern-navbar">
+        <a href="index.html" class="smart-campus-logo">
+            <div class="logo-icon-wrapper">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+            </div>
+            <div class="logo-text">
+                <div class="logo-text-main">Smart Campus</div>
+                <div class="logo-text-sub">Event Management</div>
+            </div>
+        </a>
+        <div class="modern-nav-links">
             <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
             <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
             <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
@@ -31,7 +41,7 @@
                 <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
                     <div class="bell-dropdown-header">
                         <h4>Notifications</h4>
-                        <button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
+                        <button class="btn-modern btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
                     </div>
                     <div class="bell-dropdown-list" id="bellDropdownList">
                         <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
@@ -46,24 +56,31 @@
         </div>
     </nav>
 
-    <main class="container">
-        <div class="page-header">
-            <h1><i class="fas fa-bell"></i> Notifications</h1>
-            <div class="header-actions">
-                <button class="btn btn-secondary" onclick="filterNotifications('all')">
-                    <i class="fas fa-list"></i> All
-                </button>
-                <button class="btn btn-secondary" onclick="filterNotifications('unread')">
-                    <i class="fas fa-envelope"></i> Unread
-                </button>
-                <button class="btn btn-primary" onclick="markAllAsRead()">
-                    <i class="fas fa-check-double"></i> Mark All Read
-                </button>
+    <main class="container-modern" style="padding: var(--space-xl);">
+        <div style="margin-bottom: var(--space-xl);">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md);">
+                <div>
+                    <h1 style="font-size: var(--font-size-h1); font-weight: 700; color: #0f172a; margin-bottom: var(--space-sm);">
+                        <i class="fas fa-bell"></i> Notifications
+                    </h1>
+                    <p style="color: var(--muted); font-size: var(--font-size-body);">Stay updated with your campus activities</p>
+                </div>
+                <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                    <button class="btn-modern btn-secondary" onclick="filterNotifications('all')">
+                        <i class="fas fa-list"></i> All
+                    </button>
+                    <button class="btn-modern btn-secondary" onclick="filterNotifications('unread')">
+                        <i class="fas fa-envelope"></i> Unread
+                    </button>
+                    <button class="btn-modern btn-primary" onclick="markAllAsRead()">
+                        <i class="fas fa-check-double"></i> Mark All Read
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div id="notificationsList" class="notifications-list">
-            <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading notifications...</p>
+        <div id="notificationsList" style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <p style="text-align: center; padding: 2rem; color: var(--muted);"><i class="fas fa-spinner fa-spin"></i> Loading notifications...</p>
         </div>
     </main>
 
@@ -104,9 +121,9 @@
 
             if (filtered.length === 0) {
                 list.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-bell-slash"></i>
-                        <p>No ${currentFilter === 'unread' ? 'unread' : ''} notifications</p>
+                    <div style="text-align: center; padding: 4rem; background: white; border-radius: var(--radius-card); box-shadow: var(--shadow-card);">
+                        <i class="fas fa-bell-slash" style="font-size: 4rem; color: var(--muted); opacity: 0.5; margin-bottom: 1rem;"></i>
+                        <p style="color: var(--muted); font-size: 1.1rem;">No ${currentFilter === 'unread' ? 'unread' : ''} notifications</p>
                     </div>
                 `;
                 return;
@@ -124,19 +141,24 @@
             };
 
             list.innerHTML = filtered.map(n => `
-                <div class="notification-card ${n.is_read ? 'read' : 'unread'}" onclick="markAsRead(${n.id})">
-                    <div class="notification-icon" style="background: ${getIconColor(n.type)}">
-                        <i class="fas ${iconMap[n.type] || 'fa-bell'}"></i>
-                    </div>
-                    <div class="notification-content">
-                        <div class="notification-header">
-                            <h3>${escapeHtml(n.title)}</h3>
-                            <span class="notification-time">${getTimeAgo(n.created_at)}</span>
+                <div style="background: white; border-radius: var(--radius-card); padding: var(--space-lg); box-shadow: var(--shadow-card); cursor: pointer; transition: all var(--duration-normal) var(--ease-smooth); border-left: 4px solid ${getIconColor(n.type)}; ${!n.is_read ? 'background: rgba(6, 182, 212, 0.05);' : ''}" 
+                     onclick="markAsRead(${n.id})" 
+                     onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-hover)'" 
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-card)'">
+                    <div style="display: flex; gap: var(--space-md); align-items: start;">
+                        <div style="width: 48px; height: 48px; border-radius: 12px; background: ${getIconColor(n.type)}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas ${iconMap[n.type] || 'fa-bell'}" style="color: white; font-size: 20px;"></i>
                         </div>
-                        <p class="notification-message">${escapeHtml(n.message)}</p>
-                        <div class="notification-meta">
-                            <span class="type-badge ${n.type}">${n.type.replace(/_/g, ' ')}</span>
-                            ${!n.is_read ? '<span class="unread-indicator">●</span>' : ''}
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-sm); gap: var(--space-md);">
+                                <h3 style="font-size: var(--font-size-body); font-weight: 600; color: #0f172a; margin: 0;">${escapeHtml(n.title)}</h3>
+                                <span style="color: var(--muted); font-size: var(--font-size-xs); white-space: nowrap;">${getTimeAgo(n.created_at)}</span>
+                            </div>
+                            <p style="color: var(--muted); font-size: var(--font-size-small); margin: 0 0 var(--space-sm) 0; line-height: 1.5;">${escapeHtml(n.message)}</p>
+                            <div style="display: flex; gap: var(--space-sm); align-items: center;">
+                                <span class="status-pill ${n.type}" style="font-size: var(--font-size-xs);">${n.type.replace(/_/g, ' ')}</span>
+                                ${!n.is_read ? '<span style="color: var(--cyan); font-size: var(--font-size-xs); font-weight: 600;">● Unread</span>' : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -146,14 +168,32 @@
         function filterNotifications(filter) {
             currentFilter = filter;
             renderNotifications();
+        }
+
+        function getIconColor(type) {
+            const colors = {
+                event_approved: 'var(--success)',
+                event_rejected: 'var(--error)',
+                booking_confirmed: 'var(--primary)',
+                booking_cancelled: 'var(--warning)',
+                waitlist_promotion: 'var(--cyan)',
+                venue_conflict: 'var(--error)',
+                reminder: 'var(--warning)',
+                system: 'var(--indigo)'
+            };
+            return colors[type] || 'var(--primary)';
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
             
-            // Update button states
-            document.querySelectorAll('.header-actions .btn-secondary').forEach(btn => {
-                btn.classList.remove('btn-primary');
-                btn.classList.add('btn-secondary');
-            });
-            event.target.classList.remove('btn-secondary');
-            event.target.classList.add('btn-primary');
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+            if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
+            return date.toLocaleDateString();
         }
 
         async function markAsRead(id) {
@@ -176,9 +216,9 @@
                 allNotifications.forEach(n => n.is_read = true);
                 renderNotifications();
                 updateBellBadge();
-                alert('✅ All notifications marked as read');
+                showToast('All notifications marked as read', 'success');
             } catch (error) {
-                alert('❌ Failed to mark all as read: ' + error.message);
+                showToast('Failed to mark all as read: ' + error.message, 'error');
             }
         }
 
@@ -187,6 +227,42 @@
             div.textContent = text;
             return div.innerHTML;
         }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+            toast.innerHTML = `
+                <i class="fas fa-${icon}" style="font-size: 20px; color: var(--${type});"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'toastSlideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
     </script>
+    
+    <!-- Theme Manager -->
+    <script src="js/theme.js"></script>
 </body>
 </html>

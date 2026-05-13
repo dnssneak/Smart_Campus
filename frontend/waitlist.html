@@ -4,17 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waitlist - Smart Campus</title>
+    <link rel="stylesheet" href="css/new-design-system.css">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/modern-styles.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/logo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">
-            <i class="fas fa-university"></i>
-            <span>Smart Campus</span>
-        </div>
-        <div class="nav-links">
+    <nav class="modern-navbar">
+        <a href="index.html" class="smart-campus-logo">
+            <div class="logo-icon-wrapper">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+            </div>
+            <div class="logo-text">
+                <div class="logo-text-main">Smart Campus</div>
+                <div class="logo-text-sub">Event Management</div>
+            </div>
+        </a>
+        <div class="modern-nav-links">
             <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
             <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
             <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
@@ -32,7 +42,7 @@
                 <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
                     <div class="bell-dropdown-header">
                         <h4>Notifications</h4>
-                        <button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
+                        <button class="btn-modern btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
                     </div>
                     <div class="bell-dropdown-list" id="bellDropdownList">
                         <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
@@ -46,35 +56,45 @@
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
         </div>
     </nav>
-    <main class="container">
-        <div class="page-header">
-            <h1><i class="fas fa-list-ol"></i> My Waitlist</h1>
-            <div class="waitlist-info">
-                <span class="info-badge"><i class="fas fa-info-circle"></i> 
+    
+    <main class="container-modern" style="padding: var(--space-xl);">
+        <div style="margin-bottom: var(--space-xl);">
+            <h1 style="font-size: var(--font-size-h1); font-weight: 700; color: #0f172a; margin-bottom: var(--space-sm);">
+                <i class="fas fa-list-ol"></i> My Waitlist
+            </h1>
+            <div style="background: rgba(6, 182, 212, 0.1); padding: var(--space-md); border-radius: var(--radius-button); border-left: 4px solid var(--cyan);">
+                <span style="color: #0f172a; font-size: var(--font-size-small);">
+                    <i class="fas fa-info-circle"></i> 
                     When a booking is cancelled, highest priority waitlist entries get auto-promoted
                 </span>
             </div>
         </div>
 
         <!-- Waitlist Stats -->
-        <div class="stats-overview" id="waitlistStats">
-            <div class="stat-card large">
-                <i class="fas fa-clock"></i>
-                <div>
+        <div class="stats-grid-modern" style="margin-bottom: var(--space-xl);">
+            <div class="stat-card-modern">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-card-info">
                     <h3 id="statWaiting">0</h3>
                     <p>Waiting</p>
                 </div>
             </div>
-            <div class="stat-card large">
-                <i class="fas fa-check-circle"></i>
-                <div>
+            <div class="stat-card-modern">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-card-info">
                     <h3 id="statPromoted">0</h3>
                     <p>Promoted</p>
                 </div>
             </div>
-            <div class="stat-card large">
-                <i class="fas fa-times-circle"></i>
-                <div>
+            <div class="stat-card-modern">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #EF4444, #DC2626);">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-card-info">
                     <h3 id="statExpired">0</h3>
                     <p>Expired/Cancelled</p>
                 </div>
@@ -82,35 +102,39 @@
         </div>
 
         <!-- Waitlist Entries -->
-        <div id="waitlistContainer" class="waitlist-container">
-            <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading waitlist...</p>
+        <div id="waitlistContainer" class="events-grid">
+            <p class="loading-text" style="text-align: center; padding: 2rem; color: var(--muted);">
+                <i class="fas fa-spinner fa-spin"></i> Loading waitlist...
+            </p>
         </div>
 
         <!-- Admin Section: All Waitlist -->
-        <div class="admin-section hidden" id="adminWaitlistSection">
-            <h2><i class="fas fa-cog"></i> Manage Waitlist (Admin)</h2>
-            <div class="filters-bar">
-                <select id="waitlistStatusFilter" onchange="loadAdminWaitlist()">
+        <div class="hidden" id="adminWaitlistSection" style="margin-top: var(--space-xl); background: white; padding: var(--space-xl); border-radius: var(--radius-card); box-shadow: var(--shadow-card);">
+            <h2 style="font-size: var(--font-size-h2); font-weight: 700; color: #0f172a; margin-bottom: var(--space-lg);">
+                <i class="fas fa-cog"></i> Manage Waitlist (Admin)
+            </h2>
+            <div style="display: flex; gap: var(--space-md); margin-bottom: var(--space-lg); flex-wrap: wrap;">
+                <select id="waitlistStatusFilter" onchange="loadAdminWaitlist()" class="input-modern" style="width: auto;">
                     <option value="">All Status</option>
                     <option value="waiting">Waiting</option>
                     <option value="promoted">Promoted</option>
                     <option value="cancelled">Cancelled</option>
                 </select>
-                <button class="btn btn-primary" onclick="processWaitlist()">
+                <button class="btn-modern btn-primary" onclick="processWaitlist()">
                     <i class="fas fa-magic"></i> Process Next Waitlist
                 </button>
             </div>
-            <div class="table-container">
-                <table class="data-table">
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; background: white;">
                     <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Event</th>
-                            <th>Venue</th>
-                            <th>Requested Time</th>
-                            <th>Priority</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                        <tr style="background: var(--neutral-100); border-bottom: 2px solid var(--divider);">
+                            <th style="padding: var(--space-md); text-align: left; font-weight: 600; color: #0f172a;">User</th>
+                            <th style="padding: var(--space-md); text-align: left; font-weight: 600; color: #0f172a;">Event</th>
+                            <th style="padding: var(--space-md); text-align: left; font-weight: 600; color: #0f172a;">Venue</th>
+                            <th style="padding: var(--space-md); text-align: left; font-weight: 600; color: #0f172a;">Requested Time</th>
+                            <th style="padding: var(--space-md); text-align: left; font-weight: 600; color: #0f172a;">Priority</th>
+                            <th style="padding: var(--space-md); text-align: left; font-weight: 600; color: #0f172a;">Status</th>
+                            <th style="padding: var(--space-md); text-align: left; font-weight: 600; color: #0f172a;">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="adminWaitlistTable"></tbody>
@@ -158,67 +182,73 @@
 
                 if (allWaitlist.length === 0) {
                     container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-clipboard-list"></i>
-                            <p>No waitlist entries</p>
-                            <p class="sub">When a venue is fully booked, you'll be added here automatically</p>
-                            <a href="venues.html" class="btn btn-primary">Browse Venues</a>
+                        <div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: white; border-radius: var(--radius-card); box-shadow: var(--shadow-card);">
+                            <i class="fas fa-clipboard-list" style="font-size: 4rem; color: var(--muted); opacity: 0.5; margin-bottom: 1rem;"></i>
+                            <p style="color: var(--muted); font-size: 1.1rem; margin-bottom: 0.5rem;">No waitlist entries</p>
+                            <p style="color: var(--muted); font-size: var(--font-size-small); margin-bottom: 1.5rem;">When a venue is fully booked, you'll be added here automatically</p>
+                            <a href="venues.html" class="btn-modern btn-primary">
+                                <i class="fas fa-search"></i> Browse Venues
+                            </a>
                         </div>
                     `;
                     return;
                 }
 
                 container.innerHTML = allWaitlist.map(w => `
-                    <div class="waitlist-card ${w.status}">
-                        <div class="waitlist-header">
-                            <div>
-                                <h3>${w.event?.title || 'Event'}</h3>
-                                <span class="venue-name">
-                                    <i class="fas fa-building"></i> ${w.venue?.name || 'Unknown Venue'}
-                                </span>
-                            </div>
-                            <div class="waitlist-badges">
-                                <span class="priority-badge">Priority: ${w.priority}</span>
-                                <span class="status-badge ${w.status}">${w.status}</span>
+                    <div class="modern-event-card">
+                        <div class="event-card-thumbnail" style="background: var(--gradient-accent);">
+                            <div class="event-card-tags">
+                                <span class="status-pill ${w.status}">${w.status}</span>
+                                <span class="event-tag">Priority: ${w.priority}</span>
                             </div>
                         </div>
-                        
-                        <div class="waitlist-details">
-                            <div class="detail">
-                                <i class="fas fa-calendar"></i>
-                                <span>${formatDate(w.requested_start_time)}</span>
+                        <div class="event-card-content">
+                            <h3 class="event-card-title">${w.event?.title || 'Event'}</h3>
+                            <div class="event-card-meta">
+                                <div class="event-card-meta-row">
+                                    <i class="fas fa-building"></i>
+                                    <span>${w.venue?.name || 'Unknown Venue'}</span>
+                                </div>
+                                <div class="event-card-meta-row">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>${formatDate(w.requested_start_time)}</span>
+                                </div>
+                                <div class="event-card-meta-row">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${formatTime(w.requested_start_time)} - ${formatTime(w.requested_end_time)}</span>
+                                </div>
+                                <div class="event-card-meta-row">
+                                    <i class="fas fa-users"></i>
+                                    <span>${w.venue?.capacity || 'N/A'} capacity</span>
+                                </div>
+                                <div class="event-card-meta-row">
+                                    <i class="fas fa-hourglass-half"></i>
+                                    <span>Waited: ${daysSince(w.created_at)} days</span>
+                                </div>
                             </div>
-                            <div class="detail">
-                                <i class="fas fa-clock"></i>
-                                <span>${formatTime(w.requested_start_time)} - ${formatTime(w.requested_end_time)}</span>
-                            </div>
-                            <div class="detail">
-                                <i class="fas fa-users"></i>
-                                <span>${w.venue?.capacity || 'N/A'} capacity</span>
-                            </div>
-                            <div class="detail">
-                                <i class="fas fa-hourglass-half"></i>
-                                <span>Waited: ${daysSince(w.created_at)} days</span>
-                            </div>
+                            ${w.status === 'waiting' ? `
+                                <div class="event-card-footer" style="border-top: none; padding-top: var(--space-md);">
+                                    <button class="btn-modern btn-small" style="background: var(--error); color: white; width: 100%;" onclick="cancelWaitlist(${w.id})">
+                                        <i class="fas fa-times"></i> Remove from Waitlist
+                                    </button>
+                                </div>
+                            ` : w.status === 'promoted' ? `
+                                <div style="background: rgba(16, 185, 129, 0.1); padding: var(--space-md); border-radius: var(--radius-button); margin-top: var(--space-md);">
+                                    <i class="fas fa-check-circle" style="color: var(--success);"></i> 
+                                    <span style="color: var(--success); font-weight: 600;">Promoted to confirmed booking!</span>
+                                    <a href="bookings.html" style="color: var(--primary); text-decoration: underline; margin-left: var(--space-sm);">View Bookings</a>
+                                </div>
+                            ` : ''}
                         </div>
-
-                        ${w.status === 'waiting' ? `
-                            <div class="waitlist-actions">
-                                <button class="btn btn-small btn-danger" onclick="cancelWaitlist(${w.id})">
-                                    <i class="fas fa-times"></i> Remove
-                                </button>
-                            </div>
-                        ` : w.status === 'promoted' ? `
-                            <div class="promoted-notice">
-                                <i class="fas fa-check-circle"></i> 
-                                Promoted to confirmed booking! Check <a href="bookings.html">My Bookings</a>
-                            </div>
-                        ` : ''}
                     </div>
                 `).join('');
 
             } catch (error) {
-                container.innerHTML = `<p class="error">❌ Failed to load waitlist: ${error.message}</p>`;
+                container.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 2rem; background: white; border-radius: var(--radius-card); box-shadow: var(--shadow-card);">
+                        <p style="color: var(--error);">❌ Failed to load waitlist: ${error.message}</p>
+                    </div>
+                `;
             }
         }
 
@@ -233,16 +263,16 @@
 
                 const tbody = document.getElementById('adminWaitlistTable');
                 tbody.innerHTML = entries.map(e => `
-                    <tr>
-                        <td>${e.user?.first_name || ''} ${e.user?.last_name || ''}</td>
-                        <td>${e.event?.title || 'N/A'}</td>
-                        <td>${e.venue?.name || 'N/A'}</td>
-                        <td>${formatDate(e.requested_start_time)} ${formatTime(e.requested_start_time)}</td>
-                        <td><span class="priority-badge">${e.priority}</span></td>
-                        <td><span class="status-badge ${e.status}">${e.status}</span></td>
-                        <td>
+                    <tr style="border-bottom: 1px solid var(--divider);">
+                        <td style="padding: var(--space-md);">${e.user?.first_name || ''} ${e.user?.last_name || ''}</td>
+                        <td style="padding: var(--space-md);">${e.event?.title || 'N/A'}</td>
+                        <td style="padding: var(--space-md);">${e.venue?.name || 'N/A'}</td>
+                        <td style="padding: var(--space-md);">${formatDate(e.requested_start_time)} ${formatTime(e.requested_start_time)}</td>
+                        <td style="padding: var(--space-md);"><span class="status-pill">${e.priority}</span></td>
+                        <td style="padding: var(--space-md);"><span class="status-pill ${e.status}">${e.status}</span></td>
+                        <td style="padding: var(--space-md);">
                             ${e.status === 'waiting' ? `
-                                <button class="btn btn-small btn-primary" onclick="promoteWaitlist(${e.id})">
+                                <button class="btn-modern btn-small btn-primary" onclick="promoteWaitlist(${e.id})">
                                     Promote
                                 </button>
                             ` : '-'}
@@ -260,15 +290,15 @@
 
             try {
                 await api.put(`/waitlists/${id}/cancel`);
-                alert('Waitlist entry removed');
+                showToast('Waitlist entry removed', 'success');
                 loadMyWaitlist();
             } catch (error) {
-                alert('Failed to remove: ' + error.message);
+                showToast('Failed to remove: ' + error.message, 'error');
             }
         }
 
         async function processWaitlist() {
-            alert('Waitlist is processed automatically when a booking is cancelled.\n\nTo manually process: Go to Bookings → Cancel a booking → System auto-promotes highest priority waitlist entry.');
+            showToast('Waitlist is processed automatically when a booking is cancelled', 'warning');
         }
 
         async function promoteWaitlist(id) {
@@ -283,11 +313,11 @@
                     endDateTime: entry.requested_end_time
                 });
 
-                alert('Waitlist entry promoted!');
+                showToast('Waitlist entry promoted!', 'success');
                 loadAdminWaitlist();
                 loadMyWaitlist();
             } catch (error) {
-                alert('Failed to promote: ' + error.message);
+                showToast('Failed to promote: ' + error.message, 'error');
             }
         }
 
@@ -311,12 +341,11 @@
             });
         }
 
-        // Notification badge updater
         async function updateNavBadge() {
             if (!localStorage.getItem('token')) return;
             try {
                 const response = await api.get('/notifications/unread-count');
-                const badges = document.querySelectorAll('#navBadge');
+                const badges = document.querySelectorAll('#bellBadge');
                 const count = response.unreadCount || 0;
                 badges.forEach(badge => {
                     if (count > 0) {
@@ -330,6 +359,42 @@
                 console.error('Badge update failed:', e);
             }
         }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+            toast.innerHTML = `
+                <i class="fas fa-${icon}" style="font-size: 20px; color: var(--${type});"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'toastSlideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+            return container;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
     </script>
+    
+    <!-- Theme Manager -->
+    <script src="js/theme.js"></script>
 </body>
 </html>

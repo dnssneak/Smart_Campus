@@ -5,17 +5,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Venues - Smart Campus</title>
+    <link rel="stylesheet" href="css/new-design-system.css">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/modern-styles.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/logo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">
-            <i class="fas fa-university"></i>
-            <span>Smart Campus</span>
-        </div>
-        <div class="nav-links">
+    <nav class="modern-navbar">
+        <a href="index.html" class="smart-campus-logo">
+            <div class="logo-icon-wrapper">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+            </div>
+            <div class="logo-text">
+                <div class="logo-text-main">Smart Campus</div>
+                <div class="logo-text-sub">Event Management</div>
+            </div>
+        </a>
+        <div class="modern-nav-links">
             <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
             <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
             <a href="venues.html" class="active"><i class="fas fa-building"></i> <span>Venues</span></a>
@@ -47,7 +57,7 @@
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
         </div>
     </nav>
-    <main class="container">
+    <main class="container-modern" style="padding-top: 32px;">
         <!-- Event Info Banner -->
         <div id="eventBanner" class="event-banner hidden">
             <div class="banner-content">
@@ -62,20 +72,24 @@
             </div>
         </div>
 
-        <div class="page-header">
-            <h1><i class="fas fa-building"></i> Campus Venues</h1>
-            <div class="filters">
-                <input type="text" id="venueSearch" placeholder="Search venues..." onkeyup="filterVenues()">
-                <select id="capacityFilter" onchange="filterVenues()">
-                    <option value="">All Capacities</option>
-                    <option value="small">Small (&lt; 50)</option>
-                    <option value="medium">Medium (50-200)</option>
-                    <option value="large">Large (&gt; 200)</option>
-                </select>
-            </div>
+        <div style="margin-bottom: 32px;">
+            <h1 style="font-size: 32px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                <i class="fas fa-building" style="color: var(--primary);"></i> Campus Venues
+            </h1>
+            <p style="color: var(--muted); font-size: 16px;">Browse and book available venues</p>
         </div>
 
-        <div id="venuesGrid" class="venues-grid">
+        <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+            <input type="text" id="venueSearch" placeholder="Search venues..." onkeyup="filterVenues()" class="input-modern" style="flex: 1; min-width: 300px;">
+            <select id="capacityFilter" onchange="filterVenues()" class="input-modern" style="min-width: 200px;">
+                <option value="">All Capacities</option>
+                <option value="small">Small (&lt; 50)</option>
+                <option value="medium">Medium (50-200)</option>
+                <option value="large">Large (&gt; 200)</option>
+            </select>
+        </div>
+
+        <div id="venuesGrid" class="events-grid">
             <p class="loading-text"><i class="fas fa-spinner fa-spin"></i> Loading venues...</p>
         </div>
 
@@ -464,6 +478,9 @@
             }
         }
     </script>
+    
+    <!-- Theme Manager -->
+    <script src="js/theme.js"></script>
 </body>
 
 </html>

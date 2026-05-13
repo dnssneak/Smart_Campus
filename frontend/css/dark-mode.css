@@ -1,0 +1,559 @@
+/* ===== DARK MODE STYLES ===== */
+
+:root {
+    /* Light mode colors (default) */
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --border-color: #e2e8f0;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+    --navbar-bg: rgba(255, 255, 255, 0.95);
+    --sidebar-bg: #ffffff;
+    --card-bg: #ffffff;
+    --input-bg: #ffffff;
+    --modal-bg: #ffffff;
+    --overlay-bg: rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode colors */
+[data-theme="dark"] {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --border-color: #334155;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3);
+    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.4);
+    --navbar-bg: rgba(30, 41, 59, 0.95);
+    --sidebar-bg: #1e293b;
+    --card-bg: #1e293b;
+    --input-bg: #334155;
+    --modal-bg: #1e293b;
+    --overlay-bg: rgba(0, 0, 0, 0.7);
+}
+
+/* Apply theme colors */
+body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Navbar */
+.modern-navbar {
+    background: var(--navbar-bg);
+    box-shadow: var(--shadow-md);
+}
+
+.modern-nav-links a {
+    color: var(--text-secondary);
+}
+
+.modern-nav-links a:hover,
+.modern-nav-links a.active {
+    color: var(--primary);
+}
+
+/* Sidebar */
+.sidebar {
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+}
+
+.user-info {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.user-info h3 {
+    color: var(--text-primary);
+}
+
+.user-email {
+    color: var(--text-muted);
+}
+
+.sidebar-nav a {
+    color: var(--text-secondary);
+}
+
+.sidebar-nav a:hover,
+.sidebar-nav a.active {
+    background: rgba(99, 102, 241, 0.1);
+    color: #6366f1;
+}
+
+/* Cards */
+.stat-card,
+.stat-card-modern,
+.widget,
+.card,
+.venue-card,
+.event-card,
+.booking-card,
+.modern-event-card {
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-card:hover,
+.stat-card-modern:hover,
+.widget:hover,
+.venue-card:hover,
+.modern-event-card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card h3,
+.stat-card-info h3,
+.widget h3,
+.event-card-title {
+    color: var(--text-primary);
+}
+
+.stat-card p,
+.stat-card-info p {
+    color: var(--text-secondary);
+}
+
+/* Inputs */
+.form-group input,
+.form-group select,
+.input-modern,
+.glass-search-bar input {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.input-modern:focus {
+    border-color: #06B6D4;
+}
+
+.form-group label {
+    color: var(--text-secondary);
+}
+
+/* Modal */
+.modal-content,
+.modal-content-modern {
+    background: var(--modal-bg);
+    color: var(--text-primary);
+}
+
+.modal {
+    background: var(--overlay-bg);
+}
+
+/* Detail rows */
+.detail-row {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.detail-row .label {
+    color: var(--text-secondary);
+}
+
+.detail-row .value {
+    color: var(--text-primary);
+}
+
+/* Tables */
+table {
+    background: var(--card-bg);
+}
+
+th {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+td {
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Filters */
+.filters input,
+.filters select {
+    background: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+/* Chips */
+.chip {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.chip:hover {
+    background: var(--card-bg);
+}
+
+/* Toast */
+.toast {
+    background: var(--card-bg);
+    color: var(--text-primary);
+}
+
+/* Page headers */
+.page-header h1,
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary) !important;
+}
+
+.page-header p {
+    color: var(--text-secondary);
+}
+
+/* Fix all white backgrounds in dark mode */
+[data-theme="dark"] .card,
+[data-theme="dark"] .widget,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .stat-card-modern,
+[data-theme="dark"] .venue-card,
+[data-theme="dark"] .event-card,
+[data-theme="dark"] .booking-card,
+[data-theme="dark"] .modern-event-card,
+[data-theme="dark"] .form-panel .card,
+[data-theme="dark"] div[style*="background: white"],
+[data-theme="dark"] div[style*="background:white"] {
+    background: var(--card-bg) !important;
+}
+
+/* Fix inline styles in dark mode */
+[data-theme="dark"] [style*="color: #0f172a"],
+[data-theme="dark"] [style*="color:#0f172a"] {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] [style*="color: #475569"],
+[data-theme="dark"] [style*="color:#475569"] {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] [style*="color: #64748b"],
+[data-theme="dark"] [style*="color:#64748b"] {
+    color: var(--text-muted) !important;
+}
+
+/* Empty states */
+.empty {
+    color: var(--text-muted);
+}
+
+/* Loading text */
+.loading-text {
+    color: var(--text-muted);
+}
+
+/* Venue info */
+.venue-info h3 {
+    color: var(--text-primary);
+}
+
+.location {
+    color: var(--text-secondary);
+}
+
+/* Event meta */
+.event-card-meta {
+    color: var(--text-muted);
+}
+
+/* Description */
+.description {
+    color: var(--text-secondary);
+}
+
+/* Detail items */
+.detail-item {
+    background: var(--bg-tertiary);
+}
+
+.detail-item .label {
+    color: var(--text-muted);
+}
+
+.detail-item .value {
+    color: var(--text-primary);
+}
+
+/* Theme toggle in sidebar */
+.theme-toggle-sidebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto;
+}
+
+.theme-toggle-sidebar span {
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.theme-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+    background: var(--bg-tertiary);
+    border-radius: 13px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.theme-switch.active {
+    background: linear-gradient(135deg, #2563EB, #4F46E5);
+}
+
+.theme-switch-slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.theme-switch.active .theme-switch-slider {
+    transform: translateX(24px);
+}
+
+.theme-switch i {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    transition: opacity 0.3s ease;
+}
+
+.theme-switch .fa-sun {
+    left: 6px;
+    color: #F59E0B;
+    opacity: 1;
+}
+
+.theme-switch .fa-moon {
+    right: 6px;
+    color: white;
+    opacity: 0;
+}
+
+.theme-switch.active .fa-sun {
+    opacity: 0;
+}
+
+.theme-switch.active .fa-moon {
+    opacity: 1;
+}
+
+/* Bell dropdown in dark mode */
+.bell-dropdown {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+}
+
+.bell-dropdown-header h4 {
+    color: var(--text-primary);
+}
+
+.notification-item {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notification-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.notification-item h5 {
+    color: var(--text-primary);
+}
+
+.notification-item p {
+    color: var(--text-secondary);
+}
+
+/* Activity items */
+.activity-item {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.activity-item i {
+    color: #06B6D4;
+    font-size: 20px;
+}
+
+.activity-item strong {
+    color: var(--text-primary);
+}
+
+.activity-item small {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+/* Upcoming items */
+.upcoming-item {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    transition: background 0.2s ease;
+}
+
+.upcoming-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.upcoming-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2563EB, #4F46E5);
+    color: white;
+    padding: 12px;
+    border-radius: 12px;
+    min-width: 60px;
+}
+
+.upcoming-date .day {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.upcoming-date .month {
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.upcoming-info h4 {
+    color: var(--text-primary);
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.upcoming-info p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.upcoming-info i {
+    color: #06B6D4;
+    margin-right: 6px;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+
+.status-badge.pending {
+    background: #FEF3C7;
+    color: #D97706;
+}
+
+.status-badge.confirmed {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+.status-badge.approved {
+    background: #D1FAE5;
+    color: #059669;
+}
+
+.status-badge.rejected {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+/* Smooth transitions for theme switching */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Preserve animations */
+.stat-card,
+.modern-event-card,
+.widget {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Event Count Banner - needs special handling */
+[data-theme="dark"] .text-gradient {
+    background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Glass hero section */
+[data-theme="dark"] .glass-hero {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+}
+
+[data-theme="dark"] .glass-hero-title {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .glass-hero-subtitle {
+    color: var(--text-secondary) !important;
+}
+
+/* Footer in dark mode */
+[data-theme="dark"] footer {
+    background: var(--bg-secondary) !important;
+}
+
+/* Analytics page specific fixes */
+[data-theme="dark"] .analytics-card,
+[data-theme="dark"] .recommendation-form {
+    background: var(--card-bg) !important;
+}
+
+[data-theme="dark"] .analytics-card h3,
+[data-theme="dark"] .recommendation-form h2 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .stat-item {
+    background: var(--bg-tertiary) !important;
+}
+
+[data-theme="dark"] .stat-label {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .form-group label {
+    color: var(--text-secondary) !important;
+}

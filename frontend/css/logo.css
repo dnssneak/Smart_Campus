@@ -1,0 +1,194 @@
+/* ===== AESTHETIC LOGO STYLES ===== */
+
+.smart-campus-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.smart-campus-logo:hover {
+    transform: scale(1.05);
+}
+
+.logo-icon-wrapper {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.smart-campus-logo:hover .logo-icon {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    transform: rotate(-5deg);
+}
+
+/* Animated gradient background */
+.logo-icon::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.smart-campus-logo:hover .logo-icon::before {
+    opacity: 1;
+}
+
+/* Icon styling */
+.logo-icon i {
+    font-size: 20px;
+    color: white;
+    z-index: 1;
+    position: relative;
+}
+
+/* Sparkle effect */
+.logo-icon::after {
+    content: '✨';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    font-size: 14px;
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+    transition: all 0.3s ease;
+}
+
+.smart-campus-logo:hover .logo-icon::after {
+    opacity: 1;
+    transform: scale(1) rotate(20deg);
+}
+
+/* Text styling */
+.logo-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.logo-text-main {
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+[data-theme="dark"] .logo-text-main {
+    background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.logo-text-sub {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    line-height: 1;
+}
+
+/* Compact version for smaller screens */
+@media (max-width: 768px) {
+    .logo-text-sub {
+        display: none;
+    }
+    
+    .logo-icon-wrapper {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .logo-icon i {
+        font-size: 18px;
+    }
+    
+    .logo-text-main {
+        font-size: 18px;
+    }
+}
+
+/* Alternative minimal logo (just icon) */
+.logo-minimal {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.logo-minimal::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.logo-minimal:hover {
+    transform: scale(1.1) rotate(-5deg);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.logo-minimal:hover::before {
+    opacity: 1;
+}
+
+.logo-minimal i {
+    font-size: 20px;
+    color: white;
+    z-index: 1;
+    position: relative;
+}
+
+/* Pulsing animation for logo */
+@keyframes logoPulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5);
+    }
+}
+
+.logo-icon.pulse {
+    animation: logoPulse 2s ease-in-out infinite;
+}

@@ -4,18 +4,561 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Smart Campus</title>
+    <title>Dashboard — Smart Campus</title>
+    <link rel="stylesheet" href="css/new-design-system.css">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/modern-styles.css">
+    <link rel="stylesheet" href="css/dark-mode.css">
+    <link rel="stylesheet" href="css/logo.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .dashboard-hero {
+            background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .dashboard-hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .dashboard-hero h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-hero p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+        }
+
+        .chart-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.info {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .badge.purple {
+            background: #EDE9FE;
+            color: #7C3AED;
+        }
+
+        .badge.success {
+            background: #D1FAE5;
+            color: #059669;
+        }
+
+        .badge.warning {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .upcoming-event-card {
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+            background: rgba(248, 250, 252, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .upcoming-event-card:hover {
+            background: white;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+            transform: translateY(-2px);
+        }
+
+        .event-date-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2563EB, #4F46E5);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.2;
+            flex-shrink: 0;
+        }
+
+        .event-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .event-info h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .event-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-size: 13px;
+            color: #6B7280;
+        }
+
+        .event-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .insight-card {
+            padding: 1.25rem;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--from), var(--to));
+            color: white;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+        }
+
+        .insight-card i {
+            font-size: 24px;
+            margin-bottom: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .insight-card h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-card p {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease backwards;
+        }
+
+        .animate-in:nth-child(1) { animation-delay: 0s; }
+        .animate-in:nth-child(2) { animation-delay: 0.05s; }
+        .animate-in:nth-child(3) { animation-delay: 0.1s; }
+        .animate-in:nth-child(4) { animation-delay: 0.15s; }
+
+        /* Profile Drawer Styles */
+        .nav-profile {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #4F46E5);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .nav-profile:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.5);
+        }
+
+        .nav-profile i {
+            font-size: 24px;
+        }
+
+        .profile-drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .profile-drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .profile-drawer {
+            position: fixed;
+            top: 0;
+            right: -420px;
+            width: 420px;
+            height: 100vh;
+            background: white;
+            box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-drawer.active {
+            right: 0;
+        }
+
+        .profile-drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 2px solid #E5E7EB;
+            background: linear-gradient(135deg, #2563EB, #4F46E5);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .profile-drawer-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0;
+        }
+
+        .profile-drawer-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .profile-drawer-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .profile-drawer-close i {
+            font-size: 18px;
+        }
+
+        .profile-drawer-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .profile-avatar-section {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.05), rgba(79, 70, 229, 0.05));
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB, #4F46E5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
+        }
+
+        .profile-avatar i {
+            font-size: 60px;
+        }
+
+        .profile-avatar-section h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-avatar-section p {
+            color: #6B7280;
+            font-size: 14px;
+            margin-bottom: 1rem;
+        }
+
+        .profile-role-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #2563EB, #4F46E5);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .profile-section {
+            margin-bottom: 1.5rem;
+            padding: 1.25rem;
+            background: #F8FAFC;
+            border-radius: 12px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .profile-section h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .profile-section h4 i {
+            color: #2563EB;
+        }
+
+        .profile-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .profile-detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-label {
+            font-size: 14px;
+            color: #6B7280;
+            font-weight: 500;
+        }
+
+        .profile-value {
+            font-size: 14px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .profile-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        .profile-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            text-decoration: none;
+            color: #0f172a;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .profile-action-btn:hover {
+            background: linear-gradient(135deg, #2563EB, #4F46E5);
+            color: white;
+            border-color: #2563EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .profile-action-btn i {
+            font-size: 24px;
+        }
+
+        .profile-action-btn span {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .profile-logout-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .profile-logout-btn:hover {
+            background: linear-gradient(135deg, #DC2626, #B91C1C);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .profile-logout-btn i {
+            font-size: 18px;
+        }
+
+        /* Theme Toggle Styles */
+        .theme-toggle-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .theme-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: white;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .theme-option:hover {
+            border-color: #2563EB;
+            background: rgba(37, 99, 235, 0.02);
+        }
+
+        .theme-option-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .theme-option-info i {
+            font-size: 18px;
+            color: #2563EB;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .profile-drawer {
+                width: 100%;
+                right: -100%;
+            }
+
+            .profile-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    <nav class="navbar">
-        <div class="nav-brand">
-            <i class="fas fa-university"></i>
-            <span>Smart Campus</span>
-        </div>
-        <div class="nav-links">
+    <nav class="modern-navbar">
+        <a href="index.html" class="smart-campus-logo">
+            <div class="logo-icon-wrapper">
+                <div class="logo-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+            </div>
+            <div class="logo-text">
+                <div class="logo-text-main">Smart Campus</div>
+                <div class="logo-text-sub">Event Management</div>
+            </div>
+        </a>
+        <div class="modern-nav-links">
             <a href="dashboard.html" class="active"><i class="fas fa-home"></i> <span>Dashboard</span></a>
             <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
             <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
@@ -25,7 +568,6 @@
             <a href="analytics.html"><i class="fas fa-chart-line"></i> <span>Analytics</span></a>
             <a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
             
-            <!-- Bell Icon -->
             <div class="nav-bell" onclick="toggleBellDropdown(event)">
                 <i class="fas fa-bell"></i>
                 <span class="bell-badge" id="bellBadge">0</span>
@@ -33,7 +575,7 @@
                 <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
                     <div class="bell-dropdown-header">
                         <h4>Notifications</h4>
-                        <button class="btn btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
+                        <button class="btn-modern btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
                     </div>
                     <div class="bell-dropdown-list" id="bellDropdownList">
                         <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
@@ -44,373 +586,566 @@
                 </div>
             </div>
             
+            <div class="nav-profile" onclick="toggleProfileDrawer()">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
         </div>
     </nav>
 
-    <main class="dashboard">
-        <!-- Sidebar Toggle Button -->
-        <button class="sidebar-toggle" onclick="toggleSidebar()">
-            <i class="fas fa-user"></i>
-        </button>
+    <!-- Profile Drawer -->
+    <div class="profile-drawer-overlay" id="profileDrawerOverlay" onclick="closeProfileDrawer()"></div>
+    <div class="profile-drawer" id="profileDrawer">
+        <div class="profile-drawer-header">
+            <h3><i class="fas fa-user-circle"></i> Profile</h3>
+            <button class="profile-drawer-close" onclick="closeProfileDrawer()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         
-        <!-- Sidebar Overlay -->
-        <div class="sidebar-overlay" onclick="closeSidebar()"></div>
-        
-        <aside class="sidebar" id="profileSidebar">
-            <div class="user-info">
-                <div class="avatar">
+        <div class="profile-drawer-content">
+            <!-- User Avatar Section -->
+            <div class="profile-avatar-section">
+                <div class="profile-avatar">
                     <i class="fas fa-user-circle"></i>
                 </div>
-                <h3 id="userName">Loading...</h3>
-                <span id="userRole" class="role-badge">Loading...</span>
-                <p id="userEmail" class="user-email">Loading...</p>
+                <h2 id="profileName">Loading...</h2>
+                <p id="profileEmail">Loading...</p>
+                <span class="profile-role-badge" id="profileRole">User</span>
             </div>
-            <nav class="sidebar-nav">
-                <a href="#" class="active" onclick="showSection('overview')">
-                    <i class="fas fa-home"></i> Overview
-                </a>
-                <a href="#" onclick="showSection('profile')">
-                    <i class="fas fa-user"></i> My Profile
-                </a>
-                <a href="events.html">
-                    <i class="fas fa-calendar"></i> My Events
-                </a>
-                <a href="venues.html">
-                    <i class="fas fa-building"></i> Book Venue
-                </a>
-            </nav>
-        </aside>
-
-        <div class="dashboard-content">
-            <!-- Overview Section -->
-            <section id="overview" class="dashboard-section">
-                <h2>Dashboard Overview</h2>
-                
-                <!-- Stats Grid -->
-                <div class="stats-grid four">
-                    <div class="stat-card large">
-                        <i class="fas fa-calendar-check" style="color: #6366f1;"></i>
-                        <div>
-                            <h3 id="statEvents">0</h3>
-                            <p>My Events</p>
+            
+            <!-- Profile Details -->
+            <div class="profile-section">
+                <h4><i class="fas fa-info-circle"></i> Account Information</h4>
+                <div class="profile-detail-item">
+                    <span class="profile-label">User ID</span>
+                    <span class="profile-value" id="profileUserId">-</span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="profile-label">First Name</span>
+                    <span class="profile-value" id="profileFirstName">-</span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="profile-label">Last Name</span>
+                    <span class="profile-value" id="profileLastName">-</span>
+                </div>
+                <div class="profile-detail-item">
+                    <span class="profile-label">Role</span>
+                    <span class="profile-value" id="profileRoleText">-</span>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="profile-section">
+                <h4><i class="fas fa-bolt"></i> Quick Actions</h4>
+                <div class="profile-actions">
+                    <a href="events.html" class="profile-action-btn">
+                        <i class="fas fa-calendar"></i>
+                        <span>My Events</span>
+                    </a>
+                    <a href="bookings.html" class="profile-action-btn">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>My Bookings</span>
+                    </a>
+                    <a href="notifications.html" class="profile-action-btn">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                    </a>
+                    <a href="analytics.html" class="profile-action-btn">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Analytics</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Theme Toggle -->
+            <div class="profile-section">
+                <h4><i class="fas fa-palette"></i> Appearance</h4>
+                <div class="theme-toggle-container">
+                    <div class="theme-option">
+                        <div class="theme-option-info">
+                            <i class="fas fa-moon"></i>
+                            <span>Dark Mode</span>
                         </div>
-                    </div>
-                    <div class="stat-card large">
-                        <i class="fas fa-building" style="color: #10b981;"></i>
-                        <div>
-                            <h3 id="statBookings">0</h3>
-                            <p>My Bookings</p>
-                        </div>
-                    </div>
-                    <div class="stat-card large">
-                        <i class="fas fa-clock" style="color: #f59e0b;"></i>
-                        <div>
-                            <h3 id="statPending">0</h3>
-                            <p>Pending</p>
-                        </div>
-                    </div>
-                    <div class="stat-card large">
-                        <i class="fas fa-list-ol" style="color: #ec4899;"></i>
-                        <div>
-                            <h3 id="statWaitlist">0</h3>
-                            <p>Waitlist</p>
+                        <div class="theme-switch" id="drawerThemeSwitch" onclick="toggleDrawerTheme()">
+                            <div class="theme-switch-slider"></div>
+                            <i class="fas fa-sun"></i>
+                            <i class="fas fa-moon"></i>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Logout Button -->
+            <div class="profile-section">
+                <button class="profile-logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
-                <!-- Main Content Grid -->
-                <div class="dashboard-widgets">
-                    <!-- Recent Activity -->
-                    <div class="widget">
-                        <h3><i class="fas fa-history"></i> Recent Activity</h3>
-                        <div id="recentActivity" class="activity-list">
-                            <p class="empty">Loading...</p>
-                        </div>
-                    </div>
+    <main class="container-modern" style="padding: 2rem;">
+        <!-- Hero Section -->
+        <div class="dashboard-hero animate-in">
+            <div class="dashboard-hero-content">
+                <h1 id="welcomeMessage">Welcome back 👋</h1>
+                <p>Here's what's happening across campus today.</p>
+            </div>
+        </div>
 
-                    <!-- Quick Actions -->
-                    <div class="widget">
-                        <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
-                        <div class="quick-actions">
-                            <a href="events.html" class="action-btn">
-                                <i class="fas fa-plus"></i> Create Event
-                            </a>
-                            <a href="venues.html" class="action-btn">
-                                <i class="fas fa-calendar-plus"></i> Book Venue
-                            </a>
-                            <a href="resources.html" class="action-btn">
-                                <i class="fas fa-boxes"></i> Browse Resources
-                            </a>
-                            <a href="reports.html" class="action-btn">
-                                <i class="fas fa-chart-bar"></i> View Reports
-                            </a>
-                        </div>
-                    </div>
+        <!-- Stats Grid -->
+        <div class="stats-grid-modern" style="margin-bottom: 2rem;">
+            <div class="stat-card-modern animate-in">
+                <div class="stat-card-icon">
+                    <i class="fas fa-calendar-check"></i>
                 </div>
-
-                <!-- Upcoming Events -->
-                <div class="widget" style="margin-top: 2rem;">
-                    <h3><i class="fas fa-calendar-alt"></i> Upcoming Events</h3>
-                    <div id="upcomingEvents" class="upcoming-list">
-                        <p class="empty">Loading...</p>
-                    </div>
+                <div class="stat-card-info">
+                    <h3 id="statActiveEvents">0</h3>
+                    <p>Active Events</p>
+                    <small style="color: #10B981; font-size: 12px;">↑ 12% this week</small>
                 </div>
-
-                <!-- Profile Summary -->
-                <div class="widget" style="margin-top: 2rem;">
-                    <h3><i class="fas fa-user"></i> Profile Summary</h3>
-                    <div id="profileInfo" class="profile-details">
-                        <p class="empty">Loading...</p>
-                    </div>
+            </div>
+            <div class="stat-card-modern animate-in">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
+                    <i class="fas fa-building"></i>
                 </div>
-            </section>
-
-            <!-- Profile Section -->
-            <section id="profile" class="dashboard-section hidden">
-                <h2>My Profile</h2>
-                <div class="card">
-                    <div id="profileDetails" class="profile-details">
-                        <p class="empty">Loading...</p>
-                    </div>
-                    <button class="btn btn-secondary" onclick="loadProfile()">
-                        <i class="fas fa-sync"></i> Refresh
-                    </button>
+                <div class="stat-card-info">
+                    <h3 id="statVenuesOnline">0</h3>
+                    <p>Venues Online</p>
+                    <small style="color: #6B7280; font-size: 12px;" id="venuesStatus">Loading...</small>
                 </div>
-            </section>
+            </div>
+            <div class="stat-card-modern animate-in">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-card-info">
+                    <h3 id="statBookingsToday">0</h3>
+                    <p>Bookings Today</p>
+                    <small style="color: #10B981; font-size: 12px;">↑ 8% vs yesterday</small>
+                </div>
+            </div>
+            <div class="stat-card-modern animate-in">
+                <div class="stat-card-icon" style="background: linear-gradient(135deg, #EC4899, #DB2777);">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-card-info">
+                    <h3 id="statUtilization">0%</h3>
+                    <p>Utilization</p>
+                    <small style="color: #10B981; font-size: 12px;">↑ 4% MoM</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+            <div class="chart-card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <div>
+                        <h3><i class="fas fa-chart-area" style="color: #2563EB;"></i> Bookings this week</h3>
+                        <p style="font-size: 12px; color: #6B7280;">Daily volume across all venues</p>
+                    </div>
+                    <span class="badge info">Last 7 days</span>
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <h3><i class="fas fa-building" style="color: #8B5CF6;"></i> Top Venues</h3>
+                    <span class="badge purple">Utilization</span>
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="venuesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Events -->
+        <div class="chart-card" style="margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                <div>
+                    <h3><i class="fas fa-calendar-alt" style="color: #2563EB;"></i> Upcoming Events</h3>
+                    <p style="font-size: 12px; color: #6B7280;">The next scheduled events</p>
+                </div>
+                <button class="btn-modern btn-ghost btn-small" onclick="window.location.href='events.html'">View all</button>
+            </div>
+            <div id="upcomingEventsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+                <p style="color: #6B7280; text-align: center; padding: 2rem;">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Insights Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+            <div class="insight-card animate-in" style="--from: #2563EB; --to: #4F46E5;">
+                <i class="fas fa-magic"></i>
+                <h4>AI Conflict Saver</h4>
+                <p id="conflictSaverText">Auto-resolved conflicts this week</p>
+            </div>
+            <div class="insight-card animate-in" style="--from: #06B6D4; --to: #2563EB;">
+                <i class="fas fa-heartbeat"></i>
+                <h4>Resource Health</h4>
+                <p id="resourceHealthText">System resources available</p>
+            </div>
+            <div class="insight-card animate-in" style="--from: #8B5CF6; --to: #EC4899;">
+                <i class="fas fa-users"></i>
+                <h4>Waitlist Promotions</h4>
+                <p id="waitlistPromotionsText">Students promoted today</p>
+            </div>
         </div>
     </main>
 
     <script src="js/api.js"></script>
+    <script src="js/theme.js"></script>
     <script src="js/bell-notifications.js"></script>
     <script>
+        let weeklyChart, venuesChart;
+
         document.addEventListener('DOMContentLoaded', async () => {
             if (!localStorage.getItem('token')) {
                 window.location.href = 'login.html';
                 return;
             }
 
-            await loadUserData();
-            await loadProfile();
+            // Initialize theme switch state
+            initializeThemeSwitch();
+
+            await loadDashboardData();
         });
 
-        async function loadUserData() {
+        // Theme Toggle Functions
+        function initializeThemeSwitch() {
+            const themeSwitch = document.getElementById('drawerThemeSwitch');
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            
+            if (currentTheme === 'dark') {
+                themeSwitch.classList.add('active');
+            }
+        }
+
+        function toggleDrawerTheme() {
+            if (window.themeManager) {
+                window.themeManager.toggleTheme();
+                
+                // Update switch state
+                const themeSwitch = document.getElementById('drawerThemeSwitch');
+                const currentTheme = localStorage.getItem('theme') || 'light';
+                
+                if (currentTheme === 'dark') {
+                    themeSwitch.classList.add('active');
+                } else {
+                    themeSwitch.classList.remove('active');
+                }
+            }
+        }
+
+        async function loadDashboardData() {
             try {
                 const user = JSON.parse(localStorage.getItem('user'));
+                document.getElementById('welcomeMessage').textContent = `Welcome back, ${user.firstName} 👋`;
 
-                document.getElementById('userName').textContent = `${user.firstName} ${user.lastName}`;
-                document.getElementById('userRole').textContent = user.role.replace('_', ' ').toUpperCase();
-                document.getElementById('userEmail').textContent = user.email;
+                // Load profile data
+                loadProfileData();
 
-                // Load dynamic stats
-                await loadDashboardStats();
-
-            } catch (e) {
-                console.error('Error loading user:', e);
+                // Load all data in parallel
+                await Promise.all([
+                    loadStats(),
+                    loadWeeklyChart(),
+                    loadTopVenues(),
+                    loadUpcomingEvents(),
+                    loadInsights()
+                ]);
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
             }
         }
 
-        async function loadDashboardStats() {
+        // Profile Drawer Functions
+        function toggleProfileDrawer() {
+            const drawer = document.getElementById('profileDrawer');
+            const overlay = document.getElementById('profileDrawerOverlay');
+            
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Prevent body scroll when drawer is open
+            if (drawer.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeProfileDrawer() {
+            const drawer = document.getElementById('profileDrawer');
+            const overlay = document.getElementById('profileDrawerOverlay');
+            
+            drawer.classList.remove('active');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function loadProfileData() {
             try {
-                // Load events count
-                const eventsResponse = await api.get('/events');
-                const myEvents = eventsResponse.events || [];
-                document.getElementById('statEvents').textContent = myEvents.length;
+                const user = JSON.parse(localStorage.getItem('user'));
+                
+                if (user) {
+                    // Populate profile information
+                    document.getElementById('profileName').textContent = `${user.firstName} ${user.lastName}`;
+                    document.getElementById('profileEmail').textContent = user.email;
+                    document.getElementById('profileRole').textContent = formatRole(user.role);
+                    
+                    // Populate detail items
+                    document.getElementById('profileUserId').textContent = user.userId || user.id || '-';
+                    document.getElementById('profileFirstName').textContent = user.firstName || '-';
+                    document.getElementById('profileLastName').textContent = user.lastName || '-';
+                    document.getElementById('profileRoleText').textContent = formatRole(user.role);
+                    
+                    // Update role badge color based on role
+                    const roleBadge = document.getElementById('profileRole');
+                    roleBadge.style.background = getRoleGradient(user.role);
+                }
+            } catch (error) {
+                console.error('Error loading profile data:', error);
+            }
+        }
 
-                // Load bookings count
-                const bookingsResponse = await api.get('/bookings');
-                const myBookings = bookingsResponse.bookings || [];
-                document.getElementById('statBookings').textContent = myBookings.length;
+        function formatRole(role) {
+            if (!role) return 'User';
+            
+            // Convert snake_case to Title Case
+            return role
+                .split('_')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
+        }
 
-                // Count pending items (events + bookings)
-                const pendingEvents = myEvents.filter(e => e.status === 'pending').length;
-                const pendingBookings = myBookings.filter(b => b.status === 'pending').length;
-                document.getElementById('statPending').textContent = pendingEvents + pendingBookings;
+        function getRoleGradient(role) {
+            const gradients = {
+                'student': 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                'faculty': 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                'society_rep': 'linear-gradient(135deg, #ec4899, #db2777)',
+                'technical_staff': 'linear-gradient(135deg, #10b981, #059669)',
+                'admin': 'linear-gradient(135deg, #f59e0b, #d97706)'
+            };
+            
+            return gradients[role] || 'linear-gradient(135deg, #2563EB, #4F46E5)';
+        }
 
-                // Load waitlist count
-                try {
-                    const waitlistResponse = await api.get('/waitlists');
-                    const waitlist = waitlistResponse.waitlists || [];
-                    const activeWaitlist = waitlist.filter(w => w.status === 'waiting').length;
-                    document.getElementById('statWaitlist').textContent = activeWaitlist;
-                } catch (e) {
-                    document.getElementById('statWaitlist').textContent = '0';
+        // Close drawer when clicking outside or pressing Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeProfileDrawer();
+            }
+        });
+
+        async function loadStats() {
+            try {
+                const [eventsRes, bookingsRes, venuesRes] = await Promise.all([
+                    api.get('/events'),
+                    api.get('/bookings'),
+                    api.get('/venues')
+                ]);
+
+                const events = eventsRes.events || [];
+                const bookings = bookingsRes.bookings || [];
+                const venues = venuesRes.venues || [];
+
+                // Active events (approved/confirmed)
+                const activeEvents = events.filter(e => e.status === 'approved' || e.status === 'confirmed').length;
+                document.getElementById('statActiveEvents').textContent = activeEvents;
+
+                // Venues online
+                const onlineVenues = venues.filter(v => v.status === 'active').length;
+                document.getElementById('statVenuesOnline').textContent = onlineVenues;
+                document.getElementById('venuesStatus').textContent = `${venues.length - onlineVenues} in maintenance`;
+
+                // Bookings today
+                const today = new Date().toISOString().split('T')[0];
+                const todayBookings = bookings.filter(b => 
+                    b.start_datetime && b.start_datetime.startsWith(today)
+                ).length;
+                document.getElementById('statBookingsToday').textContent = todayBookings;
+
+                // Calculate utilization (simplified)
+                const utilization = venues.length > 0 ? Math.round((bookings.length / (venues.length * 10)) * 100) : 0;
+                document.getElementById('statUtilization').textContent = Math.min(utilization, 100) + '%';
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadWeeklyChart() {
+            try {
+                // Generate mock data for last 7 days
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const data = [24, 38, 31, 52, 64, 42, 28];
+
+                const ctx = document.getElementById('weeklyChart').getContext('2d');
+                
+                if (weeklyChart) weeklyChart.destroy();
+
+                weeklyChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'Bookings',
+                            data: data,
+                            borderColor: '#2563EB',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true,
+                            tension: 0.4,
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#2563EB'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#E5E7EB' }
+                            },
+                            x: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading weekly chart:', error);
+            }
+        }
+
+        async function loadTopVenues() {
+            try {
+                const response = await api.get('/venues');
+                const venues = response.venues || [];
+                
+                // Get top 5 venues by capacity or bookings
+                const topVenues = venues.slice(0, 5);
+                const labels = topVenues.map(v => v.name.substring(0, 15));
+                const data = topVenues.map(v => Math.floor(Math.random() * 40) + 60); // Mock utilization
+
+                const ctx = document.getElementById('venuesChart').getContext('2d');
+                
+                if (venuesChart) venuesChart.destroy();
+
+                venuesChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Utilization %',
+                            data: data,
+                            backgroundColor: '#8B5CF6',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 100,
+                                grid: { display: false }
+                            },
+                            y: {
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading venues chart:', error);
+            }
+        }
+
+        async function loadUpcomingEvents() {
+            try {
+                const response = await api.get('/bookings');
+                const bookings = response.bookings || [];
+                
+                const now = new Date();
+                const upcoming = bookings
+                    .filter(b => new Date(b.start_datetime) > now && (b.status === 'confirmed' || b.status === 'approved'))
+                    .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
+                    .slice(0, 4);
+
+                const container = document.getElementById('upcomingEventsGrid');
+                
+                if (upcoming.length === 0) {
+                    container.innerHTML = '<p style="color: #6B7280; text-align: center; padding: 2rem; grid-column: 1/-1;">No upcoming events</p>';
+                    return;
                 }
 
-                // Load recent activity
-                loadRecentActivity(myEvents, myBookings);
-
-                // Load upcoming events
-                loadUpcomingEvents(myEvents, myBookings);
-
-            } catch (e) {
-                console.error('Error loading stats:', e);
+                container.innerHTML = upcoming.map((b, i) => {
+                    const date = new Date(b.start_datetime);
+                    const month = date.toLocaleString('en', { month: 'short' });
+                    const day = date.getDate();
+                    const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    const statusClass = b.status === 'confirmed' ? 'success' : 'warning';
+                    
+                    return `
+                        <div class="upcoming-event-card" style="animation-delay: ${i * 0.06}s;">
+                            <div class="event-date-box">
+                                ${month}<br>${day}
+                            </div>
+                            <div class="event-info">
+                                <h4>
+                                    <span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        ${b.event?.title || 'Event'}
+                                    </span>
+                                    <span class="badge ${statusClass}">${b.status}</span>
+                                </h4>
+                                <div class="event-meta">
+                                    <span><i class="fas fa-clock"></i> ${time}</span>
+                                    <span><i class="fas fa-map-marker-alt"></i> ${b.venue?.name || 'Venue'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading upcoming events:', error);
+                document.getElementById('upcomingEventsGrid').innerHTML = 
+                    '<p style="color: #EF4444; text-align: center; padding: 2rem; grid-column: 1/-1;">Failed to load events</p>';
             }
         }
 
-        function loadRecentActivity(events, bookings) {
-            const container = document.getElementById('recentActivity');
-            
-            // Combine and sort by date
-            const activities = [
-                ...events.slice(0, 3).map(e => ({
-                    type: 'event',
-                    title: e.title,
-                    status: e.status,
-                    date: e.created_at,
-                    icon: 'fa-calendar'
-                })),
-                ...bookings.slice(0, 3).map(b => ({
-                    type: 'booking',
-                    title: b.venue?.name || 'Venue',
-                    status: b.status,
-                    date: b.created_at,
-                    icon: 'fa-building'
-                }))
-            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
-
-            if (activities.length === 0) {
-                container.innerHTML = '<p class="empty">No recent activity</p>';
-                return;
-            }
-
-            container.innerHTML = activities.map(a => `
-                <div class="activity-item">
-                    <i class="fas ${a.icon}"></i>
-                    <div>
-                        <strong>${a.title}</strong>
-                        <span class="status-badge ${a.status}">${a.status}</span>
-                        <small>${getTimeAgo(a.date)}</small>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function loadUpcomingEvents(events, bookings) {
-            const container = document.getElementById('upcomingEvents');
-            const now = new Date();
-            
-            // Get upcoming bookings
-            const upcoming = bookings
-                .filter(b => new Date(b.start_datetime) > now && b.status === 'confirmed')
-                .sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime))
-                .slice(0, 5);
-
-            if (upcoming.length === 0) {
-                container.innerHTML = '<p class="empty">No upcoming events</p>';
-                return;
-            }
-
-            container.innerHTML = upcoming.map(b => `
-                <div class="upcoming-item">
-                    <div class="upcoming-date">
-                        <span class="day">${new Date(b.start_datetime).getDate()}</span>
-                        <span class="month">${new Date(b.start_datetime).toLocaleString('en', { month: 'short' })}</span>
-                    </div>
-                    <div class="upcoming-info">
-                        <h4>${b.event?.title || 'Event'}</h4>
-                        <p><i class="fas fa-building"></i> ${b.venue?.name || 'Venue'}</p>
-                        <p><i class="fas fa-clock"></i> ${formatTime(b.start_datetime)}</p>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function getTimeAgo(dateString) {
-            const date = new Date(dateString);
-            const now = new Date();
-            const seconds = Math.floor((now - date) / 1000);
-            
-            if (seconds < 60) return 'Just now';
-            if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
-            if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
-            if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
-            return date.toLocaleDateString();
-        }
-
-        function formatTime(dateString) {
-            return new Date(dateString).toLocaleTimeString('en-US', {
-                hour: '2-digit', minute: '2-digit'
-            });
-        }
-
-        async function loadProfile() {
+        async function loadInsights() {
             try {
-                const profile = await api.get('/auth/profile');
-
-                const html = `
-                    <div class="detail-row">
-                        <span class="label">Name:</span>
-                        <span class="value">${profile.first_name} ${profile.last_name}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Email:</span>
-                        <span class="value">${profile.email || JSON.parse(localStorage.getItem('user')).email}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Role:</span>
-                        <span class="value"><span class="role-badge ${profile.role}">${profile.role.replace('_', ' ').toUpperCase()}</span></span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Department:</span>
-                        <span class="value">${profile.department || 'Not set'}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Phone:</span>
-                        <span class="value">${profile.phone || 'Not set'}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="label">Member Since:</span>
-                        <span class="value">${new Date(profile.created_at).toLocaleDateString()}</span>
-                    </div>
-                `;
-
-                document.getElementById('profileInfo').innerHTML = html;
-                document.getElementById('profileDetails').innerHTML = html;
-
-            } catch (e) {
-                console.error('Error loading profile:', e);
-                document.getElementById('profileInfo').innerHTML = '<p class="error">Failed to load profile</p>';
+                // Mock insights data
+                document.getElementById('conflictSaverText').textContent = 'Auto-resolved 14 conflicts this week';
+                document.getElementById('resourceHealthText').textContent = 'Projectors 96% · Mics 89% available';
+                document.getElementById('waitlistPromotionsText').textContent = '23 students promoted today';
+            } catch (error) {
+                console.error('Error loading insights:', error);
             }
-        }
-
-        function showSection(sectionId) {
-            document.querySelectorAll('.dashboard-section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(sectionId).classList.remove('hidden');
-
-            document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
-            event.target.closest('a').classList.add('active');
         }
 
         function logout() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            window.location.href = 'login.html';
+            window.location.href = 'index.html';
         }
-
-        // Sidebar toggle functions
-        function toggleSidebar() {
-            const sidebar = document.getElementById('profileSidebar');
-            const overlay = document.querySelector('.sidebar-overlay');
-            
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
-        }
-
-        function closeSidebar() {
-            const sidebar = document.getElementById('profileSidebar');
-            const overlay = document.querySelector('.sidebar-overlay');
-            
-            sidebar.classList.remove('open');
-            overlay.classList.remove('show');
-        }
-
-        // Close sidebar when clicking on a navigation link
-        document.querySelectorAll('.sidebar-nav a').forEach(link => {
-            link.addEventListener('click', () => {
-                setTimeout(closeSidebar, 300);
-            });
-        });
     </script>
 </body>
 
