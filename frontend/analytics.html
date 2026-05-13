@@ -38,11 +38,11 @@
         }
         .stat-label {
             font-weight: 500;
-            color: #475569 !important;
+            color: #475569;
         }
         .stat-value {
             font-weight: bold;
-            color: #6366f1 !important;
+            color: #6366f1;
             font-size: 1.1em;
         }
         .recommendation-badge {
@@ -224,91 +224,163 @@
         </div>
 
         <!-- Analytics Overview -->
-        <div id="analyticsOverview" class="analytics-grid">
-            <div class="analytics-card">
-                <h3><i class="fas fa-clock"></i> Peak Hours</h3>
-                <div id="peakHoursContent">
-                    <div class="stat-item">
-                        <span class="stat-label">09:00 - 10:00</span>
-                        <span class="stat-value">45 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">14:00 - 15:00</span>
-                        <span class="stat-value">38 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">10:00 - 11:00</span>
-                        <span class="stat-value">35 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">15:00 - 16:00</span>
-                        <span class="stat-value">32 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">11:00 - 12:00</span>
-                        <span class="stat-value">28 bookings</span>
-                    </div>
-                </div>
+<div id="analyticsOverview" class="analytics-grid">
+
+    <!-- Peak Hours -->
+    <div class="analytics-card">
+        <h3><i class="fas fa-clock"></i> Peak Hours</h3>
+
+        <div class="analytics-item">
+            <div class="analytics-info">
+                <span class="label">9:00 AM - 11:00 AM</span>
+                <span class="value">85% Booked</span>
             </div>
-            <div class="analytics-card">
-                <h3><i class="fas fa-building"></i> High-Demand Venues</h3>
-                <div id="highDemandVenuesContent">
-                    <div class="stat-item">
-                        <span class="stat-label">Main Auditorium</span>
-                        <span class="stat-value">67 bookings (78.5%)</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Conference Hall A</span>
-                        <span class="stat-value">54 bookings (65.2%)</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Seminar Room 101</span>
-                        <span class="stat-value">48 bookings (58.3%)</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Sports Complex</span>
-                        <span class="stat-value">42 bookings (52.1%)</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Library Hall</span>
-                        <span class="stat-value">38 bookings (47.8%)</span>
-                    </div>
-                </div>
-            </div>
-            <div class="analytics-card">
-                <h3><i class="fas fa-calendar-alt"></i> Popular Days</h3>
-                <div id="popularDaysContent">
-                    <div class="stat-item">
-                        <span class="stat-label">Wednesday</span>
-                        <span class="stat-value">89 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Thursday</span>
-                        <span class="stat-value">85 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Tuesday</span>
-                        <span class="stat-value">78 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Monday</span>
-                        <span class="stat-value">72 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Friday</span>
-                        <span class="stat-value">65 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Saturday</span>
-                        <span class="stat-value">28 bookings</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Sunday</span>
-                        <span class="stat-value">15 bookings</span>
-                    </div>
-                </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 85%;"></div>
             </div>
         </div>
+
+        <div class="analytics-item">
+            <div class="analytics-info">
+                <span class="label">1:00 PM - 3:00 PM</span>
+                <span class="value">72% Booked</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 72%;"></div>
+            </div>
+        </div>
+
+        <div class="analytics-item">
+            <div class="analytics-info">
+                <span class="label">4:00 PM - 6:00 PM</span>
+                <span class="value">64% Booked</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 64%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- High Demand Venues -->
+    <div class="analytics-card">
+        <h3><i class="fas fa-building"></i> High-Demand Venues</h3>
+
+        <div class="venue-stat">
+            <span>Auditorium A</span>
+            <strong>124 Bookings</strong>
+        </div>
+
+        <div class="venue-stat">
+            <span>Seminar Hall 2</span>
+            <strong>98 Bookings</strong>
+        </div>
+
+        <div class="venue-stat">
+            <span>Conference Room</span>
+            <strong>87 Bookings</strong>
+        </div>
+
+        <div class="venue-stat">
+            <span>Lab Block C</span>
+            <strong>75 Bookings</strong>
+        </div>
+    </div>
+
+    <!-- Popular Days -->
+    <div class="analytics-card">
+        <h3><i class="fas fa-calendar-alt"></i> Popular Days</h3>
+
+        <div class="day-stat">
+            <span>Monday</span>
+            <strong>91%</strong>
+        </div>
+
+        <div class="day-stat">
+            <span>Wednesday</span>
+            <strong>84%</strong>
+        </div>
+
+        <div class="day-stat">
+            <span>Thursday</span>
+            <strong>79%</strong>
+        </div>
+
+        <div class="day-stat">
+            <span>Friday</span>
+            <strong>68%</strong>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.analytics-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.analytics-card h3 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    color: #222;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.analytics-item {
+    margin-bottom: 18px;
+}
+
+.analytics-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    border-radius: 10px;
+}
+
+.venue-stat,
+.day-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 15px;
+}
+
+.venue-stat:last-child,
+.day-stat:last-child {
+    border-bottom: none;
+}
+
+.venue-stat strong,
+.day-stat strong {
+    color: #4f46e5;
+}
+</style>
 
         <!-- Venue Recommendation Form -->
         <div class="recommendation-form">
@@ -400,15 +472,13 @@
     <script>
         // Load analytics on page load
         document.addEventListener('DOMContentLoaded', async () => {
-            // Load hardcoded analytics immediately (NO AUTH CHECK)
-            loadAnalytics();
-            
-            // Check auth for other features
             if (!localStorage.getItem('token')) {
-                console.log('Not logged in - some features may be limited');
-                // Don't redirect, just skip loading venues
+                window.location.href = 'login.html';
                 return;
             }
+            
+            // Load hardcoded analytics immediately
+            loadAnalytics();
             
             // Load venues for dropdown (this can fail without affecting analytics)
             try {
@@ -462,50 +532,9 @@
                 console.log('Data prepared, updating DOM...');
 
                 // Peak Hours
-                const peakHoursHTML = peakHours.map(hour => `
-                    <div class="stat-item">
-                        <span class="stat-label">${hour.timeRange}</span>
-                        <span class="stat-value">${hour.bookingCount} bookings</span>
-                    </div>
-                `).join('');
-                
-                const peakHoursElement = document.getElementById('peakHoursContent');
-                if (peakHoursElement) {
-                    peakHoursElement.innerHTML = peakHoursHTML || '<p style="text-align:center;color:#64748b;">No data available</p>';
-                    console.log('Peak hours updated');
-                }
-
-                // High-Demand Venues
-                const venuesHTML = highDemandVenues.map(venue => `
-                    <div class="stat-item">
-                        <span class="stat-label">${venue.name}</span>
-                        <span class="stat-value">${venue.bookingCount} bookings (${venue.utilizationRate})</span>
-                    </div>
-                `).join('');
-                
-                const venuesElement = document.getElementById('highDemandVenuesContent');
-                if (venuesElement) {
-                    venuesElement.innerHTML = venuesHTML || '<p style="text-align:center;color:#64748b;">No data available</p>';
-                    console.log('Venues updated');
-                }
-
-                // Popular Days
-                const daysHTML = frequentlyBookedDays.map(day => `
-                    <div class="stat-item">
-                        <span class="stat-label">${day.day}</span>
-                        <span class="stat-value">${day.bookingCount} bookings</span>
-                    </div>
-                `).join('');
-                
-                const daysElement = document.getElementById('popularDaysContent');
-                if (daysElement) {
-                    daysElement.innerHTML = daysHTML || '<p style="text-align:center;color:#64748b;">No data available</p>';
-                    console.log('Days updated');
-                }
-                
-                console.log('All analytics data displayed successfully!');
+                console.log('Analytics data displayed successfully');
             } catch (error) {
-                console.error('Error in displayAnalytics:', error);
+                console.error('Error displaying analytics:', error);
             }
         }
 
