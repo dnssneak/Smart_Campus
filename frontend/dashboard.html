@@ -16,12 +16,13 @@
             <span>Smart Campus</span>
         </div>
         <div class="nav-links">
-            <a href="dashboard.html"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+            <a href="dashboard.html" class="active"><i class="fas fa-home"></i> <span>Dashboard</span></a>
             <a href="events.html"><i class="fas fa-calendar"></i> <span>Events</span></a>
             <a href="venues.html"><i class="fas fa-building"></i> <span>Venues</span></a>
             <a href="bookings.html"><i class="fas fa-calendar-check"></i> <span>Bookings</span></a>
             <a href="waitlist.html"><i class="fas fa-clock"></i> <span>Waitlist</span></a>
             <a href="resources.html"><i class="fas fa-boxes"></i> <span>Resources</span></a>
+            <a href="analytics.html"><i class="fas fa-chart-line"></i> <span>Analytics</span></a>
             <a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
             
             <!-- Bell Icon -->
@@ -48,7 +49,15 @@
     </nav>
 
     <main class="dashboard">
-        <aside class="sidebar">
+        <!-- Sidebar Toggle Button -->
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-user"></i>
+        </button>
+        
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" onclick="closeSidebar()"></div>
+        
+        <aside class="sidebar" id="profileSidebar">
             <div class="user-info">
                 <div class="avatar">
                     <i class="fas fa-user-circle"></i>
@@ -378,6 +387,30 @@
             localStorage.removeItem('user');
             window.location.href = 'login.html';
         }
+
+        // Sidebar toggle functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('profileSidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('profileSidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        }
+
+        // Close sidebar when clicking on a navigation link
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                setTimeout(closeSidebar, 300);
+            });
+        });
     </script>
 </body>
 

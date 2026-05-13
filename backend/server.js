@@ -55,6 +55,7 @@ app.use('/api/waitlists', require('./routes/waitlists'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/resources', require('./routes/resources'));
+app.use('/api/demand-prediction', require('./routes/demandPrediction'));
 
 // Error handler
 app.use((err, req, res, next) => {
