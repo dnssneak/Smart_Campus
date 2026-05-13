@@ -370,11 +370,13 @@ body {
 
 .stat-card h3 {
     font-size: 2rem;
-    color: #1e293b;
+    color: #0f172a;
+    font-weight: 700;
 }
 
 .stat-card p {
-    color: #64748b;
+    color: #475569;
+    font-weight: 600;
 }
 
 /* Floating animation for icons */
@@ -433,7 +435,8 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #1e293b;
+    color: #0f172a;
+    font-weight: 700;
 }
 
 /* ===== PROFILE DETAILS ===== */
@@ -451,13 +454,13 @@ body {
 }
 
 .detail-row .label {
-    color: #64748b;
-    font-weight: 500;
+    color: #475569;
+    font-weight: 600;
 }
 
 .detail-row .value {
-    color: #1e293b;
-    font-weight: 600;
+    color: #0f172a;
+    font-weight: 700;
 }
 
 /* ===== QUICK ACTIONS ===== */
@@ -476,13 +479,15 @@ body {
     border-radius: 8px;
     text-decoration: none;
     color: #6366f1;
-    font-weight: 600;
+    font-weight: 700;
     transition: all 0.3s;
+    border: 2px solid transparent;
 }
 
 .action-btn:hover {
     background: #6366f1;
     color: white;
+    border-color: #6366f1;
 }
 
 /* ===== UTILITIES ===== */
@@ -491,10 +496,11 @@ body {
 }
 
 .empty {
-    color: #64748b;
+    color: #475569;
     font-style: italic;
     text-align: center;
     padding: 2rem;
+    font-weight: 500;
 }
 
 .card {
@@ -547,7 +553,13 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    color: #1e293b;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+.page-header p {
+    color: #475569;
+    font-weight: 500;
 }
 
 .filters {
@@ -572,9 +584,10 @@ body {
 
 .loading-text {
     text-align: center;
-    color: #64748b;
+    color: #475569;
     padding: 3rem;
     grid-column: 1 / -1;
+    font-weight: 600;
 }
 
 /* ===== VENUE CARD ===== */
@@ -608,24 +621,27 @@ body {
 .venue-info h3 {
     font-size: 1.25rem;
     margin-bottom: 0.5rem;
-    color: #1e293b;
+    color: #0f172a;
+    font-weight: 700;
 }
 
 .location {
-    color: #64748b;
+    color: #475569;
     font-size: 0.9rem;
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    font-weight: 500;
 }
 
 .venue-meta {
     display: flex;
     gap: 1rem;
     margin-bottom: 1rem;
-    color: #64748b;
+    color: #475569;
     font-size: 0.85rem;
+    font-weight: 500;
 }
 
 .facilities {
@@ -637,11 +653,11 @@ body {
 
 .tag {
     background: #e0e7ff;
-    color: #4338ca;
+    color: #3730a3;
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .venue-actions {
@@ -921,23 +937,26 @@ body {
 
 .event-card h3 {
     font-size: 1.25rem;
-    color: #1e293b;
+    color: #0f172a;
     margin-bottom: 0.5rem;
+    font-weight: 700;
 }
 
 .event-desc {
-    color: #64748b;
+    color: #475569;
     margin-bottom: 1rem;
     line-height: 1.5;
+    font-weight: 500;
 }
 
 .event-meta {
     display: flex;
     gap: 1.5rem;
-    color: #64748b;
+    color: #475569;
     font-size: 0.9rem;
     margin-bottom: 1rem;
     flex-wrap: wrap;
+    font-weight: 500;
 }
 
 .event-meta span {
@@ -1105,18 +1124,20 @@ body {
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
-    color: #64748b;
+    color: #475569;
 }
 
 .empty-state i {
     font-size: 4rem;
     margin-bottom: 1rem;
-    color: #cbd5e1;
+    color: #94a3b8;
 }
 
 .empty-state p {
     font-size: 1.25rem;
     margin-bottom: 1.5rem;
+    font-weight: 600;
+    color: #475569;
 }
 
 .booking-card {
@@ -1139,17 +1160,19 @@ body {
 }
 
 .booking-header h3 {
-    color: #1e293b;
+    color: #0f172a;
     font-size: 1.25rem;
+    font-weight: 700;
 }
 
 .venue-name {
-    color: #64748b;
+    color: #475569;
     font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 0.4rem;
     margin-top: 0.25rem;
+    font-weight: 500;
 }
 
 .booking-details {
@@ -1163,8 +1186,9 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #64748b;
+    color: #475569;
     font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .booking-actions {
