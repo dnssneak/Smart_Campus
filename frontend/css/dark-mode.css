@@ -98,29 +98,54 @@ body {
 .venue-card,
 .event-card,
 .booking-card,
-.modern-event-card {
+.modern-event-card,
+.chart-card,
+.insight-card,
+.upcoming-event-card {
     background: var(--card-bg);
     box-shadow: var(--shadow-sm);
+    color: var(--text-primary);
 }
 
 .stat-card:hover,
 .stat-card-modern:hover,
 .widget:hover,
 .venue-card:hover,
-.modern-event-card:hover {
+.modern-event-card:hover,
+.chart-card:hover,
+.upcoming-event-card:hover {
     box-shadow: var(--shadow-lg);
 }
 
 .stat-card h3,
 .stat-card-info h3,
 .widget h3,
-.event-card-title {
+.event-card-title,
+.chart-card h3,
+.insight-card h4,
+.upcoming-event-card h4 {
     color: var(--text-primary);
 }
 
 .stat-card p,
-.stat-card-info p {
+.stat-card-info p,
+.chart-card p,
+.insight-card p {
     color: var(--text-secondary);
+}
+
+/* Fix specific backgrounds inside cards that might be white */
+[data-theme="dark"] .upcoming-event-card {
+    background: rgba(30, 41, 59, 0.4);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .upcoming-event-card:hover {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .event-meta {
+    color: var(--text-muted);
 }
 
 /* Inputs */

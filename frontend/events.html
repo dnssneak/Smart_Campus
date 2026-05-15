@@ -122,19 +122,21 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="eventDescription" rows="3" placeholder="Describe your event..."></textarea>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-primary);">
+                            <i class="fas fa-align-left" style="color: #3b82f6;"></i> Description
+                        </label>
+                        <textarea id="eventDescription" class="input-modern" rows="4" placeholder="Provide a detailed description of your event (e.g., agenda, goals, target audience)..." style="resize: vertical; width: 100%; border-radius: 12px; transition: all 0.3s ease; font-family: inherit; font-size: 14px;"></textarea>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Expected Attendance</label>
-                            <input type="number" id="eventAttendance" min="1" placeholder="Number of people">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);"><i class="fas fa-users" style="color: #8b5cf6;"></i> Expected Attendance</label>
+                            <input type="number" id="eventAttendance" class="input-modern" min="1" placeholder="Number of people">
                         </div>
                         <div class="form-group">
-                            <label>Priority</label>
-                            <select id="eventPriority">
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);"><i class="fas fa-flag" style="color: #ec4899;"></i> Priority</label>
+                            <select id="eventPriority" class="input-modern">
                                 <option value="low">Low</option>
                                 <option value="medium" selected>Medium</option>
                                 <option value="high">High</option>
@@ -145,35 +147,59 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Start Date & Time *</label>
-                            <input type="datetime-local" id="eventStart" required>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);"><i class="fas fa-calendar-plus" style="color: #10b981;"></i> Start Date & Time *</label>
+                            <input type="datetime-local" id="eventStart" class="input-modern" required>
                         </div>
                         <div class="form-group">
-                            <label>End Date & Time *</label>
-                            <input type="datetime-local" id="eventEnd" required>
+                            <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);"><i class="fas fa-calendar-check" style="color: #f59e0b;"></i> End Date & Time *</label>
+                            <input type="datetime-local" id="eventEnd" class="input-modern" required>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="eventRecurring" onchange="toggleRecurring()">
-                            This is a recurring event
-                        </label>
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <div class="recurring-event-card" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); padding: 1.25rem; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; transition: all 0.3s ease;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                    <i class="fas fa-redo-alt"></i>
+                                </div>
+                                <div>
+                                    <h4 style="margin: 0; font-weight: 600; color: var(--text-primary); font-size: 1rem;">Recurring Event</h4>
+                                    <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">Set this event to repeat automatically on a schedule</p>
+                                </div>
+                            </div>
+                            <label style="position: relative; display: inline-block; width: 50px; height: 28px; margin: 0;">
+                                <input type="checkbox" id="eventRecurring" onchange="toggleRecurring()" style="opacity: 0; width: 0; height: 0; position: absolute;">
+                                <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 34px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                                    <span class="slider-dot" style="position: absolute; content: ''; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"></span>
+                                </span>
+                            </label>
+                            <style>
+                                #eventRecurring:checked + span { background-color: #3b82f6; }
+                                #eventRecurring:checked + span .slider-dot { transform: translateX(22px); }
+                                [data-theme="dark"] .slider-dot { background-color: #e2e8f0 !important; }
+                            </style>
+                        </div>
                     </div>
 
-                    <div id="recurringOptions" class="hidden">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Repeat</label>
-                                <select id="recurrenceType">
+                    <div id="recurringOptions" class="hidden" style="margin-top: 1rem; padding: 1.5rem; background: var(--bg-primary); border: 2px dashed var(--border-color); border-radius: 12px; position: relative; animation: fadeIn 0.3s ease;">
+                        <style>
+                            @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+                        </style>
+                        <div style="position: absolute; top: -12px; left: 24px; background: var(--bg-primary); padding: 0 12px; color: #3b82f6; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-sync fa-spin" style="animation-duration: 3s; animation-iteration-count: infinite; animation-timing-function: linear;"></i> Recurrence Settings
+                        </div>
+                        <div class="form-row" style="margin-bottom: 0;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Repeat Pattern</label>
+                                <select id="recurrenceType" class="input-modern">
                                     <option value="weekly">Weekly</option>
                                     <option value="biweekly">Bi-weekly</option>
                                     <option value="monthly">Monthly</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label>Until Date</label>
-                                <input type="date" id="recurrenceEnd">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Repeat Until Date</label>
+                                <input type="date" id="recurrenceEnd" class="input-modern">
                             </div>
                         </div>
                     </div>
