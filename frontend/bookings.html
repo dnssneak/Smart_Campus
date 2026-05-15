@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
+
 <body>
     <nav class="modern-navbar">
         <a href="index.html" class="smart-campus-logo">
@@ -34,16 +35,17 @@
             <a href="resources.html"><i class="fas fa-boxes"></i> <span>Resources</span></a>
             <a href="analytics.html"><i class="fas fa-chart-line"></i> <span>Analytics</span></a>
             <a href="reports.html"><i class="fas fa-chart-bar"></i> <span>Reports</span></a>
-            
+
             <!-- Bell Icon -->
             <div class="nav-bell" onclick="toggleBellDropdown(event)">
                 <i class="fas fa-bell"></i>
                 <span class="bell-badge" id="bellBadge">0</span>
-                
+
                 <div class="bell-dropdown" id="bellDropdown" onclick="event.stopPropagation()">
                     <div class="bell-dropdown-header">
                         <h4>Notifications</h4>
-                        <button class="btn-modern btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all read</button>
+                        <button class="btn-modern btn-small btn-primary" onclick="markAllAsReadFromBell()">Mark all
+                            read</button>
                     </div>
                     <div class="bell-dropdown-list" id="bellDropdownList">
                         <p style="padding:1rem;text-align:center;color:#94a3b8">Loading...</p>
@@ -53,17 +55,29 @@
                     </div>
                 </div>
             </div>
-            
+
             <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
         </div>
     </nav>
-    
+
     <main class="container-modern" style="padding: var(--space-xl);">
         <div style="margin-bottom: var(--space-xl);">
-            <h1 style="font-size: var(--font-size-h1); font-weight: 700; color: #0f172a; margin-bottom: var(--space-sm);">
+            <h1
+                style="font-size: var(--font-size-h1); font-weight: 700; color: #0f172a; margin-bottom: var(--space-sm);">
                 <i class="fas fa-calendar-check"></i> My Bookings
             </h1>
             <p style="color: var(--muted); font-size: var(--font-size-body);">View and manage your venue bookings</p>
+            <div style="margin-top: var(--space-md);">
+                <input
+                    type="text"
+                    id="bookingSearch"
+                    placeholder="Search bookings..."
+                    oninput="filterBookings(this.value)"
+                    style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #e2e8f0; border-radius: 8px; font-size: var(--font-size-body); background: #f8fafc; color: #0f172a; outline: none; box-sizing: border-box; transition: border-color 0.2s, background 0.2s;"
+                    onfocus="this.style.borderColor='#cbd5e1'; this.style.background='white';"
+                    onblur="this.style.borderColor='#e2e8f0'; this.style.background='#f8fafc';"
+                />
+            </div>
         </div>
 
         <div id="bookingsList" class="events-grid">
@@ -77,19 +91,20 @@
     <script src="js/bell-notifications.js"></script>
     <script>
         let currentUser = null;
+        let allBookings = [];
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (!localStorage.getItem('token')) {
                 window.location.href = 'login.html';
                 return;
             }
-            
+
             // Get current user
             const userStr = localStorage.getItem('user');
             if (userStr) {
                 currentUser = JSON.parse(userStr);
             }
-            
+
             await loadBookings();
         });
 
@@ -98,94 +113,8 @@
 
             try {
                 const response = await api.get('/bookings');
-                const bookings = response.bookings || [];
-
-                if (bookings.length === 0) {
-                    list.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: white; border-radius: var(--radius-card); box-shadow: var(--shadow-card);">
-                            <i class="fas fa-calendar-times" style="font-size: 4rem; color: var(--muted); opacity: 0.5; margin-bottom: 1rem;"></i>
-                            <p style="color: var(--muted); font-size: 1.1rem; margin-bottom: 1.5rem;">No bookings yet</p>
-                            <a href="venues.html" class="btn-modern btn-primary">
-                                <i class="fas fa-plus"></i> Book a Venue
-                            </a>
-                        </div>
-                    `;
-                    return;
-                }
-
-                list.innerHTML = bookings.map(b => `
-                    <div class="modern-event-card">
-                        <div class="event-card-thumbnail" style="background: var(--gradient-accent);">
-                            <div class="event-card-tags">
-                                <span class="status-pill ${b.status}">${b.status}</span>
-                                ${b.event?.category ? `<span class="status-pill" style="background: var(--info);">${b.event.category}</span>` : ''}
-                            </div>
-                        </div>
-                        <div class="event-card-content">
-                            <h3 class="event-card-title">${b.event?.title || 'Event Not Found'}</h3>
-                            ${b.event?.description ? `<p style="color: var(--muted); font-size: 0.9rem; margin-bottom: var(--space-sm);">${b.event.description.substring(0, 100)}${b.event.description.length > 100 ? '...' : ''}</p>` : ''}
-                            <div class="event-card-meta">
-                                <div class="event-card-meta-row">
-                                    <i class="fas fa-building"></i>
-                                    <span><strong>${b.venue?.name || 'Unknown Venue'}</strong></span>
-                                </div>
-                                <div class="event-card-meta-row">
-                                    <i class="fas fa-calendar"></i>
-                                    <span>${formatDate(b.start_datetime)}</span>
-                                </div>
-                                <div class="event-card-meta-row">
-                                    <i class="fas fa-clock"></i>
-                                    <span>${formatTime(b.start_datetime)} - ${formatTime(b.end_datetime)}</span>
-                                </div>
-                                <div class="event-card-meta-row">
-                                    <i class="fas fa-users"></i>
-                                    <span>${b.venue?.capacity || 'N/A'} capacity</span>
-                                </div>
-                                <div class="event-card-meta-row">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>${b.venue?.location || 'Campus'}</span>
-                                </div>
-                                ${b.status === 'confirmed' && b.approved_by_profile ? `
-                                    <div class="event-card-meta-row" style="margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--border);">
-                                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
-                                        <span style="color: var(--success);">
-                                            <strong>Approved by:</strong> ${b.approved_by_profile.first_name} ${b.approved_by_profile.last_name} (${b.approved_by_profile.role})
-                                        </span>
-                                    </div>
-                                    ${b.approved_at ? `
-                                        <div class="event-card-meta-row">
-                                            <i class="fas fa-calendar-check"></i>
-                                            <span style="font-size: 0.85rem; color: var(--muted);">
-                                                Approved on ${formatDate(b.approved_at)}
-                                            </span>
-                                        </div>
-                                    ` : ''}
-                                ` : ''}
-                                ${b.status === 'pending' ? `
-                                    <div class="event-card-meta-row" style="margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--border);">
-                                        <i class="fas fa-hourglass-half" style="color: var(--warning);"></i>
-                                        <span style="color: var(--warning);">
-                                            <strong>Awaiting admin approval</strong>
-                                        </span>
-                                    </div>
-                                ` : ''}
-                            </div>
-                            ${b.status === 'pending' ? `
-                                <div class="event-card-footer" style="border-top: none; padding-top: var(--space-md); display: flex; gap: var(--space-sm); flex-wrap: wrap;">
-                                    ${currentUser?.role === 'admin' ? `
-                                        <button class="btn-modern btn-small btn-primary" style="flex: 1;" onclick="approveBooking(${b.id})">
-                                            <i class="fas fa-check"></i> Approve
-                                        </button>
-                                    ` : ''}
-                                    <button class="btn-modern btn-small" style="background: var(--error); color: white; flex: 1;" onclick="cancelBooking(${b.id})">
-                                        <i class="fas fa-times"></i> ${currentUser?.role === 'admin' ? 'Reject' : 'Cancel'}
-                                    </button>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `).join('');
-
+                allBookings = response.bookings || [];
+                renderBookings(allBookings);
             } catch (error) {
                 list.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 2rem; background: white; border-radius: var(--radius-card); box-shadow: var(--shadow-card);">
@@ -193,6 +122,112 @@
                     </div>
                 `;
             }
+        }
+
+        function filterBookings(query) {
+            const q = query.toLowerCase().trim();
+            if (!q) {
+                renderBookings(allBookings);
+                return;
+            }
+            const filtered = allBookings.filter(b =>
+                (b.event?.title || '').toLowerCase().includes(q) ||
+                (b.venue?.name || '').toLowerCase().includes(q) ||
+                (b.venue?.location || '').toLowerCase().includes(q) ||
+                (b.status || '').toLowerCase().includes(q) ||
+                (b.event?.category || '').toLowerCase().includes(q)
+            );
+            renderBookings(filtered);
+        }
+
+        function renderBookings(bookings) {
+            const list = document.getElementById('bookingsList');
+
+            if (bookings.length === 0) {
+                list.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 4rem; background: white; border-radius: var(--radius-card); box-shadow: var(--shadow-card);">
+                        <i class="fas fa-calendar-times" style="font-size: 4rem; color: var(--muted); opacity: 0.5; margin-bottom: 1rem;"></i>
+                        <p style="color: var(--muted); font-size: 1.1rem; margin-bottom: 1.5rem;">No bookings yet</p>
+                        <a href="venues.html" class="btn-modern btn-primary">
+                            <i class="fas fa-plus"></i> Book a Venue
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = bookings.map(b => `
+                <div class="modern-event-card">
+                    <div class="event-card-thumbnail" style="background: var(--gradient-accent);">
+                        <div class="event-card-tags">
+                            <span class="status-pill ${b.status}">${b.status}</span>
+                            ${b.event?.category ? `<span class="status-pill" style="background: var(--info);">${b.event.category}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="event-card-content">
+                        <h3 class="event-card-title">${b.event?.title || 'Event Not Found'}</h3>
+                        ${b.event?.description ? `<p style="color: var(--muted); font-size: 0.9rem; margin-bottom: var(--space-sm);">${b.event.description.substring(0, 100)}${b.event.description.length > 100 ? '...' : ''}</p>` : ''}
+                        <div class="event-card-meta">
+                            <div class="event-card-meta-row">
+                                <i class="fas fa-building"></i>
+                                <span><strong>${b.venue?.name || 'Unknown Venue'}</strong></span>
+                            </div>
+                            <div class="event-card-meta-row">
+                                <i class="fas fa-calendar"></i>
+                                <span>${formatDate(b.start_datetime)}</span>
+                            </div>
+                            <div class="event-card-meta-row">
+                                <i class="fas fa-clock"></i>
+                                <span>${formatTime(b.start_datetime)} - ${formatTime(b.end_datetime)}</span>
+                            </div>
+                            <div class="event-card-meta-row">
+                                <i class="fas fa-users"></i>
+                                <span>${b.venue?.capacity || 'N/A'} capacity</span>
+                            </div>
+                            <div class="event-card-meta-row">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${b.venue?.location || 'Campus'}</span>
+                            </div>
+                            ${b.status === 'confirmed' && b.approved_by_profile ? `
+                                <div class="event-card-meta-row" style="margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--border);">
+                                    <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                                    <span style="color: var(--success);">
+                                        <strong>Approved by:</strong> ${b.approved_by_profile.first_name} ${b.approved_by_profile.last_name} (${b.approved_by_profile.role})
+                                    </span>
+                                </div>
+                                ${b.approved_at ? `
+                                    <div class="event-card-meta-row">
+                                        <i class="fas fa-calendar-check"></i>
+                                        <span style="font-size: 0.85rem; color: var(--muted);">
+                                            Approved on ${formatDate(b.approved_at)}
+                                        </span>
+                                    </div>
+                                ` : ''}
+                            ` : ''}
+                            ${b.status === 'pending' ? `
+                                <div class="event-card-meta-row" style="margin-top: var(--space-sm); padding-top: var(--space-sm); border-top: 1px solid var(--border);">
+                                    <i class="fas fa-hourglass-half" style="color: var(--warning);"></i>
+                                    <span style="color: var(--warning);">
+                                        <strong>Awaiting admin approval</strong>
+                                    </span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        ${b.status === 'pending' ? `
+                            <div class="event-card-footer" style="border-top: none; padding-top: var(--space-md); display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                                ${currentUser?.role === 'admin' ? `
+                                    <button class="btn-modern btn-small btn-primary" style="flex: 1;" onclick="approveBooking(${b.id})">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                ` : ''}
+                                <button class="btn-modern btn-small" style="background: var(--error); color: white; flex: 1;" onclick="cancelBooking(${b.id})">
+                                    <i class="fas fa-times"></i> ${currentUser?.role === 'admin' ? 'Reject' : 'Cancel'}
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
         }
 
         async function approveBooking(id) {
@@ -238,15 +273,15 @@
             const container = document.getElementById('toastContainer') || createToastContainer();
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            
+
             const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
             toast.innerHTML = `
                 <i class="fas fa-${icon}" style="font-size: 20px; color: var(--${type});"></i>
                 <span>${message}</span>
             `;
-            
+
             container.appendChild(toast);
-            
+
             setTimeout(() => {
                 toast.style.animation = 'toastSlideIn 0.3s ease-out reverse';
                 setTimeout(() => toast.remove(), 300);
@@ -267,7 +302,7 @@
             window.location.href = 'index.html';
         }
     </script>
-    
+
     <!-- Theme Manager -->
     <script src="js/theme.js"></script>
 </body>
