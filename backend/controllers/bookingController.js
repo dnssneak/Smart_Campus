@@ -216,8 +216,35 @@ exports.getBookings = async (req, res) => {
             .from('bookings')
             .select(`
                 *,
-                events!bookings_event_id_fkey (title, category, status, priority),
-                venues!bookings_venue_id_fkey (name, capacity, location)
+                event:events!bookings_event_id_fkey (
+                    id,
+                    title,
+                    category,
+                    status,
+                    priority,
+                    description,
+                    expected_attendance
+                ),
+                venue:venues!bookings_venue_id_fkey (
+                    id,
+                    name,
+                    capacity,
+                    location,
+                    facilities,
+                    equipment
+                ),
+                booked_by_profile:profiles!bookings_booked_by_fkey (
+                    id,
+                    first_name,
+                    last_name,
+                    role
+                ),
+                approved_by_profile:profiles!bookings_approved_by_fkey (
+                    id,
+                    first_name,
+                    last_name,
+                    role
+                )
             `);
 
         // Non-admins see only their bookings
@@ -251,8 +278,21 @@ exports.getBookingById = async (req, res) => {
             .from('bookings')
             .select(`
                 *,
-                events!bookings_event_id_fkey (*),
-                venues!bookings_venue_id_fkey (*)
+                event:events!bookings_event_id_fkey (*),
+                venue:venues!bookings_venue_id_fkey (*),
+                booked_by_profile:profiles!bookings_booked_by_fkey (
+                    id,
+                    first_name,
+                    last_name,
+                    role,
+                    department
+                ),
+                approved_by_profile:profiles!bookings_approved_by_fkey (
+                    id,
+                    first_name,
+                    last_name,
+                    role
+                )
             `)
             .eq('id', id)
             .single();

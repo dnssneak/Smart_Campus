@@ -4,6 +4,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+// Initialize NotificationEngine (sets up event listeners)
+const { notificationEngine } = require('./utils/NotificationEngine');
+
 const app = express();
 
 // Middleware
@@ -67,6 +70,7 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`🔔 NotificationEngine initialized and listening for events`);
 });
 // 404 handler — return JSON instead of HTML
 app.use((req, res) => {
