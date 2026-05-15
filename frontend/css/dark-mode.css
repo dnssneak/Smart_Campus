@@ -9,9 +9,9 @@
     --text-secondary: #475569;
     --text-muted: #64748b;
     --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     --navbar-bg: rgba(255, 255, 255, 0.95);
     --sidebar-bg: #ffffff;
     --card-bg: #ffffff;
@@ -29,9 +29,9 @@
     --text-secondary: #cbd5e1;
     --text-muted: #94a3b8;
     --border-color: #334155;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-    --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.3);
-    --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.4);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
     --navbar-bg: rgba(30, 41, 59, 0.95);
     --sidebar-bg: #1e293b;
     --card-bg: #1e293b;
@@ -208,7 +208,12 @@ td {
 
 /* Page headers */
 .page-header h1,
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
     color: var(--text-primary) !important;
 }
 
@@ -345,7 +350,7 @@ h1, h2, h3, h4, h5, h6 {
     background: white;
     border-radius: 50%;
     transition: transform 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .theme-switch.active .theme-switch-slider {
@@ -378,6 +383,59 @@ h1, h2, h3, h4, h5, h6 {
 
 .theme-switch.active .fa-moon {
     opacity: 1;
+}
+
+/* Navigation Bell (Global) */
+.nav-bell>i {
+    color: #0f172a;
+}
+
+[data-theme="dark"] .nav-bell>i {
+    color: var(--text-primary);
+}
+
+/* Profile Drawer (Global Dark Mode) */
+[data-theme="dark"] .profile-drawer {
+    background: var(--bg-secondary);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .profile-drawer-header {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .profile-avatar-section h2,
+[data-theme="dark"] .profile-avatar-section p {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .profile-section {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .profile-section h4 {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .profile-detail-item {
+    border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .profile-label {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] .profile-value,
+[data-theme="dark"] .theme-option-info {
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .profile-action-btn,
+[data-theme="dark"] .theme-option {
+    background: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-primary);
 }
 
 /* Bell dropdown in dark mode */
