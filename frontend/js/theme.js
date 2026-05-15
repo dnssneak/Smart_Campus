@@ -110,9 +110,25 @@ class ThemeManager {
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.themeManager = new ThemeManager();
+        setupGlobalLogoRedirect();
     });
 } else {
     window.themeManager = new ThemeManager();
+    setupGlobalLogoRedirect();
+}
+
+function setupGlobalLogoRedirect() {
+    const logos = document.querySelectorAll('.smart-campus-logo');
+    logos.forEach(logo => {
+        logo.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (localStorage.getItem('token')) {
+                window.location.href = 'dashboard.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    });
 }
 
 // Export for manual use

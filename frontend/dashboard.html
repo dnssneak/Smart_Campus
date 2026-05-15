@@ -771,7 +771,7 @@
                         <h3><i class="fas fa-chart-area" style="color: #2563EB;"></i> Bookings this week</h3>
                         <p style="font-size: 12px; color: #6B7280;">Daily volume across all venues</p>
                     </div>
-                    <span class="badge info">Last 7 days</span>
+                    <span class="badge info">Next 7 days</span>
                 </div>
                 <div style="height: 250px;">
                     <canvas id="weeklyChart"></canvas>
@@ -1016,15 +1016,15 @@
                 const response = await api.get('/bookings');
                 const bookings = response.bookings || [];
 
-                // Generate data for last 7 days
+                // Generate data for next 7 days
                 const days = [];
                 const data = [];
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
-                for (let i = 6; i >= 0; i--) {
+                for (let i = 0; i < 7; i++) {
                     const d = new Date(today);
-                    d.setDate(d.getDate() - i);
+                    d.setDate(d.getDate() + i);
                     days.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
 
                     const nextDay = new Date(d);
@@ -1089,13 +1089,28 @@
 
         async function loadTopVenues() {
             try {
-                const response = await api.get('/venues');
-                const venues = response.venues || [];
+                const [venuesRes, bookingsRes] = await Promise.all([
+                    api.get('/venues'),
+                    api.get('/bookings')
+                ]);
                 
-                // Get top 5 venues by capacity or bookings
-                const topVenues = venues.slice(0, 5);
-                const labels = topVenues.map(v => v.name.substring(0, 15));
-                const data = topVenues.map(v => Math.floor(Math.random() * 40) + 60); // Mock utilization
+                const venues = venuesRes.venues || [];
+                const bookings = bookingsRes.bookings || [];
+                
+                // Calculate bookings per venue
+                const venueCounts = {};
+                venues.forEach(v => { venueCounts[v.id] = { name: v.name, count: 0 }; });
+                
+                bookings.forEach(b => {
+                    if (b.venue_id && venueCounts[b.venue_id] && b.status !== 'cancelled' && b.status !== 'rejected') {
+                        venueCounts[b.venue_id].count++;
+                    }
+                });
+                
+                const sortedVenues = Object.values(venueCounts).sort((a, b) => b.count - a.count).slice(0, 5);
+                
+                const labels = sortedVenues.map(v => v.name.substring(0, 15));
+                const data = sortedVenues.map(v => v.count);
 
                 const ctx = document.getElementById('venuesChart').getContext('2d');
 
