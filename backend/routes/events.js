@@ -6,7 +6,8 @@ const {
     getEventById,
     updateEvent,
     deleteEvent,
-    updateStatus
+    updateStatus,
+    approveEvent
 } = require('../controllers/eventController');
 const auth = require('../middleware/auth');
 const roleCheck = require('../middleware/roleCheck');
@@ -20,5 +21,6 @@ router.delete('/:id', auth, deleteEvent);
 
 // Admin only
 router.put('/:id/status', auth, roleCheck(['admin']), updateStatus);
+router.put('/:id/approve', auth, roleCheck(['admin']), approveEvent);
 
 module.exports = router;

@@ -278,6 +278,7 @@
             list.innerHTML = events.map(e => {
                 const isOwner = e.created_by === currentUser?.id;
                 const canEdit = isOwner && e.status === 'pending';
+                const isAdmin = currentUser?.role === 'admin';
                 const bgGradient = categoryColors[e.category] || categoryColors.other;
 
                 return `
@@ -306,18 +307,32 @@
                                 <i class="fas fa-users"></i>
                                 <span>${e.expected_attendance || 'N/A'} expected</span>
                             </div>
+                            ${e.creator ? `
+                                <div class="event-card-meta-row">
+                                    <i class="fas fa-user"></i>
+                                    <span>${e.creator.first_name} ${e.creator.last_name}</span>
+                                </div>
+                            ` : ''}
                         </div>
                         <div class="event-card-footer">
                             <div class="event-card-avatars">
                                 <div class="event-avatar">${(e.creator?.first_name?.[0] || 'U') + (e.creator?.last_name?.[0] || '')}</div>
                             </div>
-                            <div style="display: flex; gap: 8px;">
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                 <button class="btn-modern btn-small btn-ghost" onclick="showEventDetail(${e.id})">
                                     <i class="fas fa-eye"></i>
                                 </button>
                                 ${e.status === 'approved' ? `
                                     <button class="btn-modern btn-small btn-primary" onclick="bookVenue(${e.id})">
                                         <i class="fas fa-calendar-plus"></i> Book
+                                    </button>
+                                ` : ''}
+                                ${isAdmin && e.status === 'pending' ? `
+                                    <button class="btn-modern btn-small btn-primary" onclick="approveEvent(${e.id})" title="Approve Event">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn-modern btn-small" onclick="rejectEvent(${e.id})" style="background: var(--error); color: white;" title="Reject Event">
+                                        <i class="fas fa-times"></i>
                                     </button>
                                 ` : ''}
                             </div>
@@ -483,6 +498,57 @@
             return new Date(dateString).toLocaleTimeString('en-US', {
                 hour: '2-digit', minute: '2-digit'
             });
+        }
+
+        async function approveEvent(id) {
+            if (!confirm('Approve this event?')) return;
+
+            try {
+                await api.put(`/events/${id}/status`, { status: 'approved' });
+                showToast('✅ Event approved successfully!', 'success');
+                loadEvents();
+            } catch (error) {
+                showToast('Failed to approve: ' + error.message, 'error');
+            }
+        }
+
+        async function rejectEvent(id) {
+            if (!confirm('Reject this event?')) return;
+
+            try {
+                await api.put(`/events/${id}/status`, { status: 'rejected' });
+                showToast('Event rejected', 'success');
+                loadEvents();
+            } catch (error) {
+                showToast('Failed to reject: ' + error.message, 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer') || createToastContainer();
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+            toast.innerHTML = `
+                <i class="fas fa-${icon}" style="font-size: 20px; color: var(--${type});"></i>
+                <span>${message}</span>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'toastSlideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function createToastContainer() {
+            const container = document.createElement('div');
+            container.id = 'toastContainer';
+            container.className = 'toast-container';
+            document.body.appendChild(container);
+            return container;
         }
 
         function logout() {

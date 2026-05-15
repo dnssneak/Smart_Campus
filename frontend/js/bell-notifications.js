@@ -34,6 +34,10 @@ async function loadBellDropdown() {
             return;
         }
 
+        // Get current user to check if admin
+        const userStr = localStorage.getItem('user');
+        const currentUser = userStr ? JSON.parse(userStr) : null;
+
         const iconMap = {
             event_approved: 'fa-check-circle',
             event_rejected: 'fa-times-circle',
@@ -44,8 +48,14 @@ async function loadBellDropdown() {
             system: 'fa-info-circle'
         };
 
-        list.innerHTML = notifications.slice(0, 5).map(n => `
-            <div class="bell-dropdown-item ${n.is_read ? '' : 'unread'}" onclick="window.location.href='notifications.html'">
+        list.innerHTML = notifications.slice(0, 5).map(n => {
+            const isAdminPendingBooking = currentUser?.role === 'admin' && 
+                                          n.related_type === 'booking' && 
+                                          n.type === 'system' && 
+                                          n.title.includes('Booking Pending');
+            
+            return `
+            <div class="bell-dropdown-item ${n.is_read ? '' : 'unread'}" onclick="${isAdminPendingBooking ? 'event.stopPropagation()' : 'window.location.href=\'notifications.html\''}">
                 <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${getIconColor(n.type)};color:white;font-size:0.9rem">
                     <i class="fas ${iconMap[n.type] || 'fa-bell'}"></i>
                 </div>
@@ -53,9 +63,22 @@ async function loadBellDropdown() {
                     <div style="font-weight:600;font-size:0.9rem;color:#1e293b">${escapeHtml(n.title)}</div>
                     <div style="font-size:0.8rem;color:#64748b">${escapeHtml(n.message.substring(0, 50))}${n.message.length > 50 ? '...' : ''}</div>
                     <small>${getTimeAgo(n.created_at)}</small>
+                    ${isAdminPendingBooking && n.related_id ? `
+                        <div style="margin-top:8px;display:flex;gap:6px;">
+                            <button onclick="event.stopPropagation();quickApproveBooking(${n.related_id},${n.id})" 
+                                    style="padding:4px 8px;font-size:0.75rem;background:#059669;color:white;border:none;border-radius:4px;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                                <i class="fas fa-check"></i> Approve
+                            </button>
+                            <button onclick="event.stopPropagation();window.location.href='notifications.html'" 
+                                    style="padding:4px 8px;font-size:0.75rem;background:#6b7280;color:white;border:none;border-radius:4px;cursor:pointer;">
+                                View
+                            </button>
+                        </div>
+                    ` : ''}
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
     } catch (error) {
         console.error('Dropdown error:', error);
@@ -133,6 +156,35 @@ setInterval(() => {
         updateBellBadge();
     }
 }, 30000);
+
+// Quick approve booking from bell dropdown
+async function quickApproveBooking(bookingId, notificationId) {
+    if (!confirm('Approve this booking request?')) {
+        return;
+    }
+    
+    try {
+        await api.put(`/bookings/${bookingId}/approve`);
+        await api.put(`/notifications/${notificationId}/read`);
+        
+        // Show success message
+        const dropdown = document.getElementById('bellDropdown');
+        if (dropdown) {
+            const successMsg = document.createElement('div');
+            successMsg.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#059669;color:white;padding:8px 16px;border-radius:6px;font-size:0.85rem;z-index:1000;box-shadow:0 4px 6px rgba(0,0,0,0.1);';
+            successMsg.innerHTML = '<i class="fas fa-check"></i> Booking approved!';
+            dropdown.appendChild(successMsg);
+            
+            setTimeout(() => successMsg.remove(), 2000);
+        }
+        
+        // Refresh
+        updateBellBadge();
+        loadBellDropdown();
+    } catch (error) {
+        alert('Failed to approve: ' + error.message);
+    }
+}
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {

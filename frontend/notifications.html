@@ -89,12 +89,20 @@
     <script>
         let allNotifications = [];
         let currentFilter = 'all';
+        let currentUser = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (!localStorage.getItem('token')) {
                 window.location.href = 'login.html';
                 return;
             }
+            
+            // Get current user info
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+                currentUser = JSON.parse(userStr);
+            }
+            
             await loadNotifications();
         });
 
@@ -140,9 +148,14 @@
                 system: 'fa-info-circle'
             };
 
-            list.innerHTML = filtered.map(n => `
-                <div style="background: white; border-radius: var(--radius-card); padding: var(--space-lg); box-shadow: var(--shadow-card); cursor: pointer; transition: all var(--duration-normal) var(--ease-smooth); border-left: 4px solid ${getIconColor(n.type)}; ${!n.is_read ? 'background: rgba(6, 182, 212, 0.05);' : ''}" 
-                     onclick="markAsRead(${n.id})" 
+            list.innerHTML = filtered.map(n => {
+                const isAdminPendingBooking = currentUser?.role === 'admin' && 
+                                              n.related_type === 'booking' && 
+                                              n.type === 'system' && 
+                                              n.title.includes('Booking Pending');
+                
+                return `
+                <div style="background: white; border-radius: var(--radius-card); padding: var(--space-lg); box-shadow: var(--shadow-card); transition: all var(--duration-normal) var(--ease-smooth); border-left: 4px solid ${getIconColor(n.type)}; ${!n.is_read ? 'background: rgba(6, 182, 212, 0.05);' : ''}" 
                      onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='var(--shadow-hover)'" 
                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='var(--shadow-card)'">
                     <div style="display: flex; gap: var(--space-md); align-items: start;">
@@ -155,14 +168,44 @@
                                 <span style="color: var(--muted); font-size: var(--font-size-xs); white-space: nowrap;">${getTimeAgo(n.created_at)}</span>
                             </div>
                             <p style="color: var(--muted); font-size: var(--font-size-small); margin: 0 0 var(--space-sm) 0; line-height: 1.5;">${escapeHtml(n.message)}</p>
-                            <div style="display: flex; gap: var(--space-sm); align-items: center;">
+                            <div style="display: flex; gap: var(--space-sm); align-items: center; flex-wrap: wrap;">
                                 <span class="status-pill ${n.type}" style="font-size: var(--font-size-xs);">${n.type.replace(/_/g, ' ')}</span>
                                 ${!n.is_read ? '<span style="color: var(--cyan); font-size: var(--font-size-xs); font-weight: 600;">● Unread</span>' : ''}
+                                ${n.related_id && n.related_type ? `<span style="color: var(--muted); font-size: var(--font-size-xs);">ID: ${n.related_id}</span>` : ''}
                             </div>
+                            ${isAdminPendingBooking && n.related_id ? `
+                                <div style="margin-top: var(--space-md); padding-top: var(--space-md); border-top: 1px solid #e2e8f0; display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                                    <button class="btn-modern btn-small btn-primary" 
+                                            onclick="event.stopPropagation(); approveBooking(${n.related_id}, ${n.id})"
+                                            style="display: flex; align-items: center; gap: 6px;">
+                                        <i class="fas fa-check"></i> Approve Booking
+                                    </button>
+                                    <button class="btn-modern btn-small btn-secondary" 
+                                            onclick="event.stopPropagation(); viewBookingDetails(${n.related_id})"
+                                            style="display: flex; align-items: center; gap: 6px;">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+                                    <button class="btn-modern btn-small" 
+                                            onclick="event.stopPropagation(); rejectBooking(${n.related_id}, ${n.id})"
+                                            style="display: flex; align-items: center; gap: 6px; background: var(--error); color: white;">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </div>
+                            ` : ''}
+                            ${!isAdminPendingBooking ? `
+                                <div style="margin-top: var(--space-sm);">
+                                    <button class="btn-modern btn-small btn-secondary" 
+                                            onclick="event.stopPropagation(); markAsRead(${n.id})"
+                                            style="font-size: var(--font-size-xs);">
+                                        ${n.is_read ? 'Mark as Unread' : 'Mark as Read'}
+                                    </button>
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function filterNotifications(filter) {
@@ -253,6 +296,128 @@
             container.className = 'toast-container';
             document.body.appendChild(container);
             return container;
+        }
+
+        async function approveBooking(bookingId, notificationId) {
+            if (!confirm('Are you sure you want to approve this booking?')) {
+                return;
+            }
+            
+            try {
+                showToast('Approving booking...', 'info');
+                await api.put(`/bookings/${bookingId}/approve`);
+                await api.put(`/notifications/${notificationId}/read`);
+                showToast('✅ Booking approved successfully! User has been notified.', 'success');
+                
+                // Reload notifications after a short delay
+                setTimeout(() => {
+                    loadNotifications();
+                }, 1000);
+            } catch (error) {
+                showToast('❌ Failed to approve booking: ' + error.message, 'error');
+            }
+        }
+
+        async function rejectBooking(bookingId, notificationId) {
+            const reason = prompt('Please provide a reason for rejection (optional):');
+            if (reason === null) return; // User cancelled
+            
+            try {
+                showToast('Rejecting booking...', 'info');
+                await api.put(`/bookings/${bookingId}/cancel`);
+                await api.put(`/notifications/${notificationId}/read`);
+                showToast('🚫 Booking rejected. User has been notified.', 'success');
+                
+                // Reload notifications after a short delay
+                setTimeout(() => {
+                    loadNotifications();
+                }, 1000);
+            } catch (error) {
+                showToast('❌ Failed to reject booking: ' + error.message, 'error');
+            }
+        }
+
+        async function viewBookingDetails(bookingId) {
+            try {
+                const response = await api.get(`/bookings/${bookingId}`);
+                const booking = response.booking;
+                
+                // Create modal to show booking details
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 1rem;';
+                modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+                
+                modal.innerHTML = `
+                    <div style="background: white; border-radius: var(--radius-card); padding: var(--space-xl); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-hover);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--space-lg);">
+                            <h2 style="margin: 0; color: #0f172a;"><i class="fas fa-calendar-check"></i> Booking Details</h2>
+                            <button onclick="this.closest('div[style*=fixed]').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted);">&times;</button>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+                            <div>
+                                <label style="font-weight: 600; color: var(--muted); font-size: var(--font-size-xs); text-transform: uppercase;">Event</label>
+                                <p style="margin: 4px 0 0 0; font-size: var(--font-size-body);">${booking.event?.title || 'N/A'}</p>
+                            </div>
+                            
+                            <div>
+                                <label style="font-weight: 600; color: var(--muted); font-size: var(--font-size-xs); text-transform: uppercase;">Venue</label>
+                                <p style="margin: 4px 0 0 0; font-size: var(--font-size-body);">${booking.venue?.name || 'N/A'}</p>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+                                <div>
+                                    <label style="font-weight: 600; color: var(--muted); font-size: var(--font-size-xs); text-transform: uppercase;">Start Time</label>
+                                    <p style="margin: 4px 0 0 0; font-size: var(--font-size-body);">${new Date(booking.start_datetime).toLocaleString()}</p>
+                                </div>
+                                <div>
+                                    <label style="font-weight: 600; color: var(--muted); font-size: var(--font-size-xs); text-transform: uppercase;">End Time</label>
+                                    <p style="margin: 4px 0 0 0; font-size: var(--font-size-body);">${new Date(booking.end_datetime).toLocaleString()}</p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label style="font-weight: 600; color: var(--muted); font-size: var(--font-size-xs); text-transform: uppercase;">Requested By</label>
+                                <p style="margin: 4px 0 0 0; font-size: var(--font-size-body);">${booking.booked_by_profile?.first_name || ''} ${booking.booked_by_profile?.last_name || ''} (${booking.booked_by_profile?.role || 'N/A'})</p>
+                            </div>
+                            
+                            <div>
+                                <label style="font-weight: 600; color: var(--muted); font-size: var(--font-size-xs); text-transform: uppercase;">Status</label>
+                                <p style="margin: 4px 0 0 0;"><span class="status-pill ${booking.status}">${booking.status}</span></p>
+                            </div>
+                            
+                            ${booking.event?.description ? `
+                                <div>
+                                    <label style="font-weight: 600; color: var(--muted); font-size: var(--font-size-xs); text-transform: uppercase;">Description</label>
+                                    <p style="margin: 4px 0 0 0; font-size: var(--font-size-small); color: var(--muted);">${booking.event.description}</p>
+                                </div>
+                            ` : ''}
+                            
+                            ${booking.event?.expected_attendance ? `
+                                <div>
+                                    <label style="font-weight: 600; color: var(--muted); font-size: var(--font-size-xs); text-transform: uppercase;">Expected Attendance</label>
+                                    <p style="margin: 4px 0 0 0; font-size: var(--font-size-body);">${booking.event.expected_attendance} people</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${booking.status === 'pending' ? `
+                            <div style="margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: 1px solid #e2e8f0; display: flex; gap: var(--space-sm); justify-content: flex-end;">
+                                <button class="btn-modern btn-primary" onclick="this.closest('div[style*=fixed]').remove(); approveBooking(${bookingId}, 0);">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                <button class="btn-modern" onclick="this.closest('div[style*=fixed]').remove(); rejectBooking(${bookingId}, 0);" style="background: var(--error); color: white;">
+                                    <i class="fas fa-times"></i> Reject
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+            } catch (error) {
+                showToast('❌ Failed to load booking details: ' + error.message, 'error');
+            }
         }
 
         function logout() {

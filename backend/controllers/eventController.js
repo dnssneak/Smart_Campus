@@ -287,6 +287,63 @@ exports.deleteEvent = async (req, res) => {
     }
 };
 
+exports.approveEvent = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { data: eventBefore, error: eventError } = await supabase
+            .from('events')
+            .select('title, created_by, status')
+            .eq('id', id)
+            .single();
+
+        if (eventError || !eventBefore) {
+            return res.status(404).json({
+                success: false,
+                message: 'Event not found'
+            });
+        }
+
+        const { data: event, error } = await supabase
+            .from('events')
+            .update({
+                status: 'approved',
+                approved_by: req.user.id,
+                approved_at: new Date().toISOString()
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        // Emit event for notification system
+        await eventBus.emit(EVENTS.EVENT_APPROVED, {
+            eventId: id,
+            eventTitle: eventBefore.title,
+            userId: eventBefore.created_by
+        });
+
+        // Also update related bookings if any
+        await supabase
+            .from('bookings')
+            .update({ status: 'confirmed' })
+            .eq('event_id', id)
+            .eq('status', 'pending');
+
+        res.json({
+            success: true,
+            message: 'Event approved successfully',
+            event
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
 exports.updateStatus = async (req, res) => {
     try {
         const { id } = req.params;
