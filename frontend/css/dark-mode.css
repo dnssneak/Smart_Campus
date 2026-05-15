@@ -225,10 +225,27 @@ h1, h2, h3, h4, h5, h6 {
 [data-theme="dark"] .event-card,
 [data-theme="dark"] .booking-card,
 [data-theme="dark"] .modern-event-card,
+[data-theme="dark"] .chart-card,
+[data-theme="dark"] .upcoming-event-card,
 [data-theme="dark"] .form-panel .card,
 [data-theme="dark"] div[style*="background: white"],
 [data-theme="dark"] div[style*="background:white"] {
     background: var(--card-bg) !important;
+}
+
+[data-theme="dark"] .chart-card h3,
+[data-theme="dark"] .upcoming-event-card h4 {
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .chart-card p,
+[data-theme="dark"] .upcoming-event-card p,
+[data-theme="dark"] .event-meta {
+    color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .upcoming-event-card:hover {
+    background: var(--bg-tertiary) !important;
 }
 
 /* Fix inline styles in dark mode */

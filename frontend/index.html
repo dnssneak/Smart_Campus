@@ -3,297 +3,1515 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Campus - Discover Campus Events</title>
-    <link rel="stylesheet" href="css/new-design-system.css">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/dark-mode.css">
+    <title>Smart Campus — Event Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/logo.css">
+    <style>
+        /* ═══════════════════════════
+           ROOT & THEME TOKENS
+        ═══════════════════════════ */
+        :root {
+            --bg:         #f5f4f0;
+            --bg2:        #eceae3;
+            --surface:    #ffffff;
+            --surface2:   #f0efea;
+            --ink:        #0d0d0d;
+            --ink2:       #3a3a3a;
+            --ink3:       #7a7a7a;
+            --accent:     #4f3ff0;
+            --accent2:    #7c6ff7;
+            --accent-bg:  #ede9ff;
+            --accent-ink: #2a1fa8;
+            --gold:       #d4a843;
+            --gold-bg:    #fdf5e0;
+            --green:      #1d8a5c;
+            --green-bg:   #e1f5ea;
+            --border:     rgba(0,0,0,0.08);
+            --border2:    rgba(0,0,0,0.14);
+            --shadow:     0 2px 24px rgba(0,0,0,0.07);
+            --shadow-lg:  0 8px 48px rgba(0,0,0,0.12);
+            --font-head:  'Inter', sans-serif;
+            --font-body:  'Inter', sans-serif;
+            --nav-h:      68px;
+            --radius:     14px;
+            --radius-sm:  8px;
+            --radius-pill: 100px;
+        }
+
+        [data-theme="dark"] {
+            --bg:         #0e0e12;
+            --bg2:        #16161c;
+            --surface:    #1c1c24;
+            --surface2:   #23232e;
+            --ink:        #f0f0f0;
+            --ink2:       #b8b8c8;
+            --ink3:       #6a6a80;
+            --accent:     #7c6ff7;
+            --accent2:    #a99cf9;
+            --accent-bg:  #1e1a3a;
+            --accent-ink: #c4bbfc;
+            --gold:       #e8bc56;
+            --gold-bg:    #251f0a;
+            --green:      #3dba80;
+            --green-bg:   #0a1f14;
+            --border:     rgba(255,255,255,0.07);
+            --border2:    rgba(255,255,255,0.12);
+            --shadow:     0 2px 24px rgba(0,0,0,0.4);
+            --shadow-lg:  0 8px 48px rgba(0,0,0,0.6);
+        }
+
+        /* ═══════════════════════════
+           RESET & BASE
+        ═══════════════════════════ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ═══════════════════════════
+           NOISE TEXTURE OVERLAY
+        ═══════════════════════════ */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.4;
+        }
+
+        /* ═══════════════════════════
+           NAVBAR
+        ═══════════════════════════ */
+        .navbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--nav-h);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .navbar.scrolled {
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(16px);
+        }
+
+        /* Logo */
+        /* Nav Actions */
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 20px;
+            border-radius: var(--radius-pill);
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .nav-btn-ghost {
+            background: transparent;
+            color: var(--ink2);
+            border: 1px solid var(--border2);
+        }
+
+        .nav-btn-ghost:hover {
+            background: var(--surface2);
+            color: var(--ink);
+        }
+
+        .nav-btn-solid {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .nav-btn-solid:hover {
+            background: var(--accent2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(79, 63, 240, 0.35);
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border2);
+            background: var(--surface);
+            color: var(--ink3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--surface2);
+            color: var(--ink);
+        }
+
+        .theme-toggle.rotating i {
+            animation: spin 0.4s ease;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ═══════════════════════════
+           HERO SECTION
+        ═══════════════════════════ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: calc(var(--nav-h) + 60px) 40px 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative blobs */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+        }
+
+        [data-theme="dark"] .blob { opacity: 0.2; }
+
+        .blob-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #7c6ff7 0%, transparent 70%);
+            top: -100px;
+            right: -150px;
+            animation: blobFloat1 12s ease-in-out infinite;
+        }
+
+        .blob-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #d4a843 0%, transparent 70%);
+            bottom: -50px;
+            left: -100px;
+            animation: blobFloat2 15s ease-in-out infinite;
+        }
+
+        .blob-3 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, #1d8a5c 0%, transparent 70%);
+            top: 40%;
+            left: 20%;
+            animation: blobFloat3 18s ease-in-out infinite;
+        }
+
+        @keyframes blobFloat1 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(-30px, 20px) scale(1.05); }
+            66% { transform: translate(20px, -15px) scale(0.97); }
+        }
+
+        @keyframes blobFloat2 {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(25px, -20px) scale(1.08); }
+        }
+
+        @keyframes blobFloat3 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-20px, 30px); }
+        }
+
+        /* Dot grid */
+        .dot-grid {
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, var(--border2) 1px, transparent 1px);
+            background-size: 32px 32px;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Hero content */
+        .hero-inner {
+            position: relative;
+            z-index: 2;
+            max-width: 860px;
+            text-align: center;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--accent-bg);
+            color: var(--accent-ink);
+            border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+            border-radius: var(--radius-pill);
+            padding: 6px 16px;
+            font-size: 12.5px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            margin-bottom: 32px;
+            animation: fadeUp 0.8s ease both;
+        }
+
+        .hero-eyebrow .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.7); }
+        }
+
+        .hero-title {
+            font-family: var(--font-head);
+            font-size: clamp(44px, 7vw, 84px);
+            font-weight: 800;
+            line-height: 1.03;
+            letter-spacing: -2px;
+            color: var(--ink);
+            margin-bottom: 28px;
+            animation: fadeUp 0.8s 0.1s ease both;
+        }
+
+        .hero-title .line-accent {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-title .line-accent::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 3px;
+            opacity: 0.25;
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: lineExpand 0.8s 0.9s ease forwards;
+        }
+
+        @keyframes lineExpand { to { transform: scaleX(1); } }
+
+        .hero-sub {
+            font-size: 18px;
+            color: var(--ink3);
+            max-width: 540px;
+            margin: 0 auto 48px;
+            line-height: 1.7;
+            font-weight: 300;
+            animation: fadeUp 0.8s 0.2s ease both;
+        }
+
+        /* Search bar */
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-pill);
+            padding: 6px 6px 6px 20px;
+            max-width: 540px;
+            margin: 0 auto 24px;
+            box-shadow: var(--shadow);
+            gap: 12px;
+            animation: fadeUp 0.8s 0.3s ease both;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 63, 240, 0.12), var(--shadow);
+        }
+
+        .search-bar i {
+            color: var(--ink3);
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-family: var(--font-body);
+            font-size: 15px;
+            color: var(--ink);
+            outline: none;
+        }
+
+        .search-bar input::placeholder { color: var(--ink3); }
+
+        .search-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-pill);
+            padding: 10px 22px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .search-btn:hover {
+            background: var(--accent2);
+            transform: translateY(-1px);
+        }
+
+        /* Filter chips */
+        .chips {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 52px;
+            animation: fadeUp 0.8s 0.4s ease both;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            border: 1px solid var(--border2);
+            background: var(--surface);
+            color: var(--ink2);
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-bg);
+        }
+
+        .chip.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .chip i { font-size: 12px; }
+
+        /* CTA buttons */
+        .hero-cta {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp 0.8s 0.5s ease both;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 14px 28px;
+            border-radius: var(--radius-pill);
+            font-family: var(--font-body);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s;
+            border: none;
+        }
+
+        .cta-primary {
+            background: var(--ink);
+            color: var(--bg);
+        }
+
+        .cta-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+        }
+
+        .cta-secondary {
+            background: transparent;
+            color: var(--ink2);
+            border: 1px solid var(--border2);
+        }
+
+        .cta-secondary:hover {
+            background: var(--surface);
+            color: var(--ink);
+            border-color: var(--border2);
+            transform: translateY(-2px);
+        }
+
+        /* Scroll indicator */
+        .scroll-hint {
+            position: absolute;
+            bottom: 36px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--ink3);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: fadeUp 1s 1.2s ease both;
+        }
+
+        .scroll-hint .arrow {
+            width: 24px;
+            height: 24px;
+            border-right: 1.5px solid var(--ink3);
+            border-bottom: 1.5px solid var(--ink3);
+            transform: rotate(45deg);
+            animation: scrollBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollBounce {
+            0%, 100% { transform: rotate(45deg) translateY(0); }
+            50% { transform: rotate(45deg) translateY(5px); }
+        }
+
+        /* ═══════════════════════════
+           STATS STRIP
+        ═══════════════════════════ */
+        .stats-strip {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 32px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .stat-block {
+            text-align: center;
+            padding: 0 56px;
+            border-right: 1px solid var(--border);
+            flex: 1;
+            max-width: 240px;
+        }
+
+        .stat-block:last-child { border-right: none; }
+
+        .stat-number {
+            font-family: var(--font-head);
+            font-size: 40px;
+            font-weight: 800;
+            color: var(--ink);
+            line-height: 1;
+            letter-spacing: -1.5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--ink3);
+            margin-top: 6px;
+            font-weight: 400;
+        }
+
+        /* ═══════════════════════════
+           EVENTS SECTION
+        ═══════════════════════════ */
+        .section {
+            padding: 96px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            margin-bottom: 48px;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .section-eyebrow {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-family: var(--font-head);
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 800;
+            color: var(--ink);
+            letter-spacing: -1px;
+            line-height: 1.1;
+        }
+
+        .section-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            padding: 8px 18px;
+            border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+            border-radius: var(--radius-pill);
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .section-link:hover {
+            background: var(--accent-bg);
+        }
+
+        /* Events grid */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .event-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border2);
+        }
+
+        .event-card-thumb {
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .event-card-thumb .thumb-icon {
+            font-size: 48px;
+            opacity: 0.35;
+            position: relative;
+            z-index: 1;
+        }
+
+        .event-card-thumb::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            opacity: 0.1;
+        }
+
+        .thumb-music  { background: linear-gradient(135deg, #4f3ff0 0%, #7c6ff7 100%); color: #fff; }
+        .thumb-sport  { background: linear-gradient(135deg, #d4a843 0%, #f0c875 100%); color: #fff; }
+        .thumb-food   { background: linear-gradient(135deg, #1d8a5c 0%, #3dba80 100%); color: #fff; }
+        .thumb-film   { background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%); color: #fff; }
+        .thumb-academic { background: linear-gradient(135deg, #2c3e50 0%, #4a6278 100%); color: #fff; }
+
+        .event-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 2;
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+
+        .event-body {
+            padding: 20px;
+        }
+
+        .event-title {
+            font-family: var(--font-head);
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+
+        .event-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        .event-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--ink3);
+        }
+
+        .event-meta-row i { width: 14px; font-size: 12px; color: var(--accent); }
+
+        .event-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .event-avatars {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-chip {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--surface);
+            margin-left: -6px;
+        }
+
+        .avatar-chip:first-child { margin-left: 0; }
+        .avatar-chip.more { background: var(--surface2); color: var(--ink3); }
+
+        .event-action {
+            background: transparent;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-pill);
+            padding: 7px 16px;
+            font-family: var(--font-body);
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--ink2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .event-action:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        /* ═══════════════════════════
+           FEATURES SECTION
+        ═══════════════════════════ */
+        .features-section {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 96px 40px;
+        }
+
+        .features-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-top: 56px;
+        }
+
+        .feature-cell {
+            padding: 36px 32px;
+            background: var(--surface);
+            border: none;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .feature-cell::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-right: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            pointer-events: none;
+        }
+
+        .feature-cell:hover {
+            background: var(--surface2);
+        }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .feature-icon-purple { background: var(--accent-bg); color: var(--accent); }
+        .feature-icon-gold   { background: var(--gold-bg);   color: var(--gold);   }
+        .feature-icon-green  { background: var(--green-bg);  color: var(--green);  }
+        .feature-icon-gray   { background: var(--bg2);       color: var(--ink3);   }
+
+        .feature-title {
+            font-family: var(--font-head);
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: var(--ink3);
+            line-height: 1.65;
+            font-weight: 300;
+        }
+
+        /* ═══════════════════════════
+           CTA SECTION
+        ═══════════════════════════ */
+        .cta-section {
+            padding: 96px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+        }
+
+        .cta-inner {
+            position: relative;
+            z-index: 2;
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .cta-title {
+            font-family: var(--font-head);
+            font-size: clamp(32px, 5vw, 54px);
+            font-weight: 800;
+            color: var(--ink);
+            letter-spacing: -1.5px;
+            line-height: 1.05;
+            margin-bottom: 20px;
+        }
+
+        .cta-sub {
+            font-size: 17px;
+            color: var(--ink3);
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        /* ═══════════════════════════
+           FOOTER
+        ═══════════════════════════ */
+        footer {
+            background: var(--ink);
+            color: rgba(255,255,255,0.6);
+            padding: 48px 40px;
+            text-align: center;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .footer-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-logo-icon i { color: #fff; font-size: 15px; }
+
+        .footer-logo-text {
+            font-family: var(--font-head);
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 28px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 13.5px;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: #fff; }
+
+        .footer-copy {
+            font-size: 12.5px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* ═══════════════════════════
+           TOAST
+        ═══════════════════════════ */
+        .toast-container {
+            position: fixed;
+            top: calc(var(--nav-h) + 12px);
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            padding: 13px 18px;
+            font-size: 13.5px;
+            color: var(--ink);
+            box-shadow: var(--shadow-lg);
+            animation: toastIn 0.3s ease;
+            max-width: 300px;
+        }
+
+        .toast i { font-size: 16px; flex-shrink: 0; }
+        .toast.success i { color: var(--green); }
+        .toast.info    i { color: var(--accent); }
+
+        @keyframes toastIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+
+        /* ═══════════════════════════
+           ANIMATIONS
+        ═══════════════════════════ */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .reveal-delay-1 { transition-delay: 0.1s; }
+        .reveal-delay-2 { transition-delay: 0.2s; }
+        .reveal-delay-3 { transition-delay: 0.3s; }
+
+        /* ═══════════════════════════
+           RESPONSIVE
+        ═══════════════════════════ */
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .hero   { padding: calc(var(--nav-h) + 40px) 20px 60px; }
+            .stat-block { padding: 0 24px; }
+            .section { padding: 64px 20px; }
+            .features-section { padding: 64px 20px; }
+            .cta-section { padding: 64px 20px; }
+            footer { padding: 40px 20px; }
+        }
+
+        @media (max-width: 580px) {
+            .stats-strip { flex-direction: column; gap: 24px; }
+            .stat-block { border-right: none; border-bottom: 1px solid var(--border); padding: 0 0 24px; max-width: 100%; }
+            .stat-block:last-child { border-bottom: none; padding-bottom: 0; }
+        }
+    </style>
 </head>
 <body>
-    <!-- Modern Navbar -->
-    <nav class="modern-navbar">
-        <div class="modern-nav-brand">
-            <i class="fas fa-university"></i>
-            <span>Smart Campus</span>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar" id="navbar">
+    <a href="index.html" class="smart-campus-logo">
+        <div class="logo-icon-wrapper">
+            <div class="logo-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
         </div>
-        <div class="modern-nav-links">
-            <a href="#events" class="active"><span>Events</span></a>
-            <a href="#features"><span>Features</span></a>
-            <a href="dashboard.html"><span>Dashboard</span></a>
-            <button class="nav-create-btn" onclick="window.location.href='login.html'">
-                <i class="fas fa-sign-in-alt"></i> Get Started
+        <div class="logo-text">
+            <div class="logo-text-main">Smart Campus</div>
+            <div class="logo-text-sub">Event Management</div>
+        </div>
+    </a>
+
+    <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle dark mode">
+            <i class="fas fa-moon"></i>
+        </button>
+        <a href="login.html" class="nav-btn nav-btn-ghost">
+            <i class="fas fa-sign-in-alt"></i> Log in
+        </a>
+        <a href="login.html" class="nav-btn nav-btn-solid">
+            <i class="fas fa-rocket"></i> Get Started
+        </a>
+    </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero" id="hero">
+    <div class="dot-grid"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div class="hero-inner">
+        <div class="hero-eyebrow">
+            <span class="dot"></span>
+            Campus-wide event platform
+        </div>
+
+        <h1 class="hero-title">
+            Discover events<br>
+            that <span class="line-accent">matter</span> to you
+        </h1>
+
+        <p class="hero-sub">
+            Tailored to your school, your interests, your calendar.
+            One platform for every campus moment.
+        </p>
+
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="heroSearch" placeholder="Search events, venues, or categories…">
+            <button class="search-btn" onclick="searchEvents()">
+                <i class="fas fa-arrow-right"></i> Search
             </button>
         </div>
-    </nav>
 
-    <!-- Glass Hero Section -->
-    <section class="glass-hero">
-        <div class="glass-hero-content">
-            <h1 class="glass-hero-title">Discover campus events that matter</h1>
-            <p class="glass-hero-subtitle">Tailored to your school, your interests, your calendar</p>
-            
-            <!-- Search Bar -->
-            <div class="glass-search-bar">
-                <i class="fas fa-search" style="color: var(--muted); margin-left: 16px;"></i>
-                <input type="text" placeholder="Find events..." id="heroSearch">
-                <button onclick="searchEvents()">
-                    <i class="fas fa-search"></i> Search
-                </button>
+        <div class="chips">
+            <div class="chip active" data-filter="all">
+                <i class="fas fa-star"></i> All
             </div>
-            
-            <!-- Filter Chips -->
-            <div class="filter-chips">
-                <div class="chip active" data-filter="all">
-                    <i class="fas fa-star"></i> All Events
-                </div>
-                <div class="chip" data-filter="music">
-                    <i class="fas fa-music"></i> Music
-                </div>
-                <div class="chip" data-filter="food">
-                    <i class="fas fa-utensils"></i> Food
-                </div>
-                <div class="chip" data-filter="sport">
-                    <i class="fas fa-basketball-ball"></i> Sport
-                </div>
-                <div class="chip" data-filter="movies">
-                    <i class="fas fa-film"></i> Movies
-                </div>
+            <div class="chip" data-filter="music">
+                <i class="fas fa-music"></i> Music
             </div>
-            
-            <div style="display: flex; gap: 16px; justify-content: center; margin-top: 24px;">
-                <button class="btn-modern btn-primary btn-large" onclick="window.location.href='dashboard.html'">
-                    <i class="fas fa-rocket"></i> Explore Events
-                </button>
-                <button class="btn-modern btn-secondary btn-large" onclick="window.location.href='login.html'">
-                    <i class="fas fa-plus"></i> Create Event
-                </button>
+            <div class="chip" data-filter="food">
+                <i class="fas fa-utensils"></i> Food
+            </div>
+            <div class="chip" data-filter="sport">
+                <i class="fas fa-basketball-ball"></i> Sport
+            </div>
+            <div class="chip" data-filter="film">
+                <i class="fas fa-film"></i> Film
+            </div>
+            <div class="chip" data-filter="academic">
+                <i class="fas fa-graduation-cap"></i> Academic
             </div>
         </div>
-    </section>
 
-    <!-- Event Count Banner -->
-    <div style="background: white; padding: 24px; text-align: center; box-shadow: var(--shadow-card);">
-        <h2 style="font-size: 28px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
-            <span class="text-gradient" id="eventCount">10,000</span> Events
-        </h2>
-        <p style="color: var(--muted); font-size: 16px;">Happening across campus this semester</p>
+        <div class="hero-cta">
+            <a href="dashboard.html" class="cta-btn cta-primary">
+                <i class="fas fa-compass"></i> Explore Events
+            </a>
+            <a href="login.html" class="cta-btn cta-secondary">
+                <i class="fas fa-plus"></i> Create Event
+            </a>
+        </div>
     </div>
 
-    <!-- Events Grid -->
-    <section id="events" class="events-grid">
-        <!-- Event Cards will be dynamically loaded -->
-        <div class="modern-event-card">
-            <div class="event-card-thumbnail">
-                <div class="event-card-tags">
-                    <span class="event-tag">Music</span>
-                </div>
-            </div>
-            <div class="event-card-content">
-                <h3 class="event-card-title">Campus Music Festival</h3>
-                <div class="event-card-meta">
-                    <div class="event-card-meta-row">
-                        <i class="fas fa-calendar"></i>
-                        <span>Sat, Dec 14</span>
-                    </div>
-                    <div class="event-card-meta-row">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Main Auditorium</span>
-                    </div>
-                </div>
-                <div class="event-card-footer">
-                    <div class="event-card-avatars">
-                        <div class="event-avatar verified">JD</div>
-                        <div class="event-avatar">+22</div>
-                    </div>
-                    <button class="event-card-action" onclick="window.location.href='dashboard.html'">
-                        View Details
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div class="scroll-hint">
+        <span>Scroll</span>
+        <div class="arrow"></div>
+    </div>
+</section>
 
-    <!-- Features Section -->
-    <section id="features" style="background: white; padding: 80px 32px;">
-        <div class="container-modern">
-            <h2 style="text-align: center; font-size: 36px; font-weight: 700; margin-bottom: 16px;">
-                <span class="text-gradient">Powerful Features</span>
-            </h2>
-            <p style="text-align: center; color: var(--muted); font-size: 18px; margin-bottom: 64px;">
-                Everything you need to manage campus events efficiently
-            </p>
-            
-            <div class="stats-grid-modern">
-                <div class="stat-card-modern">
-                    <div class="stat-card-icon">
+<!-- ═══════════════ STATS STRIP ═══════════════ -->
+<div class="stats-strip">
+    <div class="stat-block">
+        <div class="stat-number" id="statEvents">0</div>
+        <div class="stat-label">Events this semester</div>
+    </div>
+    <div class="stat-block">
+        <div class="stat-number" id="statVenues">0</div>
+        <div class="stat-label">Campus venues</div>
+    </div>
+    <div class="stat-block">
+        <div class="stat-number" id="statUsers">0</div>
+        <div class="stat-label">Active students</div>
+    </div>
+    <div class="stat-block">
+        <div class="stat-number" id="statBookings">0</div>
+        <div class="stat-label">Bookings today</div>
+    </div>
+</div>
+
+<!-- ═══════════════ EVENTS ═══════════════ -->
+<div id="events">
+    <div class="section">
+        <div class="section-header reveal">
+            <div>
+                <div class="section-eyebrow">Live on campus</div>
+                <div class="section-title">Upcoming events</div>
+            </div>
+            <a href="dashboard.html" class="section-link">
+                View all <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="events-grid" id="eventsGrid">
+
+            <div class="event-card reveal">
+                <div class="event-card-thumb thumb-music">
+                    <div class="event-tag">Music</div>
+                    <i class="fas fa-music thumb-icon"></i>
+                </div>
+                <div class="event-body">
+                    <div class="event-title">Campus Music Festival</div>
+                    <div class="event-meta">
+                        <div class="event-meta-row">
+                            <i class="fas fa-calendar"></i> Sat, Dec 14 · 6:00 PM
+                        </div>
+                        <div class="event-meta-row">
+                            <i class="fas fa-map-marker-alt"></i> Main Auditorium
+                        </div>
+                    </div>
+                    <div class="event-footer">
+                        <div class="event-avatars">
+                            <div class="avatar-chip">JD</div>
+                            <div class="avatar-chip">AM</div>
+                            <div class="avatar-chip more">+22</div>
+                        </div>
+                        <button class="event-action" onclick="window.location.href='dashboard.html'">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-card reveal reveal-delay-1">
+                <div class="event-card-thumb thumb-sport">
+                    <div class="event-tag">Sport</div>
+                    <i class="fas fa-basketball-ball thumb-icon"></i>
+                </div>
+                <div class="event-body">
+                    <div class="event-title">Inter-College Basketball Finals</div>
+                    <div class="event-meta">
+                        <div class="event-meta-row">
+                            <i class="fas fa-calendar"></i> Sun, Dec 15 · 3:00 PM
+                        </div>
+                        <div class="event-meta-row">
+                            <i class="fas fa-map-marker-alt"></i> Sports Complex
+                        </div>
+                    </div>
+                    <div class="event-footer">
+                        <div class="event-avatars">
+                            <div class="avatar-chip">RK</div>
+                            <div class="avatar-chip">SL</div>
+                            <div class="avatar-chip more">+56</div>
+                        </div>
+                        <button class="event-action" onclick="window.location.href='dashboard.html'">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-card reveal reveal-delay-2">
+                <div class="event-card-thumb thumb-food">
+                    <div class="event-tag">Food</div>
+                    <i class="fas fa-utensils thumb-icon"></i>
+                </div>
+                <div class="event-body">
+                    <div class="event-title">International Food Carnival</div>
+                    <div class="event-meta">
+                        <div class="event-meta-row">
+                            <i class="fas fa-calendar"></i> Fri, Dec 13 · 12:00 PM
+                        </div>
+                        <div class="event-meta-row">
+                            <i class="fas fa-map-marker-alt"></i> Campus Courtyard
+                        </div>
+                    </div>
+                    <div class="event-footer">
+                        <div class="event-avatars">
+                            <div class="avatar-chip">FN</div>
+                            <div class="avatar-chip more">+34</div>
+                        </div>
+                        <button class="event-action" onclick="window.location.href='dashboard.html'">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-card reveal reveal-delay-3">
+                <div class="event-card-thumb thumb-academic">
+                    <div class="event-tag">Academic</div>
+                    <i class="fas fa-graduation-cap thumb-icon"></i>
+                </div>
+                <div class="event-body">
+                    <div class="event-title">AI &amp; Future of Education Summit</div>
+                    <div class="event-meta">
+                        <div class="event-meta-row">
+                            <i class="fas fa-calendar"></i> Mon, Dec 16 · 10:00 AM
+                        </div>
+                        <div class="event-meta-row">
+                            <i class="fas fa-map-marker-alt"></i> Conference Hall A
+                        </div>
+                    </div>
+                    <div class="event-footer">
+                        <div class="event-avatars">
+                            <div class="avatar-chip">PK</div>
+                            <div class="avatar-chip">BT</div>
+                            <div class="avatar-chip more">+18</div>
+                        </div>
+                        <button class="event-action" onclick="window.location.href='dashboard.html'">
+                            View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════ FEATURES ═══════════════ -->
+<div id="features">
+    <section class="features-section">
+        <div class="features-inner">
+            <div style="text-align:center;" class="reveal">
+                <div class="section-eyebrow">Why Smart Campus</div>
+                <div class="section-title">Everything you need,<br>nothing you don't</div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-cell reveal">
+                    <div class="feature-icon feature-icon-purple">
                         <i class="fas fa-calendar-check"></i>
                     </div>
-                    <div class="stat-card-info">
-                        <h3>Smart</h3>
-                        <p>Scheduling</p>
-                    </div>
+                    <div class="feature-title">Smart Scheduling</div>
+                    <div class="feature-desc">AI-powered time slot recommendations that avoid conflicts and predict high-demand periods.</div>
                 </div>
-                
-                <div class="stat-card-modern">
-                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #10B981, #059669);">
+
+                <div class="feature-cell reveal reveal-delay-1">
+                    <div class="feature-icon feature-icon-gold">
                         <i class="fas fa-building"></i>
                     </div>
-                    <div class="stat-card-info">
-                        <h3>Venue</h3>
-                        <p>Management</p>
-                    </div>
+                    <div class="feature-title">Venue Management</div>
+                    <div class="feature-desc">Book, track, and manage any campus venue in real time with full availability visibility.</div>
                 </div>
-                
-                <div class="stat-card-modern">
-                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+
+                <div class="feature-cell reveal reveal-delay-2">
+                    <div class="feature-icon feature-icon-green">
                         <i class="fas fa-bell"></i>
                     </div>
-                    <div class="stat-card-info">
-                        <h3>Live</h3>
-                        <p>Notifications</p>
-                    </div>
+                    <div class="feature-title">Live Notifications</div>
+                    <div class="feature-desc">Instant alerts for booking confirmations, waitlist updates, and event reminders.</div>
                 </div>
-                
-                <div class="stat-card-modern">
-                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #EC4899, #DB2777);">
+
+                <div class="feature-cell reveal reveal-delay-3">
+                    <div class="feature-icon feature-icon-gray">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <div class="stat-card-info">
-                        <h3>Analytics</h3>
-                        <p>& Reports</p>
-                    </div>
+                    <div class="feature-title">Analytics &amp; Reports</div>
+                    <div class="feature-desc">Deep insights into attendance, venue utilisation, and demand trends across campus.</div>
                 </div>
             </div>
         </div>
     </section>
+</div>
 
-    <!-- CTA Section -->
-    <section style="background: var(--gradient-hero); padding: 80px 32px; text-align: center; color: white;">
-        <div class="container-modern">
-            <h2 style="font-size: 36px; font-weight: 700; margin-bottom: 16px;">
-                Ready to Transform Your Campus?
-            </h2>
-            <p style="font-size: 18px; margin-bottom: 32px; opacity: 0.9;">
-                Join hundreds of institutions using Smart Campus for seamless event management
-            </p>
-            <button class="btn-modern btn-large" style="background: white; color: var(--primary);" onclick="window.location.href='login.html'">
-                <i class="fas fa-rocket"></i> Start Now
-            </button>
+<!-- ═══════════════ CTA ═══════════════ -->
+<section class="cta-section">
+    <div class="blob blob-1" style="opacity:0.2; top:-80px; right:-120px;"></div>
+    <div class="blob blob-2" style="opacity:0.15; bottom:-60px; left:-80px;"></div>
+    <div class="cta-inner reveal">
+        <div class="section-eyebrow">Get started today</div>
+        <div class="cta-title">Ready to transform your campus?</div>
+        <div class="cta-sub">Join hundreds of institutions using Smart Campus for seamless event management.</div>
+        <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+            <a href="login.html" class="cta-btn cta-primary">
+                <i class="fas fa-rocket"></i> Start for free
+            </a>
+            <a href="dashboard.html" class="cta-btn cta-secondary">
+                <i class="fas fa-eye"></i> See a demo
+            </a>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Footer -->
-    <footer style="background: #1E293B; color: white; padding: 48px 32px; text-align: center;">
-        <div class="container-modern">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 24px;">
-                <i class="fas fa-university" style="font-size: 32px;"></i>
-                <span style="font-size: 24px; font-weight: 700;">Smart Campus</span>
-            </div>
-            <div style="display: flex; gap: 32px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
-                <a href="login.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">Login</a>
-                <a href="#events" style="color: rgba(255,255,255,0.7); text-decoration: none;">Events</a>
-                <a href="#features" style="color: rgba(255,255,255,0.7); text-decoration: none;">Features</a>
-                <a href="dashboard.html" style="color: rgba(255,255,255,0.7); text-decoration: none;">Dashboard</a>
-            </div>
-            <p style="color: rgba(255,255,255,0.5); font-size: 14px;">
-                &copy; 2026 Smart Campus. All rights reserved.
-            </p>
-        </div>
-    </footer>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
 
-    <script>
-        // Filter chips functionality
-        document.querySelectorAll('.chip').forEach(chip => {
-            chip.addEventListener('click', function() {
-                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                showToast(`Filtered by: ${this.textContent.trim()}`, 'success');
-            });
-        });
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
 
-        // Search functionality
-        function searchEvents() {
-            const query = document.getElementById('heroSearch').value;
-            if (query.trim()) {
-                showToast(`Searching for: ${query}`, 'success');
-                setTimeout(() => {
-                    window.location.href = `dashboard.html?search=${encodeURIComponent(query)}`;
-                }, 1000);
-            }
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script src="js/theme.js" onerror="console.warn('theme.js not found, using built-in theme manager')"></script>
+<script>
+/* ══════════════════════════════════════
+   INLINE THEME MANAGER
+   (runs even if theme.js fails to load)
+══════════════════════════════════════ */
+(function() {
+    const STORAGE_KEY = 'theme';
+
+    function applyTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        localStorage.setItem(STORAGE_KEY, t);
+        const btn = document.getElementById('themeToggle');
+        if (btn) btn.innerHTML = t === 'dark'
+            ? '<i class="fas fa-sun"></i>'
+            : '<i class="fas fa-moon"></i>';
+    }
+
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme') || 'light';
+        const next    = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.classList.add('rotating');
+            setTimeout(() => btn.classList.remove('rotating'), 500);
         }
 
-        // Enter key search
-        document.getElementById('heroSearch').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchEvents();
-            }
-        });
+        showToast(next === 'dark' ? '🌙 Dark mode enabled' : '☀️ Light mode enabled', 'info');
+    }
 
-        // Toast notification function
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            
-            const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
-            toast.innerHTML = `
-                <i class="fas fa-${icon}" style="font-size: 20px; color: var(--${type});"></i>
-                <span>${message}</span>
-            `;
-            
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.animation = 'toastSlideIn 0.3s ease-out reverse';
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+    // Init
+    const saved   = localStorage.getItem(STORAGE_KEY);
+    const prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(saved || (prefers ? 'dark' : 'light'));
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('themeToggle');
+        if (btn) btn.addEventListener('click', toggleTheme);
+    });
+
+    // Expose for theme.js compatibility
+    window.themeManager = { toggleTheme, applyTheme };
+    window.ThemeManager = function() { return window.themeManager; };
+})();
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+function showToast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const iconMap = { success: 'check-circle', info: 'info-circle', error: 'exclamation-circle' };
+    toast.innerHTML = `<i class="fas fa-${iconMap[type] || 'info-circle'}"></i><span>${msg}</span>`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 350);
+    }, 3000);
+}
+
+/* ══════════════════════════════════════
+   COUNTER ANIMATION
+══════════════════════════════════════ */
+function animateCounter(el, target, suffix = '', duration = 1800) {
+    let start = null;
+    const step = (timestamp) => {
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / duration, 1);
+        const eased    = 1 - Math.pow(1 - progress, 3);
+        el.textContent = Math.floor(eased * target).toLocaleString() + (progress === 1 ? suffix : '');
+        if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+}
+
+/* ══════════════════════════════════════
+   SEARCH
+══════════════════════════════════════ */
+function searchEvents() {
+    const q = document.getElementById('heroSearch').value.trim();
+    if (!q) return;
+    showToast(`Searching for: ${q}`, 'success');
+    setTimeout(() => {
+        window.location.href = `dashboard.html?search=${encodeURIComponent(q)}`;
+    }, 900);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('heroSearch');
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') searchEvents();
+        });
+    }
+});
+
+/* ══════════════════════════════════════
+   FILTER CHIPS
+══════════════════════════════════════ */
+document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        const filter = this.dataset.filter;
+        const label  = this.textContent.trim();
+        showToast(`Showing: ${label}`, 'info');
+
+        // Filter cards
+        document.querySelectorAll('.event-card').forEach(card => {
+            const tag = card.querySelector('.event-tag');
+            if (!tag) return;
+            const match = filter === 'all' || tag.textContent.toLowerCase() === filter.toLowerCase();
+            card.style.opacity    = match ? '1' : '0.35';
+            card.style.transform  = match ? '' : 'scale(0.97)';
+            card.style.transition = 'opacity 0.3s, transform 0.3s';
+        });
+    });
+});
+
+/* ══════════════════════════════════════
+   SCROLL REVEAL
+══════════════════════════════════════ */
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
         }
+    });
+}, { threshold: 0.12 });
 
-        // Animate event count on load
-        function animateCount() {
-            const element = document.getElementById('eventCount');
-            const target = 10000;
-            const duration = 2000;
-            const step = target / (duration / 16);
-            let current = 0;
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-            const timer = setInterval(() => {
-                current += step;
-                if (current >= target) {
-                    element.textContent = target.toLocaleString() + '+';
-                    clearInterval(timer);
-                } else {
-                    element.textContent = Math.floor(current).toLocaleString() + '+';
-                }
-            }, 16);
+/* ══════════════════════════════════════
+   NAVBAR SCROLL EFFECT
+══════════════════════════════════════ */
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('navbar');
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+/* ══════════════════════════════════════
+   SMOOTH SCROLL
+══════════════════════════════════════ */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', (e) => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+    });
+});
 
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
+/* ══════════════════════════════════════
+   INIT ON LOAD
+══════════════════════════════════════ */
+window.addEventListener('load', () => {
+    animateCounter(document.getElementById('statEvents'),   10247, '+');
+    animateCounter(document.getElementById('statVenues'),     48, '+');
+    animateCounter(document.getElementById('statUsers'),    3820, '+');
+    animateCounter(document.getElementById('statBookings'),  142, '+');
 
-        // Initialize on load
-        window.addEventListener('load', () => {
-            animateCount();
-            showToast('Welcome to Smart Campus! 🎉', 'success');
-        });
-    </script>
-    
-    <!-- Theme Manager -->
-    <script src="js/theme.js"></script>
+    setTimeout(() => showToast('Welcome to Smart Campus!', 'success'), 600);
+});
+</script>
 </body>
 </html>

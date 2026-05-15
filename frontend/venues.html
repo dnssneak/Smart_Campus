@@ -319,8 +319,32 @@
             document.getElementById('slotSection').classList.remove('hidden');
 
             try {
-                const response = await api.get(`/venues/${selectedVenueId}/availability?date=${date}`);
-                const slots = response.slots;
+                // Get start and end of the day to check for all conflicts
+                const startOfDay = `${date}T00:00:00`;
+                const endOfDay = `${date}T23:59:59`;
+
+                const response = await api.get(`/venues/${selectedVenueId}/availability?startDateTime=${startOfDay}&endDateTime=${endOfDay}`);
+                const conflicts = response.conflicts || [];
+
+                // Generate slots from 08:00 to 20:00 (1 hour each)
+                const slots = [];
+                for (let i = 8; i < 20; i++) {
+                    const startHour = i.toString().padStart(2, '0');
+                    const endHour = (i + 1).toString().padStart(2, '0');
+                    const slotStart = `${date}T${startHour}:00:00`;
+                    const slotEnd = `${date}T${endHour}:00:00`;
+
+                    // Check if slot overlaps with any conflict
+                    const isAvailable = !conflicts.some(c => {
+                        return (slotStart < c.end) && (slotEnd > c.start);
+                    });
+
+                    slots.push({
+                        start: slotStart,
+                        end: slotEnd,
+                        available: isAvailable
+                    });
+                }
 
                 if (slots.length === 0) {
                     container.innerHTML = '<p class="empty">No slots available for this date</p>';
